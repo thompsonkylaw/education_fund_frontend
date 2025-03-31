@@ -1,12 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Box,
   Collapse,
   FormControlLabel,
+  IconButton,
   Switch,
   TextField,
   Typography
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import LoginModal from './Login';
 
 const UseInflation = ({ 
   inflationRate,
@@ -14,17 +17,43 @@ const UseInflation = ({
   useInflation,
   setUseInflation,
   onInflationRateChange,
-  onCurrencyRateChange
+  onCurrencyRateChange,
+  processedData,
+  inputs,
+  numberOfYearAccMP
 }) => {
+  const [openLoginModal, setOpenLoginModal] = useState(false);
+
   return (
     <Box sx={{ mb: 2 }}>
-      <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-        Financial Adjustments
-      </Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600 }}>
+          計劃易
+        </Typography>
+        <IconButton 
+          onClick={() => setOpenLoginModal(true)}
+          sx={{ 
+            color: 'primary.main',
+            '&:hover': {
+              backgroundColor: 'action.hover'
+            }
+          }}
+        >
+          <EditIcon fontSize="small" />
+        </IconButton>
+      </Box>
+
+      <LoginModal
+        open={openLoginModal}
+        onClose={() => setOpenLoginModal(false)}
+        maxWidth="sm"
+        processedData={processedData}
+        inputs={inputs}
+        numberOfYearAccMP={numberOfYearAccMP}
+        useInflation = {useInflation}
+      />
       
-     
-      
-      {/* Inflation Adjustment Section */}
+      {/* Rest of the component remains the same */}
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, p: 2 }}>
         <FormControlLabel
           control={
@@ -55,18 +84,17 @@ const UseInflation = ({
           />
         </Collapse>
 
-         {/* Currency Rate Field */}
-      <TextField
-        fullWidth
-        label="Currency Rate"
-        type="number"
-        value={currencyRate}
-        onChange={(e) => onCurrencyRateChange(Number(e.target.value))}
-        inputProps={{ min: 0, step: 0.01 }}
-        variant="outlined"
-        margin="normal"
-        sx={{ mb: 2 }}
-      />
+        <TextField
+          fullWidth
+          label="Currency Rate"
+          type="number"
+          value={currencyRate}
+          onChange={(e) => onCurrencyRateChange(Number(e.target.value))}
+          inputProps={{ min: 0, step: 0.01 }}
+          variant="outlined"
+          margin="normal"
+          sx={{ mb: 2 }}
+        />
       </Box>
     </Box>
   );

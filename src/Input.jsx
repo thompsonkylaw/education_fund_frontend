@@ -1,5 +1,5 @@
-import React from 'react';
-import { Box, Card, CardContent, MenuItem, Typography, InputLabel, Select } from '@mui/material';
+import React, { useEffect } from 'react';
+import { Box, Card, CardContent, MenuItem, Typography, Select } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import ManulifeMedicalPlan from './dropdown/manulife/manulife_medical_plan';
 import DeductibleOptions from './dropdown/manulife/deductible_options';
@@ -7,6 +7,14 @@ import DeductibleOptions from './dropdown/manulife/deductible_options';
 const Input = ({ inputs, setInputs, appBarColor }) => {
   const { t } = useTranslation();
 
+  // Set default value for numberOfYears to 15 if not already set
+  useEffect(() => {
+    if (!inputs.numberOfYears) {
+      setInputs(prev => ({ ...prev, numberOfYears: 15 }));
+    }
+  }, [inputs, setInputs]);
+
+  // Handle changes to input fields
   const handleChange = (field) => (event) => {
     setInputs(prev => ({
       ...prev,
@@ -16,6 +24,9 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
 
   // Generate years from 2024 to 2034
   const years = Array.from({ length: 11 }, (_, i) => 2024 + i);
+
+  // Specific options for "Number of Years"
+  const numberOfYearsOptions = [3, 5, 10, 15];
 
   return (
     <Box display="grid" gap={1}>
@@ -110,7 +121,7 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
                 value={inputs.numberOfYears}
                 onChange={handleChange('numberOfYears')}
               >
-                {Array.from({ length: 20 }, (_, i) => i + 1).map((year) => (
+                {numberOfYearsOptions.map((year) => (
                   <MenuItem key={year} value={year}>
                     {year}
                   </MenuItem>

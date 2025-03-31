@@ -21,6 +21,7 @@ import Login from './Login';
 import Input from './Input';
 import UseInflation from './UseInflation';
 import OutputTable from './OutputTable';
+import OutputForm from './OutputForm';
 
 const theme = createTheme({
   palette: { primary: { main: '#1976d2' }, secondary: { main: '#dc004e' } },
@@ -30,7 +31,7 @@ const theme = createTheme({
 const App = () => {
   const { t } = useTranslation();
   const [appBarColor, setAppBarColor] = useState(localStorage.getItem('appBarColor') || 'green');
-  const [useInflation, setUseInflation] = useState(true);
+  const [useInflation, setUseInflation] = useState(false);
   const [inputs, setInputs] = useState({
     year: '2025',
     plan: 'Smart',
@@ -41,6 +42,8 @@ const App = () => {
     currencyRate: 7.85
   });
   const [outputData, setOutputData] = useState([]);
+  const [processedData, setProcessedData] = useState([]);
+  const [numberOfYearAccMP, setNumberOfYearAccMP] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -53,7 +56,7 @@ const App = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axios.post('http://localhost:8000/getData', {
+        const response = await axios.post('http://localhost:9000/getData', {
           year: inputs.year,
           plan: inputs.plan,
           age: inputs.age,
@@ -70,6 +73,33 @@ const App = () => {
 
     fetchData();
   }, [inputs.year, inputs.plan, inputs.age, inputs.deductible, inputs.numberOfYears]);
+
+  useEffect(() => {
+    if (outputData.length === 0) return;
+  
+    let accumulatedMP = 0;
+    const processed = [];
+    
+    for (let i = 0; i < outputData.length; i++) {
+      const item = outputData[i];
+      let medicalPremium = item.medicalPremium;
+  
+      if (i > 0 && useInflation) {
+        medicalPremium = processed[i - 1].medicalPremium * (1 + inputs.inflationRate / 100);
+      }
+  
+      accumulatedMP += medicalPremium;
+      processed.push({
+        ...item,
+        medicalPremium: medicalPremium,
+        accumulatedMP: accumulatedMP
+      });
+    }
+  
+    setProcessedData(processed);
+    const finalYearData = processed.find(item => item.yearNumber === inputs.numberOfYears);
+    setNumberOfYearAccMP(finalYearData?.accumulatedMP || 0);
+  }, [outputData, useInflation, inputs.inflationRate, inputs.numberOfYears]);
 
   const handleInflationRateChange = (value) => {
     setInputs(prev => ({ ...prev, inflationRate: value }));
@@ -126,18 +156,16 @@ const App = () => {
               </Alert>
             )}
 
-            {!loading && !error && outputData.length > 0 && (
+            {!loading && !error && processedData.length > 0 && (
               <OutputTable 
-                outputData={outputData} 
+                outputData={processedData} 
                 currencyRate={inputs.currencyRate} 
                 numberOfYears={inputs.numberOfYears}
-                useInflation={useInflation}
-                inflationRate ={inputs.inflationRate}
               />
             )}
           </Grid>
 
-          {/* Right Column - Financial Adjustments */}
+          {/* Right Column - Financial Adjustments and Total */}
           <Grid item xs={12} md={4}>
             <Card elevation={3} sx={{ p: 2 }}>
               <UseInflation
@@ -147,12 +175,26 @@ const App = () => {
                 setUseInflation={setUseInflation}
                 onInflationRateChange={handleInflationRateChange}
                 onCurrencyRateChange={handleCurrencyRateChange}
+                processedData={processedData} 
+                inputs={inputs} 
+                numberOfYearAccMP={numberOfYearAccMP}
+              />
+            </Card>
+
+            <Card elevation={3} sx={{ mt: 2, p: 2 }}>
+              <OutputForm 
+                numberOfYears={inputs.numberOfYears} 
+                numberOfYearAccMP={numberOfYearAccMP} 
               />
             </Card>
           </Grid>
         </Grid>
 
-        <Login />
+        {/* <Login 
+          processedData={processedData} 
+          inputs={inputs} 
+          numberOfYearAccMP={numberOfYearAccMP}
+        /> */}
       </Container>
     </ThemeProvider>
   );

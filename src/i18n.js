@@ -16,6 +16,8 @@ i18next
           greeting: 'Hello, {{name}}!',
           Yearth: 'Year {{year}}',
           "Medical Financial Calculator" : "xxx",
+          medicalTotal: '{{years}}th Year Medical Ins Total (HKD): {{total}}',
+          
 
     
          
@@ -27,6 +29,8 @@ i18next
           greeting: '你好, {{name}}!',
           Yearth: '第{{year}}年',
           "Medical Financial Calculator" : "xxx",
+          medicalTotal: '{{years}}th Year Medical Ins Total (HKD): {{total}}',
+          
   
           
           
@@ -38,6 +42,8 @@ i18next
           greeting: '你好, {{name}}!',
           Yearth: '第{{year}}年',
           "Medical Financial Calculator" : "xxx",
+          medicalTotal: '{{years}}th Year Medical Ins Total (HKD): {{total}}',
+          
       
         }
       }
