@@ -111,7 +111,7 @@ function Login({
     setSystemMessage('');
     setNewNotionalAmount('');
     setPdfDownloadLink('');
-    setOtp('');
+    setOtp(' ');
   };
 
   // Handle login submission
