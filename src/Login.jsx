@@ -1,4 +1,3 @@
-//working2
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
@@ -54,7 +53,9 @@ function Login({
   const [sessionId, setSessionId] = useState('');
   const [step, setStep] = useState('login');
   const [loading, setLoading] = useState(false);
-  const [systemMessage, setSystemMessage] = useState(''); // Added systemMessage state
+  const [systemMessage, setSystemMessage] = useState('');
+  const [newNotionalAmount, setNewNotionalAmount] = useState('');
+  const [pdfDownloadLink, setPdfDownloadLink] = useState('');
 
   // Customer information states
   const [isCorporateCustomer, setIsCorporateCustomer] = useState(false);
@@ -73,7 +74,7 @@ function Login({
   const [premiumPaymentPeriod, setPremiumPaymentPeriod] = useState(15);
   const [worryFreeOption, setWorryFreeOption] = useState('否');
   const [currency, setCurrency] = useState('美元');
-  const [notionalAmount, setNotionalAmount] = useState('60000');
+  const [notionalAmount, setNotionalAmount] = useState('20000');
   const [premiumPaymentMethod, setPremiumPaymentMethod] = useState('每年');
   const [getPromotionalDiscount, setGetPromotionalDiscount] = useState(true);
 
@@ -90,11 +91,26 @@ function Login({
     }
   }, [inputs.age, inputs.numberOfYear]);
 
+  // Auto-download PDF when step is 'success' and pdfDownloadLink is set
+  useEffect(() => {
+    if (step === 'success' && pdfDownloadLink) {
+      // const link = document.createElement('a');
+      // link.href = pdfDownloadLink;
+      // link.download = 'proposal.pdf';
+      // document.body.appendChild(link);
+      // link.click();
+      // document.body.removeChild(link);
+    }
+  }, [step, pdfDownloadLink]);
+
   // Handle close function
   const handleClose = () => {
     onClose();
-    setStep('login'); // Reset step to 'login' on close
-    setSystemMessage(''); // Clear system message on close
+    setStep('login');
+    setSystemMessage('');
+    setNewNotionalAmount('');
+    setPdfDownloadLink('');
+    setOtp('');
   };
 
   // Handle login submission
@@ -102,7 +118,10 @@ function Login({
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:9002/login', {
+      // const response = await axios.post('http://localhost:9002/login', {
+        const response = await axios.post('https://fastapi-production-a20ab.up.railway.app/login', {
+        
+
         url,
         username,
         password,
@@ -120,7 +139,8 @@ function Login({
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:9002/verify-otp', {
+      const response = await axios.post('https://fastapi-production-a20ab.up.railway.app/verify-otp', {
+      // const response = await axios.post('http://localhost:9002/verify-otp', {
         session_id: sessionId,
         otp,
         calculation_data: {
@@ -144,8 +164,36 @@ function Login({
           useInflation,
         },
       });
-      setSystemMessage(response.data.system_message); // Set the system message from response
-      setStep('result'); // Change step to 'result' to display the message
+      if (response.data.status === 'retry') {
+        setSystemMessage(response.data.system_message);
+        setStep('retry');
+      } else if (response.data.status === 'success') {
+        setPdfDownloadLink(response.data.pdf_link);
+        setStep('success');
+      }
+    } catch (error) {
+      alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
+    }
+    setLoading(false);
+  };
+
+  // Handle retry submission with new notional amount
+  const handleRetrySubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const response = await axios.post('https://fastapi-production-a20ab.up.railway.app/retry-notional', {
+      // const response = await axios.post('http://localhost:9002/retry-notional', {
+        session_id: sessionId,
+        new_notional_amount: newNotionalAmount,
+      });
+      if (response.data.status === 'retry') {
+        setSystemMessage(response.data.system_message);
+        setNewNotionalAmount('');
+      } else if (response.data.status === 'success') {
+        setPdfDownloadLink(response.data.pdf_link);
+        setStep('success');
+      }
     } catch (error) {
       alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
     }
@@ -187,7 +235,7 @@ function Login({
           計劃易 - 登錄
         </Typography>
         
-        {step !== 'result' ? (
+        {step === 'login' || step === 'otp' ? (
           <form onSubmit={handleSubmit}>
             <div className="margin-top-20 info-section">
               {/* Customer Information Fields */}
@@ -200,6 +248,7 @@ function Login({
                       onChange={(e) => setSurname(e.target.value)}
                       required
                       fullWidth
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -211,6 +260,7 @@ function Login({
                       onChange={(e) => setGivenName(e.target.value)}
                       required
                       fullWidth
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -223,6 +273,7 @@ function Login({
                       value={chineseName}
                       onChange={(e) => setChineseName(e.target.value)}
                       fullWidth
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       inputProps={{ maxLength: 10 }}
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
@@ -235,6 +286,7 @@ function Login({
                       value={dob}
                       onChange={(e) => setDob(e.target.value)}
                       fullWidth
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -254,6 +306,7 @@ function Login({
                       <FormControlLabel
                         value="Male"
                         control={<Radio sx={{ display: 'none' }} />}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         label={
                           <>
                             <span style={{
@@ -291,6 +344,7 @@ function Login({
                       <FormControlLabel
                         value="Female"
                         control={<Radio sx={{ display: 'none' }} />}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         label={
                           <>
                             <span style={{
@@ -340,6 +394,7 @@ function Login({
                       <FormControlLabel
                         value="true"
                         control={<Radio sx={{ display: 'none' }} />}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         label={
                           <>
                             <span style={{
@@ -377,6 +432,7 @@ function Login({
                       <FormControlLabel
                         value="false"
                         control={<Radio sx={{ display: 'none' }} />}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         label={
                           <>
                             <span style={{
@@ -428,6 +484,7 @@ function Login({
                         value={planCategory}
                         onChange={(e) => setPlanCategory(e.target.value)}
                         label={<>計劃類別 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="全部">全部</MenuItem>
@@ -448,6 +505,7 @@ function Login({
                         value={basicPlan}
                         onChange={(e) => setBasicPlan(e.target.value)}
                         label={<>基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="宏摯傳承保障計劃(GS)">宏摯傳承保障計劃(GS)</MenuItem>
@@ -467,6 +525,7 @@ function Login({
                         value={currency}
                         onChange={(e) => setCurrency(e.target.value)}
                         label={<>貨幣 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="美元">美元</MenuItem>
@@ -480,6 +539,7 @@ function Login({
                       value={notionalAmount}
                       onChange={(e) => setNotionalAmount(e.target.value)}
                       fullWidth
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -504,6 +564,7 @@ function Login({
                         value={premiumPaymentMethod}
                         onChange={(e) => setPremiumPaymentMethod(e.target.value)}
                         label={<>保費繳付方式 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="每年">每年</MenuItem>
@@ -527,6 +588,7 @@ function Login({
                       onChange={(e) => setUrl(e.target.value)}
                       required
                       fullWidth
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -538,6 +600,7 @@ function Login({
                       onChange={(e) => setUsername(e.target.value)}
                       required
                       fullWidth
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -550,6 +613,7 @@ function Login({
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       fullWidth
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       sx={{ mb: 3 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -564,6 +628,7 @@ function Login({
                     onChange={(e) => setOtp(e.target.value)}
                     required
                     fullWidth
+                    disabled={loading} // Disable only when loading during OTP submission
                     sx={{ mt: 2, mb: 2 }}
                     InputLabelProps={{ style: { fontWeight: '500' } }}
                   />
@@ -592,23 +657,60 @@ function Login({
               </div>
             </div>
           </form>
-        ) : (
+        ) : step === 'retry' ? (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
               System Message
             </Typography>
-            <Typography variant="body1">
+            <Typography variant="body1" sx={{ mb: 2 }}>
               {systemMessage}
             </Typography>
+            <TextField
+              label="New Notional Amount"
+              value={newNotionalAmount}
+              onChange={(e) => setNewNotionalAmount(e.target.value)}
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    {currency === '美元' ? 'USD' : 'HKD'}
+                  </InputAdornment>
+                ),
+              }}
+              sx={{ mb: 2 }}
+              InputLabelProps={{ style: { fontWeight: '500' } }}
+              placeholder="Enter new amount"
+            />
             <Button
+              onClick={handleRetrySubmit}
               variant="contained"
-              onClick={handleClose}
-              sx={{ mt: 2, backgroundColor: '#10740AFF', '&:hover': { backgroundColor: '#0d5f08' } }}
+              fullWidth
+              disabled={loading}
+              sx={{ 
+                backgroundColor: loading ? '#ccc' : '#10740AFF', 
+                '&:hover': { backgroundColor: '#0d5f08' } 
+              }}
             >
-              Close
+              {loading ? <CircularProgress size={24} /> : 'Submit'}
             </Button>
           </Box>
-        )}
+        ) : step === 'success' ? (
+          <Box sx={{ mt: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              建立及下載建議書成功!
+            </Typography>
+            <Button
+              onClick={handleClose}
+              variant="contained"
+              sx={{ 
+                backgroundColor: '#10740AFF', 
+                '&:hover': { backgroundColor: '#0d5f08' } 
+              }}
+            >
+              完成
+            </Button>
+          </Box>
+        ) : null}
       </Paper>
     </Modal>
   );
