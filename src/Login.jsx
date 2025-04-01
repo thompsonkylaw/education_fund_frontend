@@ -94,6 +94,7 @@ function Login({
   // Auto-download PDF when step is 'success' and pdfDownloadLink is set
   useEffect(() => {
     if (step === 'success' && pdfDownloadLink) {
+      // Uncomment to enable auto-download
       // const link = document.createElement('a');
       // link.href = pdfDownloadLink;
       // link.download = 'proposal.pdf';
@@ -102,6 +103,22 @@ function Login({
       // document.body.removeChild(link);
     }
   }, [step, pdfDownloadLink]);
+
+  // SSE connection setup
+  useEffect(() => {
+    if (open) {
+      const eventSource = new EventSource('https://fastapi-production-a20ab.up.railway.app/sse');
+      eventSource.onmessage = (event) => {
+        console.log('SSE message:', event.data);
+      };
+      eventSource.onerror = (error) => {
+        console.error('SSE error:', error);
+      };
+      return () => {
+        eventSource.close();
+      };
+    }
+  }, [open]);
 
   // Handle close function
   const handleClose = () => {
@@ -118,10 +135,7 @@ function Login({
     e.preventDefault();
     setLoading(true);
     try {
-      // const response = await axios.post('http://localhost:9002/login', {
-        const response = await axios.post('https://fastapi-production-a20ab.up.railway.app/login', {
-        
-
+      const response = await axios.post('https://fastapi-production-a20ab.up.railway.app/login', {
         url,
         username,
         password,
@@ -140,7 +154,6 @@ function Login({
     setLoading(true);
     try {
       const response = await axios.post('https://fastapi-production-a20ab.up.railway.app/verify-otp', {
-      // const response = await axios.post('http://localhost:9002/verify-otp', {
         session_id: sessionId,
         otp,
         calculation_data: {
@@ -183,7 +196,6 @@ function Login({
     setLoading(true);
     try {
       const response = await axios.post('https://fastapi-production-a20ab.up.railway.app/retry-notional', {
-      // const response = await axios.post('http://localhost:9002/retry-notional', {
         session_id: sessionId,
         new_notional_amount: newNotionalAmount,
       });
