@@ -1,4 +1,4 @@
-//Server version1
+//Server version2
 //Add IsProduction
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -97,12 +97,12 @@ function Login({
   // Auto-download PDF when step is 'success' and pdfDownloadLink is set
   useEffect(() => {
     if (step === 'success' && pdfDownloadLink) {
-      // const link = document.createElement('a');
-      // link.href = pdfDownloadLink;
-      // link.download = 'proposal.pdf';
-      // document.body.appendChild(link);
-      // link.click();
-      // document.body.removeChild(link);
+      const link = document.createElement('a');
+      link.href = pdfDownloadLink;
+      link.download = 'proposal.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   }, [step, pdfDownloadLink]);
 
