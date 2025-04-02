@@ -1,3 +1,5 @@
+//Server version2
+//Add IsProduction
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
@@ -46,7 +48,7 @@ function Login({
   useInflation 
 }) {
   // Login and OTP states
-  const IsProduction = true;
+  const IsProduction = false;
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
   const [username, setUsername] = useState('CHANTSZLUNG');
   const [password, setPassword] = useState('Ctsz_!376897');
@@ -95,12 +97,12 @@ function Login({
   // Auto-download PDF when step is 'success' and pdfDownloadLink is set
   useEffect(() => {
     if (step === 'success' && pdfDownloadLink) {
-      const link = document.createElement('a');
-      link.href = pdfDownloadLink;
-      link.download = 'proposal.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // const link = document.createElement('a');
+      // link.href = pdfDownloadLink;
+      // link.download = 'proposal.pdf';
+      // document.body.appendChild(link);
+      // link.click();
+      // document.body.removeChild(link);
     }
   }, [step, pdfDownloadLink]);
 
@@ -111,29 +113,20 @@ function Login({
     setSystemMessage('');
     setNewNotionalAmount('');
     setPdfDownloadLink('');
-    setOtp(' ');
-  };
-
-  // Define manual download handler
-  const handleManualDownload = () => {
-    if (pdfDownloadLink) {
-      const link = document.createElement('a');
-      link.href = pdfDownloadLink;
-      link.download = 'proposal.pdf';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
+    setOtp('');
   };
 
   // Handle login submission
   let serverURL;
-  IsProduction ? serverURL = 'https://fastapi-production-a20ab.up.railway.app' : serverURL = 'http://localhost:9002';
+  IsProduction ? serverURL='https://fastapi-production-a20ab.up.railway.app': serverURL='http://localhost:9002';
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post(serverURL + '/login', {
+      
+        const response = await axios.post(serverURL + '/login', {
+        
+
         url,
         username,
         password,
@@ -151,7 +144,8 @@ function Login({
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post(serverURL + '/verify-otp', {
+      const response = await axios.post(serverURL+ '/verify-otp', {
+      // const response = await axios.post('http://localhost:9002/verify-otp', {
         session_id: sessionId,
         otp,
         calculation_data: {
@@ -194,6 +188,7 @@ function Login({
     setLoading(true);
     try {
       const response = await axios.post(serverURL + '/retry-notional', {
+      // const response = await axios.post('http://localhost:9002/retry-notional', {
         session_id: sessionId,
         new_notional_amount: newNotionalAmount,
       });
@@ -258,7 +253,7 @@ function Login({
                       onChange={(e) => setSurname(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -270,7 +265,7 @@ function Login({
                       onChange={(e) => setGivenName(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -283,7 +278,7 @@ function Login({
                       value={chineseName}
                       onChange={(e) => setChineseName(e.target.value)}
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       inputProps={{ maxLength: 10 }}
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
@@ -296,7 +291,7 @@ function Login({
                       value={dob}
                       onChange={(e) => setDob(e.target.value)}
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -316,7 +311,7 @@ function Login({
                       <FormControlLabel
                         value="Male"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         label={
                           <>
                             <span style={{
@@ -354,7 +349,7 @@ function Login({
                       <FormControlLabel
                         value="Female"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         label={
                           <>
                             <span style={{
@@ -404,7 +399,7 @@ function Login({
                       <FormControlLabel
                         value="true"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         label={
                           <>
                             <span style={{
@@ -442,7 +437,7 @@ function Login({
                       <FormControlLabel
                         value="false"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         label={
                           <>
                             <span style={{
@@ -494,7 +489,7 @@ function Login({
                         value={planCategory}
                         onChange={(e) => setPlanCategory(e.target.value)}
                         label={<>計劃類別 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="全部">全部</MenuItem>
@@ -515,7 +510,7 @@ function Login({
                         value={basicPlan}
                         onChange={(e) => setBasicPlan(e.target.value)}
                         label={<>基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="宏摯傳承保障計劃(GS)">宏摯傳承保障計劃(GS)</MenuItem>
@@ -535,7 +530,7 @@ function Login({
                         value={currency}
                         onChange={(e) => setCurrency(e.target.value)}
                         label={<>貨幣 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="美元">美元</MenuItem>
@@ -549,7 +544,7 @@ function Login({
                       value={notionalAmount}
                       onChange={(e) => setNotionalAmount(e.target.value)}
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -574,7 +569,7 @@ function Login({
                         value={premiumPaymentMethod}
                         onChange={(e) => setPremiumPaymentMethod(e.target.value)}
                         label={<>保費繳付方式 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="每年">每年</MenuItem>
@@ -598,7 +593,7 @@ function Login({
                       onChange={(e) => setUrl(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -610,7 +605,7 @@ function Login({
                       onChange={(e) => setUsername(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -623,7 +618,7 @@ function Login({
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
                       sx={{ mb: 3 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -638,7 +633,7 @@ function Login({
                     onChange={(e) => setOtp(e.target.value)}
                     required
                     fullWidth
-                    disabled={loading}
+                    disabled={loading} // Disable only when loading during OTP submission
                     sx={{ mt: 2, mb: 2 }}
                     InputLabelProps={{ style: { fontWeight: '500' } }}
                   />
@@ -709,28 +704,16 @@ function Login({
             <Typography variant="h6" gutterBottom>
               建立及下載建議書成功!
             </Typography>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-              <Button
-                onClick={handleManualDownload}
-                variant="contained"
-                sx={{ 
-                  backgroundColor: '#10740AFF', 
-                  '&:hover': { backgroundColor: '#0d5f08' } 
-                }}
-              >
-                下載建議書
-              </Button>
-              <Button
-                onClick={handleClose}
-                variant="contained"
-                sx={{ 
-                  backgroundColor: '#10740AFF', 
-                  '&:hover': { backgroundColor: '#0d5f08' } 
-                }}
-              >
-                完成
-              </Button>
-            </Box>
+            <Button
+              onClick={handleClose}
+              variant="contained"
+              sx={{ 
+                backgroundColor: '#10740AFF', 
+                '&:hover': { backgroundColor: '#0d5f08' } 
+              }}
+            >
+              完成
+            </Button>
           </Box>
         ) : null}
       </Paper>
