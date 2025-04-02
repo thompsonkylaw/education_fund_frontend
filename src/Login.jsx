@@ -665,7 +665,7 @@ function Login({
         ) : step === 'retry' ? (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
-              System Message
+              系統信息
             </Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>
               {systemMessage}
@@ -702,7 +702,7 @@ function Login({
         ) : step === 'success' ? (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
-              建立及下載建議書成功!
+              建議書已成功建立及下載到計劃以系統中!
             </Typography>
             <Button
               onClick={handleClose}
