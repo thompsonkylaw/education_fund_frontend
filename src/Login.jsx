@@ -48,7 +48,7 @@ function Login({
   useInflation 
 }) {
   // Login and OTP states
-  const IsProduction = false;
+  const IsProduction = true;
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
   const [username, setUsername] = useState('CHANTSZLUNG');
   const [password, setPassword] = useState('Ctsz_!376897');
