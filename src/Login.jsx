@@ -1,4 +1,5 @@
 //Server version1
+//Add IsProduction
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
@@ -47,6 +48,7 @@ function Login({
   useInflation 
 }) {
   // Login and OTP states
+  const IsProduction = true;
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
   const [username, setUsername] = useState('CHANTSZLUNG');
   const [password, setPassword] = useState('Ctsz_!376897');
@@ -115,12 +117,14 @@ function Login({
   };
 
   // Handle login submission
+  let serverURL;
+  IsProduction ? serverURL='https://fastapi-production-a20ab.up.railway.app': serverURL='http://localhost:9002';
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // const response = await axios.post('http://localhost:9002/login', {
-        const response = await axios.post('https://fastapi-production-a20ab.up.railway.app/login', {
+      
+        const response = await axios.post(serverURL + '/login', {
         
 
         url,
@@ -140,7 +144,7 @@ function Login({
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('https://fastapi-production-a20ab.up.railway.app/verify-otp', {
+      const response = await axios.post(serverURL+ '/verify-otp', {
       // const response = await axios.post('http://localhost:9002/verify-otp', {
         session_id: sessionId,
         otp,
@@ -183,7 +187,7 @@ function Login({
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('https://fastapi-production-a20ab.up.railway.app/retry-notional', {
+      const response = await axios.post(serverURL + '/retry-notional', {
       // const response = await axios.post('http://localhost:9002/retry-notional', {
         session_id: sessionId,
         new_notional_amount: newNotionalAmount,

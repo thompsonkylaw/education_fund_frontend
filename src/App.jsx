@@ -29,6 +29,7 @@ const theme = createTheme({
 });
 
 const App = () => {
+  const IsProduction = true;
   const { t } = useTranslation();
   const [appBarColor, setAppBarColor] = useState(localStorage.getItem('appBarColor') || 'green');
   const [useInflation, setUseInflation] = useState(false);
@@ -56,7 +57,9 @@ const App = () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axios.post('http://localhost:9000/getData', {
+        let serverURL;
+        IsProduction ? serverURL='https://fastapi-production-a20ab.up.railway.app': serverURL='http://localhost:9002';
+        const response = await axios.post(serverURL+'/getData', {
           year: inputs.year,
           plan: inputs.plan,
           age: inputs.age,
