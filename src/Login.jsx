@@ -1,5 +1,3 @@
-//Server version2
-//Add IsProduction
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { 
@@ -50,8 +48,8 @@ function Login({
   // Login and OTP states
   const IsProduction = true;
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
-  const [username, setUsername] = useState('CHANTSZLUNG');
-  const [password, setPassword] = useState('Ctsz_!376897');
+  const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
+  const [password, setPassword] = useState(() => localStorage.getItem('password') || '');
   const [otp, setOtp] = useState('');
   const [sessionId, setSessionId] = useState('');
   const [step, setStep] = useState('login');
@@ -63,9 +61,9 @@ function Login({
   // Customer information states
   const [isCorporateCustomer, setIsCorporateCustomer] = useState(false);
   const [isPolicyHolder, setIsPolicyHolder] = useState(true);
-  const [surname, setSurname] = useState('Chan');
-  const [givenName, setGivenName] = useState('Peter');
-  const [chineseName, setChineseName] = useState('陳大文');
+  const [surname, setSurname] = useState('');
+  const [givenName, setGivenName] = useState('');
+  const [chineseName, setChineseName] = useState('');
   const [dob, setDob] = useState('');
   const [insuranceAge, setInsuranceAge] = useState(inputs.age);
   const [gender, setGender] = useState('Male');
@@ -85,7 +83,17 @@ function Login({
   const [fromYear, setFromYear] = useState(inputs.numberOfYear + 1);
   const [withdrawalPeriod, setWithdrawalPeriod] = useState('');
   const [annualWithdrawalAmount, setAnnualWithdrawalAmount] = useState(1000);
-  
+  const [proposalLanguage, setproposalLanguage] = useState("zh");
+
+  // Save username and password to localStorage when they change
+  useEffect(() => {
+    localStorage.setItem('username', username);
+  }, [username]);
+
+  useEffect(() => {
+    localStorage.setItem('password', password);
+  }, [password]);
+
   // Update withdrawal period based on inputs.age and inputs.numberOfYear
   useEffect(() => {
     if (inputs.age && inputs.numberOfYear) {
@@ -123,10 +131,7 @@ function Login({
     e.preventDefault();
     setLoading(true);
     try {
-      
-        const response = await axios.post(serverURL + '/login', {
-        
-
+      const response = await axios.post(serverURL + '/login', {
         url,
         username,
         password,
@@ -144,8 +149,7 @@ function Login({
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post(serverURL+ '/verify-otp', {
-      // const response = await axios.post('http://localhost:9002/verify-otp', {
+      const response = await axios.post(serverURL + '/verify-otp', {
         session_id: sessionId,
         otp,
         calculation_data: {
@@ -167,6 +171,7 @@ function Login({
           notionalAmount,
           premiumPaymentMethod,
           useInflation,
+          proposalLanguage, // Fixed variable name
         },
       });
       if (response.data.status === 'retry') {
@@ -188,7 +193,6 @@ function Login({
     setLoading(true);
     try {
       const response = await axios.post(serverURL + '/retry-notional', {
-      // const response = await axios.post('http://localhost:9002/retry-notional', {
         session_id: sessionId,
         new_notional_amount: newNotionalAmount,
       });
@@ -253,9 +257,23 @@ function Login({
                       onChange={(e) => setSurname(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
-                      sx={{ mb: 2 }}
-                      InputLabelProps={{ style: { fontWeight: '500' } }}
+                      disabled={loading || step === 'otp'}
+                      sx={{ 
+                        mb: 2,
+                        // Hide Material-UI's default asterisk
+                        '& .MuiInputLabel-asterisk': {
+                          display: 'none'
+                        }
+                      }}
+                      InputLabelProps={{
+                        style: { fontWeight: '500' },
+                        // This prevents the asterisk from pushing the label
+                        componentsProps: {
+                          asterisk: {
+                            style: { display: 'none' }
+                          }
+                        }
+                      }}
                     />
                   </div>
                   <div>
@@ -265,9 +283,23 @@ function Login({
                       onChange={(e) => setGivenName(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
-                      sx={{ mb: 2 }}
-                      InputLabelProps={{ style: { fontWeight: '500' } }}
+                      disabled={loading || step === 'otp'}
+                      sx={{ 
+                        mb: 2,
+                        // Hide Material-UI's default asterisk
+                        '& .MuiInputLabel-asterisk': {
+                          display: 'none'
+                        }
+                      }}
+                      InputLabelProps={{
+                        style: { fontWeight: '500' },
+                        // This prevents the asterisk from pushing the label
+                        componentsProps: {
+                          asterisk: {
+                            style: { display: 'none' }
+                          }
+                        }
+                      }}
                     />
                   </div>
                 </Box>
@@ -278,7 +310,7 @@ function Login({
                       value={chineseName}
                       onChange={(e) => setChineseName(e.target.value)}
                       fullWidth
-                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
+                      disabled={loading || step === 'otp'}
                       inputProps={{ maxLength: 10 }}
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
@@ -291,7 +323,7 @@ function Login({
                       value={dob}
                       onChange={(e) => setDob(e.target.value)}
                       fullWidth
-                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
+                      disabled={loading || step === 'otp'}
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -311,7 +343,7 @@ function Login({
                       <FormControlLabel
                         value="Male"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
+                        disabled={loading || step === 'otp'}
                         label={
                           <>
                             <span style={{
@@ -349,7 +381,7 @@ function Login({
                       <FormControlLabel
                         value="Female"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
+                        disabled={loading || step === 'otp'}
                         label={
                           <>
                             <span style={{
@@ -399,7 +431,7 @@ function Login({
                       <FormControlLabel
                         value="true"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
+                        disabled={loading || step === 'otp'}
                         label={
                           <>
                             <span style={{
@@ -437,7 +469,7 @@ function Login({
                       <FormControlLabel
                         value="false"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
+                        disabled={loading || step === 'otp'}
                         label={
                           <>
                             <span style={{
@@ -489,7 +521,7 @@ function Login({
                         value={planCategory}
                         onChange={(e) => setPlanCategory(e.target.value)}
                         label={<>計劃類別 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
+                        disabled={loading || step === 'otp'}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="全部">全部</MenuItem>
@@ -510,7 +542,7 @@ function Login({
                         value={basicPlan}
                         onChange={(e) => setBasicPlan(e.target.value)}
                         label={<>基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
+                        disabled={loading || step === 'otp'}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="宏摯傳承保障計劃(GS)">宏摯傳承保障計劃(GS)</MenuItem>
@@ -530,7 +562,7 @@ function Login({
                         value={currency}
                         onChange={(e) => setCurrency(e.target.value)}
                         label={<>貨幣 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
+                        disabled={loading || step === 'otp'}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="美元">美元</MenuItem>
@@ -540,11 +572,12 @@ function Login({
                   </div>
                   <div>
                     <TextField
-                      label="名義金額"
+                      label="名義金額" 
                       value={notionalAmount}
                       onChange={(e) => setNotionalAmount(e.target.value)}
+                      required
                       fullWidth
-                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
+                      disabled={loading || step === 'otp'}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -552,8 +585,18 @@ function Login({
                           </InputAdornment>
                         ),
                       }}
-                      sx={{ mb: 2 }}
-                      InputLabelProps={{ style: { fontWeight: '500' } }}
+                      sx={{ 
+                        mb: 2,
+                        // Hide Material-UI's default asterisk
+                        '& .MuiInputLabel-asterisk': {
+                          color: 'red'
+                        }
+                      }}
+                      InputLabelProps={{
+                        style: { fontWeight: '500' },
+                        // This prevents the asterisk from pushing the label
+                        
+                      }}
                       placeholder="Enter amount"
                     />
                   </div>
@@ -569,7 +612,7 @@ function Login({
                         value={premiumPaymentMethod}
                         onChange={(e) => setPremiumPaymentMethod(e.target.value)}
                         label={<>保費繳付方式 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'} // Disable when loading or in OTP step
+                        disabled={loading || step === 'otp'}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="每年">每年</MenuItem>
@@ -578,6 +621,61 @@ function Login({
                         <MenuItem value="每月">每月</MenuItem>
                       </Select>
                     </FormControl>
+                  </div>
+                  <div>
+                    <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>
+                      建議書語言 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                    </Typography>
+                    <RadioGroup
+                      value={proposalLanguage}
+                      onChange={(e) => setproposalLanguage(e.target.value)}
+                      row
+                      sx={{ display: 'flex', gap: '20px' }}
+                    >
+                      {['zh', 'sc', 'en'].map((lang) => (
+                        <FormControlLabel
+                          key={lang}
+                          value={lang}
+                          control={<Radio sx={{ display: 'none' }} />}
+                          disabled={loading || step === 'otp'}
+                          label={
+                            <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                              <span style={{
+                                display: 'inline-block',
+                                width: '20px',
+                                height: '20px',
+                                border: `2px solid ${proposalLanguage === lang ? '#10740AFF' : '#ccc'}`,
+                                borderRadius: '50%',
+                                marginRight: '8px',
+                                backgroundColor: '#fff',
+                                position: 'relative',
+                                transition: 'all 0.3s ease',
+                              }}>
+                                {proposalLanguage === lang && (
+                                  <svg
+                                    style={{
+                                      position: 'absolute',
+                                      top: '50%',
+                                      left: '50%',
+                                      transform: 'translate(-50%, -50%)',
+                                    }}
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="#10740AFF"
+                                  >
+                                    <circle cx="12" cy="12" r="6" />
+                                  </svg>
+                                )}
+                              </span>
+                              {lang === 'zh' && '繁體中文'}
+                              {lang === 'sc' && '簡體中文'}
+                              {lang === 'en' && '英文'}
+                            </div>
+                          }
+                        />
+                      ))}
+                    </RadioGroup>
                   </div>
                 </div>
               </div>
@@ -593,9 +691,23 @@ function Login({
                       onChange={(e) => setUrl(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
-                      sx={{ mb: 2 }}
-                      InputLabelProps={{ style: { fontWeight: '500' } }}
+                      disabled={loading || step === 'otp'}
+                      sx={{ 
+                        mb: 2,
+                        // Hide Material-UI's default asterisk
+                        '& .MuiInputLabel-asterisk': {
+                          display: 'none'
+                        }
+                      }}
+                      InputLabelProps={{
+                        style: { fontWeight: '500' },
+                        // This prevents the asterisk from pushing the label
+                        componentsProps: {
+                          asterisk: {
+                            style: { display: 'none' }
+                          }
+                        }
+                      }}
                     />
                   </div>
                   <div>
@@ -605,9 +717,23 @@ function Login({
                       onChange={(e) => setUsername(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
-                      sx={{ mb: 2 }}
-                      InputLabelProps={{ style: { fontWeight: '500' } }}
+                      disabled={loading || step === 'otp'}
+                      sx={{ 
+                        mb: 2,
+                        // Hide Material-UI's default asterisk
+                        '& .MuiInputLabel-asterisk': {
+                          display: 'none'
+                        }
+                      }}
+                      InputLabelProps={{
+                        style: { fontWeight: '500' },
+                        // This prevents the asterisk from pushing the label
+                        componentsProps: {
+                          asterisk: {
+                            style: { display: 'none' }
+                          }
+                        }
+                      }}
                     />
                   </div>
                   <div>
@@ -618,9 +744,23 @@ function Login({
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'} // Disable when loading or in OTP step
-                      sx={{ mb: 3 }}
-                      InputLabelProps={{ style: { fontWeight: '500' } }}
+                      disabled={loading || step === 'otp'}
+                      sx={{ 
+                        mb: 2,
+                        // Hide Material-UI's default asterisk
+                        '& .MuiInputLabel-asterisk': {
+                          display: 'none'
+                        }
+                      }}
+                      InputLabelProps={{
+                        style: { fontWeight: '500' },
+                        // This prevents the asterisk from pushing the label
+                        componentsProps: {
+                          asterisk: {
+                            style: { display: 'none' }
+                          }
+                        }
+                      }}
                     />
                   </div>
                 </Box>
@@ -633,7 +773,7 @@ function Login({
                     onChange={(e) => setOtp(e.target.value)}
                     required
                     fullWidth
-                    disabled={loading} // Disable only when loading during OTP submission
+                    disabled={loading}
                     sx={{ mt: 2, mb: 2 }}
                     InputLabelProps={{ style: { fontWeight: '500' } }}
                   />
