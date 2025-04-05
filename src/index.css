@@ -26,7 +26,7 @@ body {
   margin: 0;
   /* display: flex; */
   /* place-items: center; */
-  /* min-width: 320px; */
+  min-width: 320px;
   min-height: 100vh;
 }
 
@@ -53,3 +53,14 @@ button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: #fff; /* Matches your design */
+}
+
+/* Division */
+body > div:nth-child(1){
+  background-color:#ffffff;
+ }

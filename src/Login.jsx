@@ -48,8 +48,8 @@ function Login({
   // Login and OTP states
   const IsProduction = true;
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
-  const [username, setUsername] = useState(() => localStorage.getItem('username') || '');
-  const [password, setPassword] = useState(() => localStorage.getItem('password') || '');
+  const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('');
+  const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('');
   const [otp, setOtp] = useState('');
   const [sessionId, setSessionId] = useState('');
   const [step, setStep] = useState('login');
@@ -61,8 +61,8 @@ function Login({
   // Customer information states
   const [isCorporateCustomer, setIsCorporateCustomer] = useState(false);
   const [isPolicyHolder, setIsPolicyHolder] = useState(true);
-  const [surname, setSurname] = useState('');
-  const [givenName, setGivenName] = useState('');
+  const [surname, setSurname] = IsProduction ? useState('') : useState('Chan');
+  const [givenName, setGivenName] = IsProduction ? useState("") : useState('Peter');
   const [chineseName, setChineseName] = useState('');
   const [dob, setDob] = useState('');
   const [insuranceAge, setInsuranceAge] = useState(inputs.age);
@@ -842,7 +842,7 @@ function Login({
         ) : step === 'success' ? (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
-              建議書已成功建立及下載到計劃以系統中!
+              建議書已成功建立及下載到計劃易系統中!
             </Typography>
             <Button
               onClick={handleClose}
