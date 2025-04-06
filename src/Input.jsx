@@ -34,7 +34,7 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
         <CardContent>
           <Box display="grid" gap={1} sx={{ gridTemplateColumns: { xs: '1fr', md: 'repeat(5, 1fr)' } }}>
             {/* Year Selection */}
-            <Box>
+            {/* <Box>
               <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
                 {t('Year')}
               </Typography>
@@ -50,7 +50,7 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
                   </MenuItem>
                 ))}
               </Select>
-            </Box>
+            </Box> */}
 
             {/* Plan Selection */}
             <Box>
@@ -82,13 +82,14 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
                 value={inputs.age}
                 onChange={handleChange('age')}
               >
-                {Array.from({ length: 121 }, (_, i) => i + 1).map((age) => (
+                {Array.from({ length: 121 }, (_, i) => i).map((age) => (
                   <MenuItem key={age} value={age}>
                     {age}
                   </MenuItem>
                 ))}
               </Select>
             </Box>
+            
 
             {/* Deductible Selection */}
             <Box>
