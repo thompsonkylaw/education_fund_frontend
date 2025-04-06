@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'; // Add useRef
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { 
   Modal,
@@ -48,6 +48,7 @@ function Login({
   numberOfYearAccMP,
   useInflation 
 }) {
+  // Login and OTP states
   const IsProduction = true;
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
   const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('CHANTSZLUNG');
@@ -59,9 +60,8 @@ function Login({
   const [systemMessage, setSystemMessage] = useState('');
   const [newNotionalAmount, setNewNotionalAmount] = useState('');
   const [pdfDownloadLink, setPdfDownloadLink] = useState('');
-  const [logMessages, setLogMessages] = useState([]);
-  const [logDialogOpen, setLogDialogOpen] = useState(false);
 
+  // Customer information states
   const [isCorporateCustomer, setIsCorporateCustomer] = useState(false);
   const [isPolicyHolder, setIsPolicyHolder] = useState(true);
   const [surname, setSurname] = IsProduction ? useState('') : useState('Chann');
@@ -72,6 +72,7 @@ function Login({
   const [gender, setGender] = useState('Male');
   const [isSmoker, setIsSmoker] = useState(false);
   
+  // Plan and payment states
   const [planCategory, setPlanCategory] = useState('全部');
   const [basicPlan, setBasicPlan] = useState('宏摯傳承保障計劃(GS)');
   const [premiumPaymentPeriod, setPremiumPaymentPeriod] = useState(15);
@@ -81,16 +82,18 @@ function Login({
   const [premiumPaymentMethod, setPremiumPaymentMethod] = useState('每年');
   const [getPromotionalDiscount, setGetPromotionalDiscount] = useState(true);
 
+  // Withdrawal states
   const [fromYear, setFromYear] = useState(inputs.numberOfYear + 1);
   const [withdrawalPeriod, setWithdrawalPeriod] = useState('');
   const [annualWithdrawalAmount, setAnnualWithdrawalAmount] = useState(1000);
   const [proposalLanguage, setProposalLanguage] = useState("zh");
 
-  const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:9002';
+  // Log states
+  const [logs, setLogs] = useState([]);
+  const [logDialogOpen, setLogDialogOpen] = useState(false);
+  const logRef = useRef(null);
 
-  // Ref to the dialog content for scrolling
-  const logContentRef = useRef(null);
-
+  // Save username and password to localStorage
   useEffect(() => {
     localStorage.setItem('username', username);
   }, [username]);
@@ -99,6 +102,7 @@ function Login({
     localStorage.setItem('password', password);
   }, [password]);
 
+  // Update withdrawal period
   useEffect(() => {
     if (inputs.age && inputs.numberOfYear) {
       const calculatedWithdrawalPeriod = 100 - inputs.age - inputs.numberOfYear + 2;
@@ -106,9 +110,10 @@ function Login({
     }
   }, [inputs.age, inputs.numberOfYear]);
 
+  // Auto-download PDF
   useEffect(() => {
     if (step === 'success' && pdfDownloadLink) {
-      // Uncomment to auto-download PDF
+      // Uncomment to enable auto-download
       // const link = document.createElement('a');
       // link.href = pdfDownloadLink;
       // link.download = 'proposal.pdf';
@@ -118,33 +123,32 @@ function Login({
     }
   }, [step, pdfDownloadLink]);
 
+  // Handle SSE for logs
+  const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:9002';
   useEffect(() => {
-    const source = new EventSource(`${serverURL}/stream-logs`);
-    
-    source.onmessage = (event) => {
-      setLogMessages((prev) => [...prev, event.data]);
-    };
-
-    source.onerror = () => {
-      console.error('SSE connection error');
-      source.close();
-    };
-
-    return () => {
-      source.close();
-    };
-  }, [serverURL]);
-
-  // Auto-scroll to bottom when logMessages update
-  useEffect(() => {
-    if (logDialogOpen && logContentRef.current) {
-      logContentRef.current.scrollTo({
-        top: logContentRef.current.scrollHeight,
-        behavior: 'smooth', // Smooth scrolling for better UX
-      });
+    if (sessionId) {
+      const eventSource = new EventSource(`${serverURL}/logs/${sessionId}`);
+      eventSource.onmessage = (event) => {
+        setLogs(prevLogs => [...prevLogs, event.data]);
+      };
+      eventSource.onerror = (error) => {
+        console.error("SSE error:", error);
+        eventSource.close();
+      };
+      return () => {
+        eventSource.close();
+      };
     }
-  }, [logMessages, logDialogOpen]);
+  }, [sessionId]);
 
+  // Auto-scroll logs
+  useEffect(() => {
+    if (logRef.current) {
+      logRef.current.scrollTop = logRef.current.scrollHeight;
+    }
+  }, [logs]);
+
+  // Handle close
   const handleClose = () => {
     onClose();
     setStep('login');
@@ -152,9 +156,11 @@ function Login({
     setNewNotionalAmount('');
     setPdfDownloadLink('');
     setOtp('');
-    setLogMessages([]);
+    setSessionId('');
+    setLogs([]);
   };
 
+  // Handle login
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -172,6 +178,7 @@ function Login({
     setLoading(false);
   };
 
+  // Handle OTP submission
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -214,6 +221,7 @@ function Login({
     setLoading(false);
   };
 
+  // Handle retry submission
   const handleRetrySubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -235,6 +243,7 @@ function Login({
     setLoading(false);
   };
 
+  // Dynamic submit handler
   const handleSubmit = (e) => {
     if (step === 'login') {
       handleLogin(e);
@@ -246,7 +255,7 @@ function Login({
   return (
     <Modal
       open={open}
-      onClose={() => {}} 
+      onClose={() => {}} // Prevents closing on backdrop click or escape key
       aria-labelledby="login-modal"
       aria-describedby="insurance-plan-login"
     >
@@ -254,7 +263,12 @@ function Login({
         <IconButton
           aria-label="close"
           onClick={handleClose}
-          sx={{ position: 'absolute', right: 8, top: 8, color: (theme) => theme.palette.grey[500] }}
+          sx={{
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: (theme) => theme.palette.grey[500],
+          }}
         >
           <CloseIcon />
         </IconButton>
@@ -266,7 +280,7 @@ function Login({
         {step === 'login' || step === 'otp' ? (
           <form onSubmit={handleSubmit}>
             <div className="margin-top-20 info-section">
-              {/* ... (Keep your existing form fields unchanged) */}
+              {/* Customer Information Fields */}
               <div className="customer-card-container" style={{ display: 'grid', gap: '20px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
@@ -342,7 +356,7 @@ function Login({
                         control={<Radio sx={{ display: 'none' }} />}
                         disabled={loading || step === 'otp'}
                         label={
-                          <span style={{ display: 'flex', alignItems: 'center' }}>
+                          <>
                             <span style={{
                               display: 'inline-block',
                               width: '20px',
@@ -354,13 +368,24 @@ function Login({
                               position: 'relative',
                             }}>
                               {gender === 'Male' && (
-                                <svg style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} width="12" height="12" viewBox="0 0 24 24" fill="#10740AFF">
+                                <svg
+                                  style={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                  }}
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="#10740AFF"
+                                >
                                   <circle cx="12" cy="12" r="6" />
                                 </svg>
                               )}
                             </span>
                             男
-                          </span>
+                          </>
                         }
                       />
                       <FormControlLabel
@@ -368,7 +393,7 @@ function Login({
                         control={<Radio sx={{ display: 'none' }} />}
                         disabled={loading || step === 'otp'}
                         label={
-                          <span style={{ display: 'flex', alignItems: 'center' }}>
+                          <>
                             <span style={{
                               display: 'inline-block',
                               width: '20px',
@@ -380,13 +405,24 @@ function Login({
                               position: 'relative',
                             }}>
                               {gender === 'Female' && (
-                                <svg style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} width="12" height="12" viewBox="0 0 24 24" fill="#10740AFF">
+                                <svg
+                                  style={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                  }}
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="#10740AFF"
+                                >
                                   <circle cx="12" cy="12" r="6" />
                                 </svg>
                               )}
                             </span>
                             女
-                          </span>
+                          </>
                         }
                       />
                     </RadioGroup>
@@ -406,7 +442,7 @@ function Login({
                         control={<Radio sx={{ display: 'none' }} />}
                         disabled={loading || step === 'otp'}
                         label={
-                          <span style={{ display: 'flex', alignItems: 'center' }}>
+                          <>
                             <span style={{
                               display: 'inline-block',
                               width: '20px',
@@ -418,13 +454,24 @@ function Login({
                               position: 'relative',
                             }}>
                               {isSmoker && (
-                                <svg style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} width="12" height="12" viewBox="0 0 24 24" fill="#10740AFF">
+                                <svg
+                                  style={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                  }}
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="#10740AFF"
+                                >
                                   <circle cx="12" cy="12" r="6" />
                                 </svg>
                               )}
                             </span>
                             是
-                          </span>
+                          </>
                         }
                       />
                       <FormControlLabel
@@ -432,7 +479,7 @@ function Login({
                         control={<Radio sx={{ display: 'none' }} />}
                         disabled={loading || step === 'otp'}
                         label={
-                          <span style={{ display: 'flex', alignItems: 'center' }}>
+                          <>
                             <span style={{
                               display: 'inline-block',
                               width: '20px',
@@ -444,13 +491,24 @@ function Login({
                               position: 'relative',
                             }}>
                               {!isSmoker && (
-                                <svg style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} width="12" height="12" viewBox="0 0 24 24" fill="#10740AFF">
+                                <svg
+                                  style={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                  }}
+                                  width="12"
+                                  height="12"
+                                  viewBox="0 0 24 24"
+                                  fill="#10740AFF"
+                                >
                                   <circle cx="12" cy="12" r="6" />
                                 </svg>
                               )}
                             </span>
                             否
-                          </span>
+                          </>
                         }
                       />
                     </RadioGroup>
@@ -458,6 +516,7 @@ function Login({
                 </Box>
               </div>
 
+              {/* Plan and Payment Fields */}
               <div className="customer-card-container" style={{ marginTop: '20px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                   <div>
@@ -533,7 +592,7 @@ function Login({
                           </InputAdornment>
                         ),
                       }}
-                      sx={{ mb: 2 }}
+                      sx={{ mb: 2, '& .MuiInputLabel-asterisk': { color: 'red' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                       placeholder="Enter amount"
                     />
@@ -589,7 +648,18 @@ function Login({
                                 position: 'relative',
                               }}>
                                 {proposalLanguage === lang && (
-                                  <svg style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }} width="12" height="12" viewBox="0 0 24 24" fill="#10740AFF">
+                                  <svg
+                                    style={{
+                                      position: 'absolute',
+                                      top: '50%',
+                                      left: '50%',
+                                      transform: 'translate(-50%, -50%)',
+                                    }}
+                                    width="12"
+                                    height="12"
+                                    viewBox="0 0 24 24"
+                                    fill="#10740AFF"
+                                  >
                                     <circle cx="12" cy="12" r="6" />
                                   </svg>
                                 )}
@@ -606,6 +676,7 @@ function Login({
                 </div>
               </div>
 
+              {/* Login Fields */}
               <div className="login-fields margin-top-20" style={{ marginTop: '30px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
@@ -666,7 +737,11 @@ function Login({
                   variant="contained"
                   fullWidth
                   disabled={loading}
-                  sx={{ padding: '12px 24px', backgroundColor: loading ? '#ccc' : '#10740AFF', '&:hover': { backgroundColor: '#0d5f08' } }}
+                  sx={{ 
+                    padding: '12px 24px', 
+                    backgroundColor: loading ? '#ccc' : '#10740AFF', 
+                    '&:hover': { backgroundColor: '#0d5f08' } 
+                  }}
                 >
                   {loading ? (
                     <CircularProgress size={24} />
@@ -677,15 +752,12 @@ function Login({
                   )}
                 </Button>
 
-                <Button
-                  variant="outlined"
-                  fullWidth
-                  onClick={() => setLogDialogOpen(true)}
-                  sx={{ mt: 2 }}
-                  disabled={logMessages.length === 0}
-                >
-                  View Logs ({logMessages.length})
-                </Button>
+                {/* View Logs Button */}
+                <Box sx={{ mt: 2, textAlign: 'center' }}>
+                  <Button onClick={() => setLogDialogOpen(true)} variant="outlined">
+                    View Logs ({logs.length})
+                  </Button>
+                </Box>
               </div>
             </div>
           </form>
@@ -718,10 +790,18 @@ function Login({
               variant="contained"
               fullWidth
               disabled={loading}
-              sx={{ backgroundColor: loading ? '#ccc' : '#10740AFF', '&:hover': { backgroundColor: '#0d5f08' } }}
+              sx={{ 
+                backgroundColor: loading ? '#ccc' : '#10740AFF', 
+                '&:hover': { backgroundColor: '#0d5f08' } 
+              }}
             >
               {loading ? <CircularProgress size={24} /> : 'Submit'}
             </Button>
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
+              <Button onClick={() => setLogDialogOpen(true)} variant="outlined">
+                View Logs ({logs.length})
+              </Button>
+            </Box>
           </Box>
         ) : step === 'success' ? (
           <Box sx={{ mt: 2 }}>
@@ -731,30 +811,30 @@ function Login({
             <Button
               onClick={handleClose}
               variant="contained"
-              sx={{ backgroundColor: '#10740AFF', '&:hover': { backgroundColor: '#0d5f08' } }}
+              sx={{ 
+                backgroundColor: '#10740AFF', 
+                '&:hover': { backgroundColor: '#0d5f08' } 
+              }}
             >
               完成
             </Button>
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
+              <Button onClick={() => setLogDialogOpen(true)} variant="outlined">
+                View Logs ({logs.length})
+              </Button>
+            </Box>
           </Box>
         ) : null}
 
-        <Dialog
-          open={logDialogOpen}
-          onClose={() => setLogDialogOpen(false)}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle>Backend Logs</DialogTitle>
-          <DialogContent ref={logContentRef} sx={{ maxHeight: '400px', overflowY: 'auto' }}>
-            {logMessages.length > 0 ? (
-              logMessages.map((msg, index) => (
-                <Typography key={index} variant="body2" sx={{ mb: 1 }}>
-                  {msg}
-                </Typography>
-              ))
-            ) : (
-              <Typography variant="body2">No logs available</Typography>
-            )}
+        {/* Log Dialog */}
+        <Dialog open={logDialogOpen} onClose={() => setLogDialogOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle>Logs</DialogTitle>
+          <DialogContent>
+            <Box sx={{ maxHeight: '400px', overflowY: 'auto' }} ref={logRef}>
+              {logs.map((log, index) => (
+                <Typography key={index}>{log}</Typography>
+              ))}
+            </Box>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setLogDialogOpen(false)}>Close</Button>
