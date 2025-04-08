@@ -49,12 +49,11 @@ function Login({
   useInflation 
 }) {
   // Login and OTP states
-  const IsProduction = true;
+  const IsProduction = false;
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
   const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('CHANTSZLUNG');
   const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('Ctsz_!376897');
   const [otp, setOtp] = useState('');
-  const [otpError, setOtpError] = useState(''); // New state for OTP error message
   const [sessionId, setSessionId] = useState('');
   const [step, setStep] = useState('login');
   const [loading, setLoading] = useState(false);
@@ -147,7 +146,7 @@ function Login({
     if (logRef.current) {
       logRef.current.scrollTop = logRef.current.scrollHeight;
     }
-  }, [logDialogOpen, logs]);
+  }, [logDialogOpen,logs]);
 
   // Handle close
   const handleClose = () => {
@@ -157,7 +156,6 @@ function Login({
     setNewNotionalAmount('');
     setPdfDownloadLink('');
     setOtp('');
-    setOtpError(''); // Clear OTP error on close
     setSessionId('');
     setLogs([]);
   };
@@ -184,7 +182,6 @@ function Login({
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setOtpError(''); // Clear previous error before submission
     try {
       const response = await axios.post(serverURL + '/verify-otp', {
         session_id: sessionId,
@@ -211,9 +208,7 @@ function Login({
           proposalLanguage,
         },
       });
-      if (response.data.status === 'otp_failed') {
-        setOtpError(response.data.message); // Set error message from backend
-      } else if (response.data.status === 'retry') {
+      if (response.data.status === 'retry') {
         setSystemMessage(response.data.system_message);
         setStep('retry');
       } else if (response.data.status === 'success') {
@@ -732,8 +727,7 @@ function Login({
                     required
                     fullWidth
                     disabled={loading}
-                    error={!!otpError} // Highlight field if there's an error
-                    helperText={otpError} // Display error message below field
+                    
                     sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                     InputLabelProps={{ style: { fontWeight: '500' } }}
                   />
@@ -759,17 +753,19 @@ function Login({
                   )}
                 </Button>
 
-                {/* View Logs Button */}
-                <Box sx={{ mt: 2 }}>
-                  <Button 
-                    onClick={() => setLogDialogOpen(true)} 
-                    variant="outlined"
-                    fullWidth
-                    sx={{ padding: '12px 24px' }}
-                  >
-                    View Logs ({logs.length})
-                  </Button>
-                </Box>
+               {/* View Logs Button */}
+              <Box sx={{ mt: 2 }}>
+                <Button 
+                  onClick={() => setLogDialogOpen(true)} 
+                  variant="outlined"
+                  fullWidth
+                  sx={{
+                    padding: '12px 24px' // Optional: match padding with the first button
+                  }}
+                >
+                  View Logs ({logs.length})
+                </Button>
+              </Box>
               </div>
             </div>
           </form>
@@ -840,26 +836,26 @@ function Login({
 
         {/* Log Dialog */}
         <Dialog open={logDialogOpen} onClose={() => setLogDialogOpen(false)} maxWidth="md" fullWidth>
-          <DialogTitle>系統信息</DialogTitle>
-          <DialogContent>
-            <Box
-              sx={{
-                maxHeight: '400px',
-                overflowY: 'auto',
-                border: '1px solid #ccc',
-                borderRadius: '4px',
-                padding: '8px',
-                backgroundColor: '#f9f9f9',
-              }}
-              ref={logRef}
-            >
-              {logs.map((log, index) => (
-                <Typography key={index} sx={{ marginBottom: '8px' }}>
-                  {log}
-                </Typography>
-              ))}
-            </Box>
-          </DialogContent>
+  <DialogTitle>系統信息</DialogTitle>
+  <DialogContent>
+    <Box
+      sx={{
+        maxHeight: '400px',            // Limits the height of the log area
+        overflowY: 'auto',             // Enables scrolling if content overflows
+        border: '1px solid #ccc',      // Adds a single frame around all messages
+        borderRadius: '4px',           // Rounds the corners of the frame
+        padding: '8px',                // Adds spacing inside the frame
+        backgroundColor: '#f9f9f9',    // Optional: light background for contrast
+      }}
+      ref={logRef}
+    >
+      {logs.map((log, index) => (
+        <Typography key={index} sx={{ marginBottom: '8px' }}>
+          {log}
+        </Typography>
+      ))}
+    </Box>
+  </DialogContent>
           <DialogActions>
             <Button onClick={() => setLogDialogOpen(false)}>Close</Button>
           </DialogActions>
