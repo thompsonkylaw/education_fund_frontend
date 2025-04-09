@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import manulifeSavingPlans from './dropdown/manulife/manulife_saving_plan.json';
+import premiumPaymentPeriodOptions from './dropdown/manulife/premium_payment_period_options.json';
+
 import { 
   Modal,
   Box,
@@ -76,7 +79,7 @@ function Login({
   // Plan and payment states
   const [planCategory, setPlanCategory] = useState('全部');
   const [basicPlan, setBasicPlan] = useState('宏摯傳承保障計劃(GS)');
-  const [premiumPaymentPeriod, setPremiumPaymentPeriod] = useState(15);
+  const [premiumPaymentPeriod, setPremiumPaymentPeriod] = useState('15');
   const [worryFreeOption, setWorryFreeOption] = useState('否');
   const [currency, setCurrency] = useState('美元');
   const [notionalAmount, setNotionalAmount] = useState('20000');
@@ -88,11 +91,13 @@ function Login({
   const [withdrawalPeriod, setWithdrawalPeriod] = useState('');
   const [annualWithdrawalAmount, setAnnualWithdrawalAmount] = useState(1000);
   const [proposalLanguage, setProposalLanguage] = useState("zh");
+  const [availablePaymentPeriods, setAvailablePaymentPeriods] = useState([]);
 
   // Log states
   const [logs, setLogs] = useState([]);
   const [logDialogOpen, setLogDialogOpen] = useState(false);
   const logRef = useRef(null);
+  const shouldShowField = false;
 
   // Save username and password to localStorage
   useEffect(() => {
@@ -206,6 +211,7 @@ function Login({
           basicPlan,
           currency, 
           notionalAmount,
+          premiumPaymentPeriod,
           premiumPaymentMethod,
           useInflation,
           proposalLanguage,
@@ -256,6 +262,16 @@ function Login({
       handleOtpSubmit(e);
     }
   };
+
+  // Update available payment periods when basicPlan changes
+  useEffect(() => {
+    if (basicPlan && premiumPaymentPeriodOptions[basicPlan]) {
+      setAvailablePaymentPeriods(premiumPaymentPeriodOptions[basicPlan]);
+    } else {
+      setAvailablePaymentPeriods([]);
+    }
+    setPremiumPaymentPeriod(''); // Reset payment period when plan changes
+  }, [basicPlan]);
 
   return (
     <Modal
@@ -327,6 +343,7 @@ function Login({
                     />
                   </div>
                   <div>
+                  {shouldShowField && (
                     <TextField
                       label="投保年齡"
                       value={insuranceAge}
@@ -337,12 +354,13 @@ function Login({
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                       select
                     >
-                      {Array.from({ length: 83 }, (_, i) => 17 + i).map((num) => (
+                      {Array.from({ length: 100 }, (_, i) => 0 + i).map((num) => (
                         <MenuItem key={num} value={String(num)}>
                           {num}
                         </MenuItem>
                       ))}
                     </TextField>
+                    )}
                   </div>
                 </Box>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
@@ -523,46 +541,49 @@ function Login({
 
               {/* Plan and Payment Fields */}
               <div className="customer-card-container" style={{ marginTop: '20px' }}>
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
-                  <div>
-                    <FormControl fullWidth>
-                      <InputLabel sx={{ fontWeight: '500' }}>
-                        計劃類別 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
-                      </InputLabel>
-                      <Select
-                        value={planCategory}
-                        onChange={(e) => setPlanCategory(e.target.value)}
-                        label={<>計劃類別 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
-                        sx={{ backgroundColor: 'white', color: 'black' }}
-                      >
-                        <MenuItem value="全部">全部</MenuItem>
-                        <MenuItem value="退休">退休</MenuItem>
-                        <MenuItem value="危疾">危疾</MenuItem>
-                        <MenuItem value="儲蓄">儲蓄</MenuItem>
-                        <MenuItem value="住院">住院</MenuItem>
-                        <MenuItem value="投資">投資</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </div>
-                  <div>
-                    <FormControl fullWidth>
-                      <InputLabel sx={{ fontWeight: '500' }}>
-                        基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
-                      </InputLabel>
-                      <Select
-                        value={basicPlan}
-                        onChange={(e) => setBasicPlan(e.target.value)}
-                        label={<>基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
-                        sx={{ backgroundColor: 'white', color: 'black' }}
-                      >
-                        <MenuItem value="宏摯傳承保障計劃(GS)">宏摯傳承保障計劃(GS)</MenuItem>
-                        <MenuItem value="更多">更多</MenuItem>
-                      </Select>
-                    </FormControl>
-                  </div>
-                </Box>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
+    <div>
+      <FormControl fullWidth>
+        <InputLabel sx={{ fontWeight: '500' }}>
+          基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+        </InputLabel>
+        <Select
+          value={basicPlan}
+          onChange={(e) => setBasicPlan(e.target.value)}
+          label={<>基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+          disabled={loading || step === 'otp'}
+          sx={{ backgroundColor: 'white', color: 'black' }}
+        >
+          {manulifeSavingPlans.map((plan) => (
+            <MenuItem key={plan} value={plan}>
+              {plan}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </div>
+    <div>
+      <FormControl fullWidth>
+        <InputLabel sx={{ fontWeight: '500' }}>
+          保費繳付期 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+        </InputLabel>
+        <Select
+          value={premiumPaymentPeriod}
+          onChange={(e) => setPremiumPaymentPeriod(e.target.value)}
+          label={<>保費繳付期 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+          disabled={loading || step === 'otp' || !basicPlan}
+          sx={{ backgroundColor: 'white', color: 'black' }}
+          required
+        >
+          {availablePaymentPeriods.map((period) => (
+            <MenuItem key={period} value={period}>
+              {period}年
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </div>
+  </Box>
 
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                   <div>
@@ -723,8 +744,46 @@ function Login({
                     />
                   </div>
                 </Box>
-
                 {step === 'otp' && (
+                <TextField
+                  label={<>OTP Verification <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                  value={otp}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Only allow numeric input
+                    if (/^\d*$/.test(value)) {
+                      setOtp(value);
+                      // Validate on change (optional) or you can validate on submit
+                      if (value.length !== 6) {
+                        setOtpError('OTP must be exactly 6 digits');
+                      } else {
+                        setOtpError('');
+                      }
+                    }
+                  }}
+                  onBlur={() => {
+                    // Validate when field loses focus
+                    if (otp.length !== 6) {
+                      setOtpError('OTP must be exactly 6 digits');
+                    } else {
+                      setOtpError('');
+                    }
+                  }}
+                  required
+                  fullWidth
+                  disabled={loading}
+                  error={!!otpError}
+                  helperText={otpError}
+                  sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
+                  InputLabelProps={{ style: { fontWeight: '500' } }}
+                  inputProps={{
+                    maxLength: 6, // Prevent input longer than 6 characters
+                    inputMode: 'numeric', // Show numeric keyboard on mobile devices
+                  }}
+                />
+              )}
+
+                {/* {step === 'otp' && (
                   <TextField
                     label={<>OTP Verification <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                     value={otp}
@@ -737,7 +796,7 @@ function Login({
                     sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                     InputLabelProps={{ style: { fontWeight: '500' } }}
                   />
-                )}
+                )} */}
 
                 <Button
                   type="submit"
@@ -782,21 +841,29 @@ function Login({
               {systemMessage}
             </Typography>
             <TextField
-              label="New Notional Amount"
-              value={newNotionalAmount}
-              onChange={(e) => setNewNotionalAmount(e.target.value)}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    {currency === '美元' ? 'USD' : 'HKD'}
-                  </InputAdornment>
-                ),
-              }}
-              sx={{ mb: 2 }}
-              InputLabelProps={{ style: { fontWeight: '500' } }}
-              placeholder="Enter new amount"
-            />
+                label="New Notional Amount"
+                value={newNotionalAmount}
+                onChange={(e) => {
+                  // Only allow numbers and decimal point
+                  const value = e.target.value;
+                  if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+                    setNewNotionalAmount(value);
+                  }
+                }}
+                fullWidth
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      {currency === '美元' ? 'USD' : 'HKD'}
+                    </InputAdornment>
+                  ),
+                  inputMode: 'decimal', // Shows numeric keyboard on mobile with decimal point
+                }}
+                sx={{ mb: 2 }}
+                InputLabelProps={{ style: { fontWeight: '500' } }}
+                placeholder="Enter new amount"
+                type="text" // Important: Don't use type="number" to avoid default browser behavior
+              />
             <Button
               onClick={handleRetrySubmit}
               variant="contained"
