@@ -372,7 +372,8 @@ function Login({
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
                       row
-                      sx={{ display: 'flex', gap: '20px' }}
+                      sx={{ display: 'flex', gap: '20px',position: 'relative',
+                        right: '-12px', }}
                     >
                       <FormControlLabel
                         value="Male"
@@ -458,7 +459,8 @@ function Login({
                       value={isSmoker.toString()}
                       onChange={(e) => setIsSmoker(e.target.value === 'true')}
                       row
-                      sx={{ display: 'flex', gap: '20px' }}
+                      sx={{ display: 'flex', gap: '20px',position: 'relative',
+                        right: '-12px', }}
                     >
                       <FormControlLabel
                         value="true"
@@ -653,7 +655,8 @@ function Login({
                       value={proposalLanguage}
                       onChange={(e) => setProposalLanguage(e.target.value)}
                       row
-                      sx={{ display: 'flex', gap: '20px' }}
+                      sx={{ display: 'flex', gap: '20px',position: 'relative',
+                        right: '-12px', }}
                     >
                       {['zh', 'sc', 'en'].map((lang) => (
                         <FormControlLabel

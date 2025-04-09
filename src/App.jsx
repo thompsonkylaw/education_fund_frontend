@@ -218,11 +218,11 @@ const App = () => {
         </Grid>
 
         {/* Uncomment if Login component is needed */}
-        {/* <Login 
+        <Login 
           processedData={processedData} 
           inputs={inputs} 
           numberOfYearAccMP={numberOfYearAccMP}
-        /> */}
+        />
       </Container>
     </ThemeProvider>
   );
