@@ -36,20 +36,20 @@ const App = () => {
   const [appBarColor, setAppBarColor] = useState(localStorage.getItem('appBarColor') || 'green');
   const [useInflation, setUseInflation] = useState(false);
   
+  // Initialize inputs state with a function that checks localStorage
   const [inputs, setInputs] = useState(() => {
     const savedInputs = localStorage.getItem('inputs');
-    const defaultInputs = {
-      company: "manulife",
-      planFileName: "晉悅自願醫保靈活計劃_智選_2024-12-29_HKD_na_na",
-      age: 40,
-      planOption: "22,800港元",
-      numberOfYears: 15,
-      inflationRate: 6,
-      currencyRate: 7.85
-    };
     return savedInputs
-      ? { ...defaultInputs, ...JSON.parse(savedInputs) }
-      : defaultInputs;
+      ? JSON.parse(savedInputs)
+      : {
+          year: '2025',
+          plan: 'Smart',
+          age: 40,
+          deductible: 22800,
+          numberOfYears: 15,
+          inflationRate: 6,
+          currencyRate: 7.85
+        };
   });
 
   const [outputData, setOutputData] = useState([]);
@@ -63,39 +63,33 @@ const App = () => {
     localStorage.setItem('appBarColor', appBarColor);
   }, [appBarColor]);
 
-  // Fetch data with debouncing
+  // Fetch data based on input values
   useEffect(() => {
-    const timer = setTimeout(() => {
-      const fetchData = async () => {
-        try {
-          setLoading(true);
-          setError(null);
-          let serverURL;
-          IsProduction
-            ? (serverURL = 'https://fastapi-production-a20ab.up.railway.app')
-            : (serverURL = 'http://localhost:9002');
-          const response = await axios.post(serverURL + '/getData', {
-            company: inputs.company,
-            planFileName: inputs.planFileName,
-            age: inputs.age,
-            planOption: inputs.planOption,
-            numberOfYears: inputs.numberOfYears
-          });
-          
-          setOutputData(response.data);
-        } catch (err) {
-          setError(err.response?.data?.detail || 'Failed to fetch data');
-        } finally {
-          setLoading(false);
-        }
-      };
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        let serverURL;
+        IsProduction
+          ? (serverURL = 'https://fastapi-production-a20ab.up.railway.app')
+          : (serverURL = 'http://localhost:9002');
+        const response = await axios.post(serverURL + '/getData', {
+          year: inputs.year,
+          plan: inputs.plan,
+          age: inputs.age,
+          deductible: inputs.deductible,
+          numberOfYears: inputs.numberOfYears
+        });
+        setOutputData(response.data);
+      } catch (err) {
+        setError(err.response?.data?.detail || 'Failed to fetch data');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      fetchData();
-    }, 300); // Wait 300ms after the last state change
-
-    // Cleanup: clear the timer if inputs change before 300ms
-    return () => clearTimeout(timer);
-  }, [inputs.company, inputs.planFileName, inputs.age, inputs.planOption, inputs.numberOfYears]);
+    fetchData();
+  }, [inputs.year, inputs.plan, inputs.age, inputs.deductible, inputs.numberOfYears]);
 
   // Process data with inflation if applicable
   useEffect(() => {
@@ -139,8 +133,6 @@ const App = () => {
     setInputs(prev => ({ ...prev, currencyRate: value }));
   };
 
-  console.log(inputs);
-
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -170,6 +162,7 @@ const App = () => {
 
       <Container sx={{ mt: 10, mb: 4 }}>
         <Grid container spacing={3}>
+          {/* Left Column - Input Form and Results */}
           <Grid item xs={12} md={8}>
             <Input
               inputs={inputs}
@@ -177,6 +170,7 @@ const App = () => {
               appBarColor={appBarColor}
             />
 
+            {/* Loading and Results Section */}
             {loading && (
               <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                 <CircularProgress />
@@ -198,6 +192,7 @@ const App = () => {
             )}
           </Grid>
 
+          {/* Right Column - Financial Adjustments and Total */}
           <Grid item xs={12} md={4}>
             <Card elevation={3} sx={{ p: 2 }}>
               <UseInflation
@@ -222,6 +217,7 @@ const App = () => {
           </Grid>
         </Grid>
 
+        {/* Uncomment if Login component is needed */}
         <Login 
           processedData={processedData} 
           inputs={inputs} 
