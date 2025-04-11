@@ -11,6 +11,12 @@ import {
 } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
+// Create a numeric formatter without currency symbol
+const numberFormatter = new Intl.NumberFormat('en-US', {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0,
+});
+
 const OutputTable = ({ 
   outputData, 
   currencyRate, 
@@ -53,21 +59,19 @@ const OutputTable = ({
                     backgroundColor: isFinalYear ? '#ffebee' : 'inherit',
                     fontWeight: isFinalYear ? 600 : 'normal'
                   }}>
-                    {/* {row.medicalPremium.toFixed(2)} */}
-                    {(row.medicalPremium / currencyRate).toFixed(0)}
-                  </TableCell>
-                  
-                  <TableCell sx={{ 
-                    backgroundColor: isDecade ? '#f5f5f5' : 'inherit',
-                    fontWeight: isDecade ? 600 : 'normal'
-                  }}>
-                    {(row.accumulatedMP / currencyRate).toFixed(0)}
+                    {numberFormatter.format(row.medicalPremium / currencyRate)}
                   </TableCell>
                   <TableCell sx={{ 
                     backgroundColor: isDecade ? '#f5f5f5' : 'inherit',
                     fontWeight: isDecade ? 600 : 'normal'
                   }}>
-                    {row.accumulatedMP.toFixed(0)}
+                    {numberFormatter.format(row.accumulatedMP / currencyRate)}
+                  </TableCell>
+                  <TableCell sx={{ 
+                    backgroundColor: isDecade ? '#f5f5f5' : 'inherit',
+                    fontWeight: isDecade ? 600 : 'normal'
+                  }}>
+                    {numberFormatter.format(row.accumulatedMP)}
                   </TableCell>
                   <TableCell />
                 </TableRow>
