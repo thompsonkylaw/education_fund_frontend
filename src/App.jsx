@@ -29,13 +29,12 @@ const theme = createTheme({
 });
 
 const App = () => {
-  const IsProduction = true;
+  const IsProduction = false;
   const { t } = useTranslation();
 
   // State declarations
   const [appBarColor, setAppBarColor] = useState(localStorage.getItem('appBarColor') || 'green');
   const [useInflation, setUseInflation] = useState(false);
-  
   const [inputs, setInputs] = useState(() => {
     const savedInputs = localStorage.getItem('inputs');
     const defaultInputs = {
@@ -51,12 +50,12 @@ const App = () => {
       ? { ...defaultInputs, ...JSON.parse(savedInputs) }
       : defaultInputs;
   });
-
   const [outputData, setOutputData] = useState([]);
   const [processedData, setProcessedData] = useState([]);
   const [numberOfYearAccMP, setNumberOfYearAccMP] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [finalNotionalAmount, setFinalNotionalAmount] = useState(null); // New state
 
   // Save appBarColor to localStorage when it changes
   useEffect(() => {
@@ -81,7 +80,6 @@ const App = () => {
             planOption: inputs.planOption,
             numberOfYears: inputs.numberOfYears
           });
-          
           setOutputData(response.data);
         } catch (err) {
           setError(err.response?.data?.detail || 'Failed to fetch data');
@@ -89,11 +87,9 @@ const App = () => {
           setLoading(false);
         }
       };
-
       fetchData();
-    }, 300); // Wait 300ms after the last state change
+    }, 300);
 
-    // Cleanup: clear the timer if inputs change before 300ms
     return () => clearTimeout(timer);
   }, [inputs.company, inputs.planFileName, inputs.age, inputs.planOption, inputs.numberOfYears]);
 
@@ -210,6 +206,7 @@ const App = () => {
                 processedData={processedData}
                 inputs={inputs}
                 numberOfYearAccMP={numberOfYearAccMP}
+                setFinalNotionalAmount={setFinalNotionalAmount} // Pass setter
               />
             </Card>
 
@@ -217,16 +214,13 @@ const App = () => {
               <OutputForm
                 numberOfYears={inputs.numberOfYears}
                 numberOfYearAccMP={numberOfYearAccMP}
+                finalNotionalAmount={finalNotionalAmount} // Pass finalNotionalAmount
+                age={inputs.age}
+                currencyRate={inputs.currencyRate}
               />
             </Card>
           </Grid>
         </Grid>
-
-        <Login 
-          processedData={processedData} 
-          inputs={inputs} 
-          numberOfYearAccMP={numberOfYearAccMP}
-        />
       </Container>
     </ThemeProvider>
   );

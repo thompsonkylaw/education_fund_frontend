@@ -49,16 +49,15 @@ function Login({
   processedData, 
   inputs, 
   numberOfYearAccMP,
-  useInflation,
-  setFinalNotionalAmount // Receive from UseInflation
+  useInflation 
 }) {
   // Login and OTP states
-  const IsProduction = true;
+  const IsProduction = false;
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
   const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('CHANTSZLUNG');
   const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('Ctsz_!376897');
   const [otp, setOtp] = useState('');
-  const [otpError, setOtpError] = useState('');
+  const [otpError, setOtpError] = useState(''); // New state for OTP error message
   const [sessionId, setSessionId] = useState('');
   const [step, setStep] = useState('login');
   const [loading, setLoading] = useState(false);
@@ -88,7 +87,7 @@ function Login({
   const [getPromotionalDiscount, setGetPromotionalDiscount] = useState(true);
 
   // Withdrawal states
-  const [fromYear, setFromYear] = useState(inputs.numberOfYears + 1); // Fixed typo: numberOfYear -> numberOfYears
+  const [fromYear, setFromYear] = useState(inputs.numberOfYear + 1);
   const [withdrawalPeriod, setWithdrawalPeriod] = useState('');
   const [annualWithdrawalAmount, setAnnualWithdrawalAmount] = useState(1000);
   const [proposalLanguage, setProposalLanguage] = useState("zh");
@@ -111,11 +110,11 @@ function Login({
 
   // Update withdrawal period
   useEffect(() => {
-    if (inputs.age && inputs.numberOfYears) { // Fixed typo: numberOfYear -> numberOfYears
-      const calculatedWithdrawalPeriod = 100 - inputs.age - inputs.numberOfYears + 2;
+    if (inputs.age && inputs.numberOfYear) {
+      const calculatedWithdrawalPeriod = 100 - inputs.age - inputs.numberOfYear + 2;
       setWithdrawalPeriod(calculatedWithdrawalPeriod);
     }
-  }, [inputs.age, inputs.numberOfYears]);
+  }, [inputs.age, inputs.numberOfYear]);
 
   // Auto-download PDF
   useEffect(() => {
@@ -163,7 +162,7 @@ function Login({
     setNewNotionalAmount('');
     setPdfDownloadLink('');
     setOtp('');
-    setOtpError('');
+    setOtpError(''); // Clear OTP error on close
     setSessionId('');
     setLogs([]);
   };
@@ -190,7 +189,7 @@ function Login({
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setOtpError('');
+    setOtpError(''); // Clear previous error before submission
     try {
       const response = await axios.post(serverURL + '/verify-otp', {
         session_id: sessionId,
@@ -219,14 +218,13 @@ function Login({
         },
       });
       if (response.data.status === 'otp_failed') {
-        setOtpError(response.data.message);
+        setOtpError(response.data.message); // Set error message from backend
       } else if (response.data.status === 'retry') {
         setSystemMessage(response.data.system_message);
         setStep('retry');
       } else if (response.data.status === 'success') {
         setPdfDownloadLink(response.data.pdf_link);
         setStep('success');
-        setFinalNotionalAmount(notionalAmount); // No retry, use initial notionalAmount
       }
     } catch (error) {
       alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
@@ -249,7 +247,6 @@ function Login({
       } else if (response.data.status === 'success') {
         setPdfDownloadLink(response.data.pdf_link);
         setStep('success');
-        setFinalNotionalAmount(newNotionalAmount); // Retry succeeded, use newNotionalAmount
       }
     } catch (error) {
       alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
@@ -273,53 +270,10 @@ function Login({
     } else {
       setAvailablePaymentPeriods([]);
     }
-    setPremiumPaymentPeriod('');
+    setPremiumPaymentPeriod(''); // Reset payment period when plan changes
   }, [basicPlan]);
 
-  // Numeric formatter without currency symbol
-  const numberFormatter = new Intl.NumberFormat('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-
-  const [displayValue, setDisplayValue] = useState('');
-
-  // Handle input change
-  const handleChange = (e) => {
-    const input = e.target.value.replace(/[^0-9]/g, '');
-    if (input === '') {
-      setNotionalAmount('');
-      setDisplayValue('');
-      return;
-    }
-
-    const numericValue = parseInt(input, 10);
-    if (!isNaN(numericValue)) {
-      setNotionalAmount(numericValue.toString());
-      setDisplayValue(numberFormatter.format(numericValue));
-    }
-  };
-
-  // Handle blur to format the value
-  const handleBlur = () => {
-    if (notionalAmount !== '') {
-      const numericValue = parseInt(notionalAmount, 10);
-      if (!isNaN(numericValue)) {
-        setDisplayValue(numberFormatter.format(numericValue));
-      } else {
-        setNotionalAmount('');
-        setDisplayValue('');
-      }
-    }
-  };
-
-  // Handle focus to show raw number
-  const handleFocus = () => {
-    if (notionalAmount !== '') {
-      setDisplayValue(notionalAmount);
-    }
-  };
-
+  
   return (
     <Modal
       open={open}
@@ -390,23 +344,23 @@ function Login({
                     />
                   </div>
                   <div>
-                    {shouldShowField && (
-                      <TextField
-                        label="投保年齡"
-                        value={insuranceAge}
-                        onChange={(e) => setInsuranceAge(e.target.value)}
-                        fullWidth
-                        disabled={loading || step === 'otp'}
-                        sx={{ mb: 2 }}
-                        InputLabelProps={{ style: { fontWeight: '500' } }}
-                        select
-                      >
-                        {Array.from({ length: 100 }, (_, i) => 0 + i).map((num) => (
-                          <MenuItem key={num} value={String(num)}>
-                            {num}
-                          </MenuItem>
-                        ))}
-                      </TextField>
+                  {shouldShowField && (
+                    <TextField
+                      label="投保年齡"
+                      value={insuranceAge}
+                      onChange={(e) => setInsuranceAge(e.target.value)}
+                      fullWidth
+                      disabled={loading || step === 'otp'}
+                      sx={{ mb: 2 }}
+                      InputLabelProps={{ style: { fontWeight: '500' } }}
+                      select
+                    >
+                      {Array.from({ length: 100 }, (_, i) => 0 + i).map((num) => (
+                        <MenuItem key={num} value={String(num)}>
+                          {num}
+                        </MenuItem>
+                      ))}
+                    </TextField>
                     )}
                   </div>
                 </Box>
@@ -419,7 +373,8 @@ function Login({
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
                       row
-                      sx={{ display: 'flex', gap: '20px', position: 'relative', right: '-12px' }}
+                      sx={{ display: 'flex', gap: '20px',position: 'relative',
+                        right: '-12px', }}
                     >
                       <FormControlLabel
                         value="Male"
@@ -505,7 +460,8 @@ function Login({
                       value={isSmoker.toString()}
                       onChange={(e) => setIsSmoker(e.target.value === 'true')}
                       row
-                      sx={{ display: 'flex', gap: '20px', position: 'relative', right: '-12px' }}
+                      sx={{ display: 'flex', gap: '20px',position: 'relative',
+                        right: '-12px', }}
                     >
                       <FormControlLabel
                         value="true"
@@ -588,49 +544,49 @@ function Login({
 
               {/* Plan and Payment Fields */}
               <div className="customer-card-container" style={{ marginTop: '20px' }}>
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
-                  <div>
-                    <FormControl fullWidth>
-                      <InputLabel sx={{ fontWeight: '500' }}>
-                        基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
-                      </InputLabel>
-                      <Select
-                        value={basicPlan}
-                        onChange={(e) => setBasicPlan(e.target.value)}
-                        label={<>基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
-                        sx={{ backgroundColor: 'white', color: 'black' }}
-                      >
-                        {manulifeSavingPlans.map((plan) => (
-                          <MenuItem key={plan} value={plan}>
-                            {plan}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
-                  <div>
-                    <FormControl fullWidth>
-                      <InputLabel sx={{ fontWeight: '500' }}>
-                        保費繳付期 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
-                      </InputLabel>
-                      <Select
-                        value={premiumPaymentPeriod}
-                        onChange={(e) => setPremiumPaymentPeriod(e.target.value)}
-                        label={<>保費繳付期 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp' || !basicPlan}
-                        sx={{ backgroundColor: 'white', color: 'black' }}
-                        required
-                      >
-                        {availablePaymentPeriods.map((period) => (
-                          <MenuItem key={period} value={period}>
-                            {period}年
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                  </div>
-                </Box>
+              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
+    <div>
+      <FormControl fullWidth>
+        <InputLabel sx={{ fontWeight: '500' }}>
+          基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+        </InputLabel>
+        <Select
+          value={basicPlan}
+          onChange={(e) => setBasicPlan(e.target.value)}
+          label={<>基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+          disabled={loading || step === 'otp'}
+          sx={{ backgroundColor: 'white', color: 'black' }}
+        >
+          {manulifeSavingPlans.map((plan) => (
+            <MenuItem key={plan} value={plan}>
+              {plan}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </div>
+    <div>
+      <FormControl fullWidth>
+        <InputLabel sx={{ fontWeight: '500' }}>
+          保費繳付期 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+        </InputLabel>
+        <Select
+          value={premiumPaymentPeriod}
+          onChange={(e) => setPremiumPaymentPeriod(e.target.value)}
+          label={<>保費繳付期 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+          disabled={loading || step === 'otp' || !basicPlan}
+          sx={{ backgroundColor: 'white', color: 'black' }}
+          required
+        >
+          {availablePaymentPeriods.map((period) => (
+            <MenuItem key={period} value={period}>
+              {period}年
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </div>
+  </Box>
 
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                   <div>
@@ -652,11 +608,9 @@ function Login({
                   </div>
                   <div>
                     <TextField
-                      label="名義金額"
-                      value={displayValue}
-                      onChange={handleChange}
-                      onFocus={handleFocus}
-                      onBlur={handleBlur}
+                      label="名義金額" 
+                      value={notionalAmount}
+                      onChange={(e) => setNotionalAmount(e.target.value)}
                       required
                       fullWidth
                       disabled={loading || step === 'otp'}
@@ -702,7 +656,8 @@ function Login({
                       value={proposalLanguage}
                       onChange={(e) => setProposalLanguage(e.target.value)}
                       row
-                      sx={{ display: 'flex', gap: '20px', position: 'relative', right: '-12px' }}
+                      sx={{ display: 'flex', gap: '20px',position: 'relative',
+                        right: '-12px', }}
                     >
                       {['zh', 'sc', 'en'].map((lang) => (
                         <FormControlLabel
@@ -794,40 +749,58 @@ function Login({
                   </div>
                 </Box>
                 {step === 'otp' && (
-                  <TextField
-                    label={<>OTP Verification <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                    value={otp}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^\d*$/.test(value)) {
-                        setOtp(value);
-                        if (value.length !== 6) {
-                          setOtpError('OTP must be exactly 6 digits');
-                        } else {
-                          setOtpError('');
-                        }
-                      }
-                    }}
-                    onBlur={() => {
-                      if (otp.length !== 6) {
+                <TextField
+                  label={<>OTP Verification <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                  value={otp}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Only allow numeric input
+                    if (/^\d*$/.test(value)) {
+                      setOtp(value);
+                      // Validate on change (optional) or you can validate on submit
+                      if (value.length !== 6) {
                         setOtpError('OTP must be exactly 6 digits');
                       } else {
                         setOtpError('');
                       }
-                    }}
+                    }
+                  }}
+                  onBlur={() => {
+                    // Validate when field loses focus
+                    if (otp.length !== 6) {
+                      setOtpError('OTP must be exactly 6 digits');
+                    } else {
+                      setOtpError('');
+                    }
+                  }}
+                  required
+                  fullWidth
+                  disabled={loading}
+                  error={!!otpError}
+                  helperText={otpError}
+                  sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
+                  InputLabelProps={{ style: { fontWeight: '500' } }}
+                  inputProps={{
+                    maxLength: 6, // Prevent input longer than 6 characters
+                    inputMode: 'numeric', // Show numeric keyboard on mobile devices
+                  }}
+                />
+              )}
+
+                {/* {step === 'otp' && (
+                  <TextField
+                    label={<>OTP Verification <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value)}
                     required
                     fullWidth
                     disabled={loading}
-                    error={!!otpError}
-                    helperText={otpError}
+                    error={!!otpError} // Highlight field if there's an error
+                    helperText={otpError} // Display error message below field
                     sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                     InputLabelProps={{ style: { fontWeight: '500' } }}
-                    inputProps={{
-                      maxLength: 6,
-                      inputMode: 'numeric',
-                    }}
                   />
-                )}
+                )} */}
 
                 <Button
                   type="submit"
@@ -849,6 +822,7 @@ function Login({
                   )}
                 </Button>
 
+                {/* View Logs Button */}
                 <Box sx={{ mt: 2 }}>
                   <Button 
                     onClick={() => setLogDialogOpen(true)} 
@@ -871,28 +845,29 @@ function Login({
               {systemMessage}
             </Typography>
             <TextField
-              label="New Notional Amount"
-              value={newNotionalAmount}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
-                  setNewNotionalAmount(value);
-                }
-              }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    {currency === '美元' ? 'USD' : 'HKD'}
-                  </InputAdornment>
-                ),
-                inputMode: 'decimal',
-              }}
-              sx={{ mb: 2 }}
-              InputLabelProps={{ style: { fontWeight: '500' } }}
-              placeholder="Enter new amount"
-              type="text"
-            />
+                label="New Notional Amount"
+                value={newNotionalAmount}
+                onChange={(e) => {
+                  // Only allow numbers and decimal point
+                  const value = e.target.value;
+                  if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
+                    setNewNotionalAmount(value);
+                  }
+                }}
+                fullWidth
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      {currency === '美元' ? 'USD' : 'HKD'}
+                    </InputAdornment>
+                  ),
+                  inputMode: 'decimal', // Shows numeric keyboard on mobile with decimal point
+                }}
+                sx={{ mb: 2 }}
+                InputLabelProps={{ style: { fontWeight: '500' } }}
+                placeholder="Enter new amount"
+                type="text" // Important: Don't use type="number" to avoid default browser behavior
+              />
             <Button
               onClick={handleRetrySubmit}
               variant="contained"

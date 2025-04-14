@@ -9,7 +9,7 @@ import {
   Typography
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import LoginModal from './Login';
+import Login from './Login'; // Adjusted import name to match usage
 
 const UseInflation = ({ 
   inflationRate,
@@ -20,7 +20,8 @@ const UseInflation = ({
   onCurrencyRateChange,
   processedData,
   inputs,
-  numberOfYearAccMP
+  numberOfYearAccMP,
+  setFinalNotionalAmount // Receive from App.jsx
 }) => {
   const [openLoginModal, setOpenLoginModal] = useState(false);
 
@@ -43,17 +44,16 @@ const UseInflation = ({
         </IconButton>
       </Box>
 
-      <LoginModal
+      <Login
         open={openLoginModal}
         onClose={() => setOpenLoginModal(false)}
-        maxWidth="sm"
         processedData={processedData}
         inputs={inputs}
         numberOfYearAccMP={numberOfYearAccMP}
-        useInflation = {useInflation}
+        useInflation={useInflation}
+        setFinalNotionalAmount={setFinalNotionalAmount} // Pass to Login
       />
       
-      {/* Rest of the component remains the same */}
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, p: 2 }}>
         <FormControlLabel
           control={

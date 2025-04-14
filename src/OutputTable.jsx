@@ -56,20 +56,23 @@ const OutputTable = ({
                   <TableCell>{row.yearNumber}</TableCell>
                   <TableCell>{row.age}</TableCell>
                   <TableCell sx={{ 
-                    backgroundColor: isFinalYear ? '#ffebee' : 'inherit',
-                    fontWeight: isFinalYear ? 600 : 'normal'
+                    backgroundColor: isFinalYear ? '#E5A23EFF' : 'inherit',
+                    fontWeight: isFinalYear ? 600 : 'normal',
+                    color: isFinalYear ? '#ffffff' : '#111111'
                   }}>
                     {numberFormatter.format(row.medicalPremium / currencyRate)}
                   </TableCell>
                   <TableCell sx={{ 
-                    backgroundColor: isDecade ? '#f5f5f5' : 'inherit',
-                    fontWeight: isDecade ? 600 : 'normal'
+                    backgroundColor: isDecade ? '#8E8D8DFF' : 'inherit',
+                    fontWeight: isDecade ? 600 : 'normal',
+                    color: isDecade ? '#ffffff' : '#111111'
                   }}>
                     {numberFormatter.format(row.accumulatedMP / currencyRate)}
                   </TableCell>
                   <TableCell sx={{ 
-                    backgroundColor: isDecade ? '#f5f5f5' : 'inherit',
-                    fontWeight: isDecade ? 600 : 'normal'
+                    backgroundColor: isDecade ? '#1E1414FF' : 'inherit',
+                    fontWeight: isDecade ? 600 : 'normal',
+                    color: isDecade ? '#ffffff' : '#111111'
                   }}>
                     {numberFormatter.format(row.accumulatedMP)}
                   </TableCell>
