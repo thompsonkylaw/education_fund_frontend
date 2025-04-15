@@ -9,7 +9,7 @@ import manulife_medical_plan_sexuality from './dropdown/manulife/5_manulife_medi
 import manulife_medical_plan_ward from './dropdown/manulife/6_manulife_medical_plan_ward';
 import manulife_medical_plan_option from './dropdown/manulife/7_manulife_medical_plan_option';
 
-const Input = ({ inputs, setInputs, appBarColor }) => {
+const Input = ({ inputs, setInputs, appBarColor,disabled }) => {
   const { t } = useTranslation();
 
   // Options for NumberOfYear
@@ -96,6 +96,7 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
                 variant="standard"
                 value={inputs.plan || ''}
                 onChange={handleChange('plan')}
+                disabled={disabled}
               >
                 {manulife_medical_plan.map((plan, index) => (
                   <MenuItem key={plan} value={plan}>
@@ -115,6 +116,7 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
                 variant="standard"
                 value={inputs.planCategory || ''}
                 onChange={handleChange('planCategory')}
+                disabled={disabled}
               >
                 {(manulife_medical_plan_catagoary[inputs.plan] || []).map((category) => (
                   <MenuItem key={category} value={category}>
@@ -151,6 +153,7 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
                 variant="standard"
                 value={inputs.currency || ''}
                 onChange={handleChange('currency')}
+                disabled={disabled}
               >
                 {(manulife_medical_plan_currency[inputs.plan] || []).map((currency) => (
                   <MenuItem key={currency} value={currency}>
@@ -173,6 +176,7 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
                 variant="standard"
                 value={inputs.sexuality || ''}
                 onChange={handleChange('sexuality')}
+                disabled={disabled}
               >
                 {(manulife_medical_plan_sexuality[inputs.plan] || []).map((sex) => (
                   <MenuItem key={sex} value={sex}>
@@ -192,6 +196,7 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
                 variant="standard"
                 value={inputs.ward || ''}
                 onChange={handleChange('ward')}
+                disabled={disabled}
               >
                 {(manulife_medical_plan_ward[inputs.plan] || []).map((ward) => (
                   <MenuItem key={ward} value={ward}>
@@ -211,6 +216,7 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
                 variant="standard"
                 value={inputs.planOption || ''}
                 onChange={handleChange('planOption')}
+                disabled={disabled}
               >
                 {planOptionOptions().map((option) => (
                   <MenuItem key={option} value={option}>
@@ -230,6 +236,7 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
                 variant="standard"
                 value={inputs.age || 0}
                 onChange={handleChange('age')}
+                disabled={disabled}
               >
                 {Array.from({ length: 121 }, (_, i) => i).map((age) => (
                   <MenuItem key={age} value={age}>
@@ -249,6 +256,7 @@ const Input = ({ inputs, setInputs, appBarColor }) => {
                 variant="standard"
                 value={inputs.numberOfYears || 15}
                 onChange={handleChange('numberOfYears')}
+                disabled={disabled}
               >
                 {numberOfYearsOptions.map((year) => (
                   <MenuItem key={year} value={year}>

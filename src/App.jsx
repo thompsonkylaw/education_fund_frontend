@@ -21,7 +21,8 @@ import Login from './Login';
 import Input from './Input';
 import UseInflation from './UseInflation';
 import OutputTable from './OutputTable';
-import OutputForm from './OutputForm';
+import OutputForm_1 from './OutputForm_1';
+import OutputForm_2 from './OutputForm_2';
 
 const theme = createTheme({
   palette: { primary: { main: '#1976d2' }, secondary: { main: '#dc004e' } },
@@ -29,7 +30,7 @@ const theme = createTheme({
 });
 
 const App = () => {
-  const IsProduction = false;
+  const IsProduction = true;
   const { t } = useTranslation();
 
   // State declarations
@@ -171,6 +172,7 @@ const App = () => {
               inputs={inputs}
               setInputs={setInputs}
               appBarColor={appBarColor}
+              disabled={finalNotionalAmount !== null}
             />
 
             {loading && (
@@ -207,17 +209,25 @@ const App = () => {
                 inputs={inputs}
                 numberOfYearAccMP={numberOfYearAccMP}
                 setFinalNotionalAmount={setFinalNotionalAmount} // Pass setter
+                disabled={finalNotionalAmount !== null}
               />
             </Card>
 
             <Card elevation={3} sx={{ mt: 2, p: 2 }}>
-              <OutputForm
+              <OutputForm_1
+                processedData={processedData}
+                age={inputs.age}
+                currencyRate={inputs.currencyRate}
+              />
+            </Card>
+              <Card elevation={3} sx={{ mt: 2, p: 2 }}>
+              <OutputForm_2
                 numberOfYears={inputs.numberOfYears}
                 numberOfYearAccMP={numberOfYearAccMP}
                 finalNotionalAmount={finalNotionalAmount} // Pass finalNotionalAmount
                 age={inputs.age}
                 currencyRate={inputs.currencyRate}
-              />
+              />  
             </Card>
           </Grid>
         </Grid>

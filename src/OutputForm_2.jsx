@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableFooter, Paper, Typography } from '@mui/material';
 
-const OutputForm = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount, currencyRate }) => {
+const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount, currencyRate }) => {
   // Check if finalNotionalAmount is null; if so, show a placeholder message
   if (finalNotionalAmount === null) {
     return <Typography>請先完成登錄以獲取名義金額</Typography>;
@@ -10,7 +10,7 @@ const OutputForm = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount
   // Convert finalNotionalAmount to a number, default to 0 if invalid
   const finalNotionalAmountNum = finalNotionalAmount ? parseFloat(finalNotionalAmount) : 0;
 
-  // Calculate total cost and average monthly cost
+  // Calculate total cost and average monthly cost for the first row
   const totalCost = numberOfYearAccMP + finalNotionalAmountNum * currencyRate;
   const averageMonthly = totalCost / numberOfYears / 12;
 
@@ -18,6 +18,41 @@ const OutputForm = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount
   const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   const formattedTotalCost = formatter.format(Math.round(totalCost));
   const formattedAverageMonthly = formatter.format(Math.round(averageMonthly));
+
+  // Initialize rows for the table body
+  const rows = [];
+
+  // First row: From age to (age + numberOfYears - 1)
+  const firstRowEndAge = age + numberOfYears - 1;
+  rows.push({
+    ageRange: `${age} - ${firstRowEndAge} 歲`,
+    value: `首${numberOfYears}年平均每月 HKD $ ${formattedAverageMonthly}`,
+  });
+
+  // Start generating subsequent rows
+  let lastRowLastAge = firstRowEndAge;
+
+  // Add rows until we reach or exceed age 100
+  while (lastRowLastAge < 100) {
+    if (lastRowLastAge + 1 < 90) {
+      // Add a 10-year range row
+      const startAge = lastRowLastAge + 1;
+      const endAge = lastRowLastAge + 10;
+      rows.push({
+        ageRange: `${startAge} - ${endAge} 歲`,
+        value: "HKD $ -",
+      });
+      lastRowLastAge = endAge;
+    } else {
+      // Add the final row from (lastRowLastAge + 1) to 100
+      const startAge = lastRowLastAge + 1;
+      rows.push({
+        ageRange: `${startAge} - 100 歲`,
+        value: "HKD $ -",
+      });
+      lastRowLastAge = 100; // Exit the loop
+    }
+  }
 
   // Render the table
   return (
@@ -38,16 +73,12 @@ const OutputForm = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount
 
         {/* Body */}
         <TableBody>
-          <TableRow>
-            {/* Age range column */}
-            <TableCell>
-              {`${age} - ${age + numberOfYears - 1} 歲`}
-            </TableCell>
-            {/* Average monthly cost column */}
-            <TableCell align="right">
-              {`首${numberOfYears}年平均每月 HKD $ ${formattedAverageMonthly}`}
-            </TableCell>
-          </TableRow>
+          {rows.map((row, index) => (
+            <TableRow key={index}>
+              <TableCell>{row.ageRange}</TableCell>
+              <TableCell align="right">{row.value}</TableCell>
+            </TableRow>
+          ))}
         </TableBody>
 
         {/* Footer */}
@@ -67,4 +98,4 @@ const OutputForm = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount
   );
 };
 
-export default OutputForm;
+export default OutputForm_2;

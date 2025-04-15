@@ -21,7 +21,8 @@ const UseInflation = ({
   processedData,
   inputs,
   numberOfYearAccMP,
-  setFinalNotionalAmount // Receive from App.jsx
+  setFinalNotionalAmount,
+  disabled// Receive from App.jsx
 }) => {
   const [openLoginModal, setOpenLoginModal] = useState(false);
 
@@ -61,6 +62,7 @@ const UseInflation = ({
               checked={useInflation}
               onChange={(e) => setUseInflation(e.target.checked)}
               color="primary"
+              disabled={disabled}
             />
           }
           label={
@@ -81,6 +83,8 @@ const UseInflation = ({
             inputProps={{ min: 0, step: 0.1 }}
             variant="outlined"
             margin="normal"
+            disabled={disabled}
+            
           />
         </Collapse>
 
@@ -94,6 +98,7 @@ const UseInflation = ({
           variant="outlined"
           margin="normal"
           sx={{ mb: 2 }}
+          disabled={disabled}
         />
       </Box>
     </Box>
