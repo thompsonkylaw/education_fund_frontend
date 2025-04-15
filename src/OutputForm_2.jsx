@@ -64,7 +64,7 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
             <TableCell
               colSpan={2}
               align="center"
-              sx={{ backgroundColor: 'orange', fontWeight: 'bold' }}
+              sx={{ backgroundColor: 'orange', fontWeight: 'bold',fontSize: '1.5rem'  }}
             >
               醫療融資保費
             </TableCell>
@@ -87,7 +87,7 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
             <TableCell
               colSpan={2}
               align="right"
-              sx={{ backgroundColor: 'yellow', fontWeight: 'bold' }}
+              sx={{ backgroundColor: 'yellow', fontWeight: 'bold',fontSize: '1.5rem'  }}
             >
               {`總成本: HKD $ ${formattedTotalCost}`}
             </TableCell>

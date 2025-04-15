@@ -94,7 +94,8 @@ const OutputForm_1 = ({ processedData, age, currencyRate }) => {
               sx={{ 
                 backgroundColor: 'teal', 
                 color: 'white', 
-                fontWeight: 'bold' 
+                fontWeight: 'bold', 
+                fontSize: '1.5rem' 
               }}
             >
               傳統醫療保費
@@ -122,7 +123,7 @@ const OutputForm_1 = ({ processedData, age, currencyRate }) => {
               align="right" 
               sx={{ 
                 backgroundColor: 'yellow', 
-                fontWeight: 'bold' 
+                fontWeight: 'bold',fontSize: '1.5rem'  
               }}
             >
               {`總成本: HKD $ ${numberFormatter.format(Math.round(ageToAccMP[100]))}`}
