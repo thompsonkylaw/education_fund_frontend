@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableFooter, Paper, Typography } from '@mui/material';
 
-const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount, currencyRate }) => {
+const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount, currencyRate, fontSizeMultiplier = 1 }) => {
   // Check if finalNotionalAmount is null; if so, show a placeholder message
   if (finalNotionalAmount === null) {
     return <Typography>請先完成登錄以獲取名義金額</Typography>;
@@ -54,6 +54,12 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
     }
   }
 
+  // Define font sizes with multiplier
+  const baseFontSize = 1;    // Default body font size in rem
+  const headerFontSize = 1.5; // Default header/footer font size in rem
+  const cellFontSize = `${baseFontSize * fontSizeMultiplier}rem`;
+  const headerFooterFontSize = `${headerFontSize * fontSizeMultiplier}rem`;
+
   // Render the table
   return (
     <TableContainer component={Paper}>
@@ -64,7 +70,11 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
             <TableCell
               colSpan={2}
               align="center"
-              sx={{ backgroundColor: 'orange', fontWeight: 'bold',fontSize: '1.5rem'  }}
+              sx={{ 
+                backgroundColor: 'orange', 
+                fontWeight: 'bold', 
+                fontSize: headerFooterFontSize 
+              }}
             >
               醫療融資保費
             </TableCell>
@@ -75,8 +85,13 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
         <TableBody>
           {rows.map((row, index) => (
             <TableRow key={index}>
-              <TableCell>{row.ageRange}</TableCell>
-              <TableCell align="right">{row.value}</TableCell>
+              <TableCell sx={{ fontSize: cellFontSize }}>{row.ageRange}</TableCell>
+              <TableCell 
+                align="right" 
+                sx={{ fontSize: cellFontSize }}
+              >
+                {row.value}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
@@ -87,7 +102,11 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
             <TableCell
               colSpan={2}
               align="right"
-              sx={{ backgroundColor: 'yellow', fontWeight: 'bold',fontSize: '1.5rem'  }}
+              sx={{ 
+                backgroundColor: 'yellow', 
+                fontWeight: 'bold', 
+                fontSize: headerFooterFontSize 
+              }}
             >
               {`總成本: HKD $ ${formattedTotalCost}`}
             </TableCell>

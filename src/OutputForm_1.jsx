@@ -16,7 +16,7 @@ const numberFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
 });
 
-const OutputForm_1 = ({ processedData, age, currencyRate }) => {
+const OutputForm_1 = ({ processedData, age, currencyRate, fontSizeMultiplier = 1 }) => {
   // Starting age from props
   const startAge = age;
 
@@ -82,6 +82,12 @@ const OutputForm_1 = ({ processedData, age, currencyRate }) => {
     }
   }
 
+  // Define font sizes with multiplier
+  const baseFontSize = 1;    // Default body font size in rem
+  const headerFontSize = 1.5; // Default header/footer font size in rem
+  const cellFontSize = `${baseFontSize * fontSizeMultiplier}rem`;
+  const headerFooterFontSize = `${headerFontSize * fontSizeMultiplier}rem`;
+
   return (
     <TableContainer component={Paper}>
       <Table>
@@ -95,7 +101,7 @@ const OutputForm_1 = ({ processedData, age, currencyRate }) => {
                 backgroundColor: 'teal', 
                 color: 'white', 
                 fontWeight: 'bold', 
-                fontSize: '1.5rem' 
+                fontSize: headerFooterFontSize 
               }}
             >
               傳統醫療保費
@@ -107,8 +113,11 @@ const OutputForm_1 = ({ processedData, age, currencyRate }) => {
         <TableBody>
           {rows.map((row, index) => (
             <TableRow key={index}>
-              <TableCell>{row.ageRange}</TableCell>
-              <TableCell align="right">
+              <TableCell sx={{ fontSize: cellFontSize }}>{row.ageRange}</TableCell>
+              <TableCell 
+                align="right" 
+                sx={{ fontSize: cellFontSize }}
+              >
                 {`HKD $ ${numberFormatter.format(Math.round(row.value))}`}
               </TableCell>
             </TableRow>
@@ -123,7 +132,8 @@ const OutputForm_1 = ({ processedData, age, currencyRate }) => {
               align="right" 
               sx={{ 
                 backgroundColor: 'yellow', 
-                fontWeight: 'bold',fontSize: '1.5rem'  
+                fontWeight: 'bold', 
+                fontSize: headerFooterFontSize 
               }}
             >
               {`總成本: HKD $ ${numberFormatter.format(Math.round(ageToAccMP[100]))}`}

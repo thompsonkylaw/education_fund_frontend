@@ -23,6 +23,7 @@ import UseInflation from './UseInflation';
 import OutputTable from './OutputTable';
 import OutputForm_1 from './OutputForm_1';
 import OutputForm_2 from './OutputForm_2';
+import OutputForm_3 from './OutputForm_3';
 
 const theme = createTheme({
   palette: { primary: { main: '#1976d2' }, secondary: { main: '#dc004e' } },
@@ -30,7 +31,7 @@ const theme = createTheme({
 });
 
 const App = () => {
-  const IsProduction = true;
+  const IsProduction = true; 
   const { t } = useTranslation();
 
   // State declarations
@@ -229,6 +230,17 @@ const App = () => {
                 currencyRate={inputs.currencyRate}
               />  
             </Card>
+            {finalNotionalAmount && <Card elevation={3} sx={{ mt: 2, p: 2 }}>
+              <OutputForm_3
+                processedData={processedData}
+                numberOfYears={inputs.numberOfYears}
+                numberOfYearAccMP={numberOfYearAccMP}
+                finalNotionalAmount={finalNotionalAmount} // Pass finalNotionalAmount
+                age={inputs.age}
+                currencyRate={inputs.currencyRate}
+              />  
+            </Card>}
+            
           </Grid>
         </Grid>
       </Container>
