@@ -53,7 +53,7 @@ function Login({
   setFinalNotionalAmount // Receive from UseInflation
 }) {
   // Login and OTP states
-  const IsProduction = true;
+  const IsProduction = false;
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
   const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('CHANTSZLUNG');
   const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('Ctsz_!376897');
@@ -651,27 +651,35 @@ function Login({
                     </FormControl>
                   </div>
                   <div>
-                    <TextField
-                      label="名義金額"
-                      value={displayValue}
-                      onChange={handleChange}
-                      onFocus={handleFocus}
-                      onBlur={handleBlur}
-                      required
-                      fullWidth
-                      disabled={loading || step === 'otp'}
-                      InputProps={{
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            {currency === '美元' ? 'USD' : 'HKD'}
-                          </InputAdornment>
-                        ),
-                      }}
-                      sx={{ mb: 2, '& .MuiInputLabel-asterisk': { color: 'red' } }}
-                      InputLabelProps={{ style: { fontWeight: '500' } }}
-                      placeholder="Enter amount"
-                    />
-                  </div>
+                      <TextField
+                        label="名義金額"
+                        value={displayValue}
+                        onChange={handleChange}
+                        onFocus={handleFocus}
+                        onBlur={handleBlur}
+                        required
+                        fullWidth
+                        disabled={loading || step === 'otp'}
+                        InputProps={{
+                          startAdornment: (
+                            <InputAdornment position="start">
+                              {currency === '美元' ? 'USD' : 'HKD'}
+                            </InputAdornment>
+                          ),
+                        }}
+                        sx={{ 
+                          mb: 2, 
+                          '& .MuiInputLabel-asterisk': { color: 'red' },
+                          '& .Mui-error': {
+                            color: 'red', // Custom error color if needed
+                          }
+                        }}
+                        InputLabelProps={{ style: { fontWeight: '500' } }}
+                        placeholder="Enter amount"
+                        error={Number(displayValue?.replace(/[^0-9.-]+/g,"")) < 1500}
+                        helperText={Number(displayValue?.replace(/[^0-9.-]+/g,"")) < 1500 ? "名義金額不得少於 1500" : ""}
+                      />
+                    </div>
                 </Box>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>

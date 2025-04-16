@@ -231,6 +231,7 @@ const App = () => {
               />  
             </Card>
             {finalNotionalAmount && <Card elevation={3} sx={{ mt: 2, p: 2 }}>
+            {/* {<Card elevation={3} sx={{ mt: 2, p: 2 }}>   */}
               <OutputForm_3
                 processedData={processedData}
                 numberOfYears={inputs.numberOfYears}
@@ -238,6 +239,7 @@ const App = () => {
                 finalNotionalAmount={finalNotionalAmount} // Pass finalNotionalAmount
                 age={inputs.age}
                 currencyRate={inputs.currencyRate}
+                setFinalNotionalAmount={setFinalNotionalAmount} // Pass setter
               />  
             </Card>}
             
