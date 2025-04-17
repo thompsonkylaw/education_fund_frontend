@@ -16,7 +16,7 @@ const numberFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
 });
 
-const OutputForm_1 = ({ processedData, age, currencyRate, fontSizeMultiplier = 1 }) => {
+const OutputForm_1 = ({ processedData, age, currencyRate, numOfRowInOutputForm_1, fontSizeMultiplier = 1 }) => {
   // Starting age from props
   const startAge = age;
 

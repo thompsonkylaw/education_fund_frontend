@@ -26,6 +26,7 @@ const ComparisonPopup = ({
   finalNotionalAmount,
   age,
   currencyRate,
+  numOfRowInOutputForm_1, // Added prop
 }) => {
   const [fontRegularData, setFontRegularData] = useState(null);
   const [fontBoldData, setFontBoldData] = useState(null);
@@ -128,52 +129,45 @@ const ComparisonPopup = ({
 
     const leftX = 14;
     const rightX = 110;
-    
-// Set card styling
-doc.setDrawColor(42, 157, 143); // Same color as your heading
-doc.setLineWidth(0.5);
 
-// Calculate dimensions
-const cardPadding = 5;
-const cardWidth = 85; // Adjust as needed
-const cardHeight = 50; // Adjust as needed
-const cardX = leftX +5- cardPadding ;
-const cardY = 40 - cardPadding - 10; // Adjust Y position to account for title
-
-// Draw the rectangle
-doc.rect(cardX, cardY, cardWidth, cardHeight);
+    // Set card styling for traditional insurance
+    doc.setDrawColor(42, 157, 143);
+    doc.setLineWidth(0.5);
+    const cardPadding = 5;
+    const cardWidth = 85;
+    const cardHeight = 50;
+    const cardX = leftX + 5 - cardPadding;
+    const cardY = 40 - cardPadding - 10;
+    doc.rect(cardX, cardY, cardWidth, cardHeight);
 
     doc.setFontSize(14);
     doc.setTextColor(42, 157, 143);
     doc.setFont('NotoSansCJKtc', 'bold');
-    doc.text('傳統醫療保費', leftX +2, 32);
+    doc.text('傳統醫療保費', leftX + 2, 32);
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     doc.setFont('NotoSansCJKtc', 'normal');
-    doc.text('1. 逐年購買，住院賠錢，無事洗錢', leftX + 2 , 42);
-    doc.text('2. 年年加價，年輕時保費便宜', leftX+2, 52);
-    doc.text('3. 年長時保費遞增，退休後保費高昂', leftX+2, 62);
+    doc.text('1. 逐年購買，住院賠錢，無事洗錢', leftX + 2, 42);
+    doc.text('2. 年年加價，年輕時保費便宜', leftX + 2, 52);
+    doc.text('3. 年長時保費遞增，退休後保費高昂', leftX + 2, 62);
     doc.text('4. 消費性產品', leftX + 2, 72);
 
-
-// Set card styling
-doc.setDrawColor(244, 162, 97); // Same color as your heading
-doc.setLineWidth(0.5);
-
-// Draw the rectangle
-doc.rect(cardX+96, cardY, cardWidth, cardHeight);
+    // Set card styling for financing insurance
+    doc.setDrawColor(244, 162, 97);
+    doc.setLineWidth(0.5);
+    doc.rect(cardX + 96, cardY, cardWidth, cardHeight);
 
     doc.setFontSize(14);
     doc.setTextColor(244, 162, 97);
     doc.setFont('NotoSansCJKtc', 'bold');
-    doc.text('醫療融資保費', rightX +3, 32);
+    doc.text('醫療融資保費', rightX + 3, 32);
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     doc.setFont('NotoSansCJKtc', 'normal');
-    doc.text(`1. 只需${numberOfYears}年完成終生醫療保衛`, rightX+3, 42);
-    doc.text(`2. 節省${formattedSavingsPercentage}%終身醫療保費$${formattedSavingsInMillions}萬`, rightX+3, 52);
-    doc.text('3. 全面終身醫療保障至100歲', rightX+3, 62);
-    doc.text('4. 有事賠錢，無事儲錢，戶口長期增值', rightX+3, 72);
+    doc.text(`1. 只需${numberOfYears}年完成終生醫療保衛`, rightX + 3, 42);
+    doc.text(`2. 節省${formattedSavingsPercentage}%終身醫療保費$${formattedSavingsInMillions}萬`, rightX + 3, 52);
+    doc.text('3. 全面終身醫療保障至100歲', rightX + 3, 62);
+    doc.text('4. 有事賠錢，無事儲錢，戶口長期增值', rightX + 3, 72);
 
     doc.setFillColor(15, 17, 28);
     doc.rect(14, 80, 182, 10, 'F');
@@ -213,8 +207,9 @@ doc.rect(cardX+96, cardY, cardWidth, cardHeight);
           const rangeStart = lastEndAge + 1;
           const rangeEnd = endAge;
           const value = ageToAccMP[endAge] - lastAccMP;
-          // rows.push([`${rangeStart} - ${rangeEnd} 歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`]);
-          rangeStart === 100 ? rows.push([`${rangeStart}歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`]) : rows.push([`${rangeStart} - ${rangeEnd} 歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`]);
+          rangeStart === 100
+            ? rows.push([`${rangeStart}歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`])
+            : rows.push([`${rangeStart} - ${rangeEnd} 歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`]);
           lastAccMP = ageToAccMP[endAge];
           lastEndAge = endAge;
         }
@@ -224,9 +219,9 @@ doc.rect(cardX+96, cardY, cardWidth, cardHeight);
         const rangeStart = lastEndAge + 1;
         const rangeEnd = 100;
         const value = ageToAccMP[100] - lastAccMP;
-        rangeStart === 100 ? rows.push([`${rangeStart}歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`]) : rows.push([`${rangeStart} - ${rangeEnd} 歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`]);
-        
-        
+        rangeStart === 100
+          ? rows.push([`${rangeStart}歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`])
+          : rows.push([`${rangeStart} - ${rangeEnd} 歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`]);
       }
     }
 
@@ -241,9 +236,6 @@ doc.rect(cardX+96, cardY, cardWidth, cardHeight);
     });
 
     const table1FinalY = doc.lastAutoTable.finalY;
-
-    doc.setFont('NotoSansCJKtc', 'bold');
-    doc.text(`總成本: HKD $ ${numberFormatter.format(Math.round(traditionalTotalCost))}`, leftX + 2, table1FinalY + 6);
 
     const outputForm2Rows = [];
     const firstRowEndAge = age + numberOfYears - 1;
@@ -263,7 +255,8 @@ doc.rect(cardX+96, cardY, cardWidth, cardHeight);
       }
     }
 
-    if (age % 10 === 0) {
+    // New row-adding logic: Add an extra row if less than numOfRowInOutputForm_1
+    if (outputForm2Rows.length < numOfRowInOutputForm_1) {
       outputForm2Rows.push(["-", "-"]);
     }
 
@@ -279,16 +272,17 @@ doc.rect(cardX+96, cardY, cardWidth, cardHeight);
 
     const table2FinalY = doc.lastAutoTable.finalY;
 
-    doc.setFont('NotoSansCJKtc', 'bold');
-    doc.text(`總成本: HKD $ ${formattedTotalCost}`, rightX + 2, table2FinalY + 6);
-
     const yPosition = Math.max(table1FinalY + 10, table2FinalY + 10);
 
+    doc.setFont('NotoSansCJKtc', 'bold');
+    doc.text(`總成本: HKD $ ${numberFormatter.format(Math.round(traditionalTotalCost))}`, leftX + 2, yPosition + 3);
+    doc.text(`總成本: HKD $ ${formattedTotalCost}`, rightX + 2, yPosition + 3);
+
     doc.setFont('NotoSansCJKtc', 'normal');
-    doc.text(`${age1} 歲戶口價值: HKD $ -`, leftX + 2, yPosition + 3); //left
-    doc.text(`${age2} 歲戶口價值: HKD $ -`, leftX + 2, yPosition + 10); //left
-    doc.text(`${age1} 歲戶口價值: HKD $ ${formattedCurrency1}`, rightX + 2, yPosition + 3); //right
-    doc.text(`${age2} 歲戶口價值: HKD $ ${formattedCurrency2}`, rightX + 2, yPosition + 10); //right
+    doc.text(`${age1} 歲戶口價值: HKD $ -`, leftX + 2, yPosition + 13);
+    doc.text(`${age2} 歲戶口價值: HKD $ -`, leftX + 2, yPosition + 20);
+    doc.text(`${age1} 歲戶口價值: HKD $ ${formattedCurrency1}`, rightX + 2, yPosition + 13);
+    doc.text(`${age2} 歲戶口價值: HKD $ ${formattedCurrency2}`, rightX + 2, yPosition + 20);
 
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
@@ -308,19 +302,32 @@ doc.rect(cardX+96, cardY, cardWidth, cardHeight);
       const clonedElement = originalElement.cloneNode(true);
       const wrapper = document.createElement('div');
       const header = document.createElement('div');
+
       header.style.textAlign = 'center';
       header.style.fontSize = '24px';
       header.style.marginBottom = '16px';
+      header.style.marginTop = '0';
       header.textContent = 'Manulife 宏利';
+
+      wrapper.style.fontSize = '80%';
+      wrapper.style.marginTop = '-20px';
+      wrapper.style.padding = '0';
+      wrapper.style.position = 'relative';
+      wrapper.style.top = '-10px';
+
       wrapper.appendChild(header);
       wrapper.appendChild(clonedElement);
-      wrapper.style.fontSize = '80%';
+
+      clonedElement.style.margin = '0';
+      clonedElement.style.padding = '0';
+      clonedElement.style.boxSizing = 'border-box';
+
       const timestamp = getHongKongTimestamp();
       html2pdf().from(wrapper).set({
         filename: `比較報告_${timestamp}.pdf`,
-        margin: [0.2, 0.2, 0.2, 0.2],
+        margin: [0.1, 0.2, 0.2, 0.2],
         image: { type: 'jpeg', quality: 2 },
-        html2canvas: { scale: 0.8 },
+        html2canvas: { scale: 0.8, y: 0 },
         jsPDF: { unit: 'in', format: 'a3', orientation: 'portrait' }
       }).save();
     }
@@ -375,7 +382,15 @@ doc.rect(cardX+96, cardY, cardWidth, cardHeight);
               <Typography variant="h4">{age2} 歲戶口價值: HKD $ -</Typography>
             </Grid>
             <Grid item xs={6}>
-              <OutputForm_2 age={age} numberOfYears={numberOfYears} numberOfYearAccMP={numberOfYearAccMP} finalNotionalAmount={finalNotionalAmount} currencyRate={currencyRate} fontSizeMultiplier={1.5} />
+              <OutputForm_2
+                age={age}
+                numberOfYears={numberOfYears}
+                numberOfYearAccMP={numberOfYearAccMP}
+                finalNotionalAmount={finalNotionalAmount}
+                currencyRate={currencyRate}
+                fontSizeMultiplier={1.5}
+                numOfRowInOutputForm_1={numOfRowInOutputForm_1} // Pass the prop to OutputForm_2
+              />
               <Typography variant="h4">{age1} 歲戶口價值: HKD $ {formattedCurrency1}</Typography>
               <Typography variant="h4">{age2} 歲戶口價值: HKD $ {formattedCurrency2}</Typography>
             </Grid>

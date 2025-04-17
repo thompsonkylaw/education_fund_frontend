@@ -1,7 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableFooter, Paper, Typography } from '@mui/material';
 
-const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount, currencyRate, fontSizeMultiplier = 1 }) => {
+const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount, currencyRate, numOfRowInOutputForm_1, fontSizeMultiplier = 1 }) => {
   // Check if finalNotionalAmount is null; if so, show a placeholder message
   if (finalNotionalAmount === null) {
     return <Typography>請先完成登錄以獲取名義金額</Typography>;
@@ -32,12 +32,9 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
   // Start generating subsequent rows
   let lastRowLastAge = firstRowEndAge;
 
-  // Check if age is a multiple of 10 (i.e., starts with 0, 10, 20, ..., 90)
-  const isMultipleOfTen = age % 10 === 0;
-
   // Add rows until we reach or exceed age 100
   while (lastRowLastAge < 100) {
-    if (lastRowLastAge + 1 < 90 || (isMultipleOfTen && lastRowLastAge + 1 <= 90)) {
+    if (lastRowLastAge + 1 <= 90) {
       // Add a 10-year range row
       const startAge = lastRowLastAge + 1;
       const endAge = Math.min(startAge + 9, 100);
@@ -57,8 +54,8 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
     }
   }
 
-  // If age is a multiple of 10 and the last row ends at 100, add an extra row
-  if (isMultipleOfTen && lastRowLastAge === 100) {
+  // Add extra row if rows.length < numOfRowInOutputForm_1
+  if (rows.length < numOfRowInOutputForm_1) {
     rows.push({
       ageRange: " - ",
       value: " - ",

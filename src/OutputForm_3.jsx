@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Select, MenuItem, TextField, FormControl, InputLabel, Box } from '@mui/material';
 import ComparisonPopup from './ComparisonPopup';
 
-const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNotionalAmount, age, currencyRate,setFinalNotionalAmount }) => {
+const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNotionalAmount, age, currencyRate,setFinalNotionalAmount,numOfRowInOutputForm_1 }) => {
   // State for age selections and currency inputs
   const [age1, setAge1] = useState(65);
   const [age2, setAge2] = useState(85);
@@ -99,6 +99,7 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
         finalNotionalAmount={finalNotionalAmount}
         age={age}
         currencyRate={currencyRate}
+        numOfRowInOutputForm_1={numOfRowInOutputForm_1}
       />
     </Box>
   );

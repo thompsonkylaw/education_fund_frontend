@@ -17,8 +17,8 @@ import {
 import { ArrowBack as ArrowBackIcon } from '@mui/icons-material';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useTranslation } from 'react-i18next';
-import Login from './Login';
 import Input from './Input';
+import Input_2 from './Input_2';
 import UseInflation from './UseInflation';
 import OutputTable from './OutputTable';
 import OutputForm_1 from './OutputForm_1';
@@ -31,60 +31,95 @@ const theme = createTheme({
 });
 
 const App = () => {
-  const IsProduction = true; 
+  const IsProduction = true;
   const { t } = useTranslation();
 
   // State declarations
   const [appBarColor, setAppBarColor] = useState(localStorage.getItem('appBarColor') || 'green');
   const [useInflation, setUseInflation] = useState(false);
-  const [inputs, setInputs] = useState(() => {
-    const savedInputs = localStorage.getItem('inputs');
+  const [plan1Inputs, setPlan1Inputs] = useState(() => {
+    const savedInputs = localStorage.getItem('plan1Inputs');
     const defaultInputs = {
       company: "manulife",
-      planFileName: "晉悅自願醫保靈活計劃_智選_2024-12-29_HKD_na_na",
-      age: 40,
+      plan: "晉悅自願醫保靈活計劃",
+      planCategory: "智選",
+      effectiveDate: "2024-12-29",
+      currency: "HKD",
+      sexuality: "na",
+      ward: "na",
       planOption: "22,800港元",
+      age: 40,
       numberOfYears: 15,
       inflationRate: 6,
-      currencyRate: 7.85
+      currencyRate: 7.85,
+      planFileName: "晉悅自願醫保靈活計劃_智選_2024-12-29_HKD_na_na"
     };
-    return savedInputs
-      ? { ...defaultInputs, ...JSON.parse(savedInputs) }
-      : defaultInputs;
+    return savedInputs ? { ...defaultInputs, ...JSON.parse(savedInputs) } : defaultInputs;
   });
-  const [outputData, setOutputData] = useState([]);
+  const [plan2Inputs, setPlan2Inputs] = useState(null);
+  const [showSecondPlan, setShowSecondPlan] = useState(false);
+  const [outputData1, setOutputData1] = useState([]);
+  const [outputData2, setOutputData2] = useState([]);
   const [processedData, setProcessedData] = useState([]);
   const [numberOfYearAccMP, setNumberOfYearAccMP] = useState(0);
+  const [numOfRowInOutputForm_1, setNumOfRowInOutputForm_1] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [finalNotionalAmount, setFinalNotionalAmount] = useState(null); // New state
+  const [finalNotionalAmount, setFinalNotionalAmount] = useState(null);
 
-  // Save appBarColor to localStorage when it changes
+  // Save appBarColor to localStorage
   useEffect(() => {
     localStorage.setItem('appBarColor', appBarColor);
   }, [appBarColor]);
 
-  // Fetch data with debouncing
+  // Initialize or sync plan2Inputs
+  useEffect(() => {
+    if (showSecondPlan) {
+      if (!plan2Inputs) {
+        setPlan2Inputs({
+          company: "manulife",
+          plan: "晉悅自願醫保靈活計劃",
+          planCategory: "智選",
+          effectiveDate: "2024-12-29",
+          currency: "HKD",
+          sexuality: "na",
+          ward: "na",
+          planOption: "22,800港元",
+          age: plan1Inputs.age,
+          numberOfYears: plan1Inputs.numberOfYears,
+          inflationRate: plan1Inputs.inflationRate,
+          currencyRate: plan1Inputs.currencyRate,
+          planFileName: "晉悅自願醫保靈活計劃_智選_2024-12-29_HKD_na_na"
+        });
+      } else {
+        setPlan2Inputs(prev => ({ ...prev, age: plan1Inputs.age, numberOfYears: plan1Inputs.numberOfYears }));
+      }
+    } else {
+      setPlan2Inputs(null);
+      setOutputData2([]);
+    }
+  }, [showSecondPlan, plan1Inputs.age, plan1Inputs.numberOfYears]);
+
+  // Fetch data for Plan 1
   useEffect(() => {
     const timer = setTimeout(() => {
       const fetchData = async () => {
         try {
           setLoading(true);
           setError(null);
-          let serverURL;
-          IsProduction
-            ? (serverURL = 'https://fastapi-production-a20ab.up.railway.app')
-            : (serverURL = 'http://localhost:9002');
+          const serverURL = IsProduction
+            ? 'https://fastapi-production-a20ab.up.railway.app'
+            : 'http://localhost:9002';
           const response = await axios.post(serverURL + '/getData', {
-            company: inputs.company,
-            planFileName: inputs.planFileName,
-            age: inputs.age,
-            planOption: inputs.planOption,
-            numberOfYears: inputs.numberOfYears
+            company: plan1Inputs.company,
+            planFileName: plan1Inputs.planFileName,
+            age: plan1Inputs.age,
+            planOption: plan1Inputs.planOption,
+            numberOfYears: plan1Inputs.numberOfYears
           });
-          setOutputData(response.data);
+          setOutputData1(response.data);
         } catch (err) {
-          setError(err.response?.data?.detail || 'Failed to fetch data');
+          setError(err.response?.data?.detail || 'Failed to fetch data for Plan 1');
         } finally {
           setLoading(false);
         }
@@ -93,61 +128,130 @@ const App = () => {
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [inputs.company, inputs.planFileName, inputs.age, inputs.planOption, inputs.numberOfYears]);
+  }, [plan1Inputs.company, plan1Inputs.planFileName, plan1Inputs.age, plan1Inputs.planOption, plan1Inputs.numberOfYears]);
 
-  // Process data with inflation if applicable
+  // Fetch data for Plan 2
   useEffect(() => {
-    if (outputData.length === 0) return;
+    if (showSecondPlan && plan2Inputs) {
+      const timer = setTimeout(() => {
+        const fetchData = async () => {
+          try {
+            setLoading(true);
+            setError(null);
+            const serverURL = IsProduction
+              ? 'https://fastapi-production-a20ab.up.railway.app'
+              : 'http://localhost:9002';
+            const response = await axios.post(serverURL + '/getData', {
+              company: plan2Inputs.company,
+              planFileName: plan2Inputs.planFileName,
+              age: plan2Inputs.age,
+              planOption: plan2Inputs.planOption,
+              numberOfYears: plan2Inputs.numberOfYears
+            });
+            setOutputData2(response.data);
+          } catch (err) {
+            setError(err.response?.data?.detail || 'Failed to fetch data for Plan 2');
+          } finally {
+            setLoading(false);
+          }
+        };
+        fetchData();
+      }, 300);
 
-    let accumulatedMP = 0;
-    const processed = [];
+      return () => clearTimeout(timer);
+    }
+  }, [showSecondPlan, plan2Inputs]);
 
-    for (let i = 0; i < outputData.length; i++) {
-      const item = outputData[i];
-      let medicalPremium = item.medicalPremium;
-
-      if (i > 0 && useInflation) {
-        medicalPremium = processed[i - 1].medicalPremium * (1 + inputs.inflationRate / 100);
-      }
-
-      accumulatedMP += medicalPremium;
-      processed.push({
-        ...item,
-        medicalPremium: medicalPremium,
-        accumulatedMP: accumulatedMP
-      });
+  // Process data for both plans
+  useEffect(() => {
+    if (outputData1.length === 0) {
+      setProcessedData([]);
+      setNumberOfYearAccMP(0);
+      setNumOfRowInOutputForm_1(0);
+      return;
     }
 
-    setProcessedData(processed);
-    const finalYearData = processed.find(item => item.yearNumber === inputs.numberOfYears);
+    const processData = (data, inflationRate) => {
+      let accumulatedMP = 0;
+      const processed = [];
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
+        let medicalPremium = item.medicalPremium;
+        if (i > 0 && useInflation) {
+          medicalPremium = processed[i - 1].medicalPremium * (1 + inflationRate / 100);
+        }
+        accumulatedMP += medicalPremium;
+        processed.push({
+          ...item,
+          medicalPremium,
+          accumulatedMP
+        });
+      }
+      return processed;
+    };
+
+    const processed1 = processData(outputData1, plan1Inputs.inflationRate);
+    let combinedData;
+
+    if (showSecondPlan && outputData2.length > 0 && outputData2.length === outputData1.length) {
+      const processed2 = processData(outputData2, plan1Inputs.inflationRate);
+      combinedData = processed1.map((row1, index) => {
+        const row2 = processed2[index];
+        return {
+          yearNumber: row1.yearNumber,
+          age: row1.age,
+          medicalPremium1: row1.medicalPremium,
+          medicalPremium2: row2.medicalPremium,
+          medicalPremium: row1.medicalPremium + row2.medicalPremium,
+          accumulatedMP: row1.accumulatedMP + row2.accumulatedMP
+        };
+      });
+    } else {
+      combinedData = processed1;
+    }
+
+    // Calculate number of rows for OutputForm_1
+    let lastEndAge = plan1Inputs.age - 1;
+    let rowCount = 0;
+    while (lastEndAge < 100) {
+      const rowStart = lastEndAge + 1;
+      if (rowStart > 100) break;
+      const rowEnd = Math.min(rowStart + 9, 100);
+      if (!combinedData.some(item => item.age === rowEnd)) break;
+      rowCount++;
+      lastEndAge = rowEnd;
+    }
+    setNumOfRowInOutputForm_1(rowCount);
+
+    setProcessedData(combinedData);
+    const finalYearData = combinedData.find(item => item.yearNumber === plan1Inputs.numberOfYears);
     setNumberOfYearAccMP(finalYearData?.accumulatedMP || 0);
-  }, [outputData, useInflation, inputs.inflationRate, inputs.numberOfYears]);
+  }, [outputData1, outputData2, useInflation, plan1Inputs.inflationRate, showSecondPlan, plan1Inputs.numberOfYears, plan1Inputs.age]);
 
-  // Save inputs to localStorage whenever inputs change
+  // Save plan1Inputs to localStorage
   useEffect(() => {
-    localStorage.setItem('inputs', JSON.stringify(inputs));
-  }, [inputs]);
+    localStorage.setItem('plan1Inputs', JSON.stringify(plan1Inputs));
+  }, [plan1Inputs]);
 
-  // Handler functions for updating specific input fields
+  // Handlers
   const handleInflationRateChange = (value) => {
-    setInputs(prev => ({ ...prev, inflationRate: value }));
+    setPlan1Inputs(prev => ({ ...prev, inflationRate: value }));
   };
 
   const handleCurrencyRateChange = (value) => {
-    setInputs(prev => ({ ...prev, currencyRate: value }));
+    setPlan1Inputs(prev => ({ ...prev, currencyRate: value }));
   };
 
-  console.log(inputs);
+  const onToggleSecondPlan = () => {
+    setShowSecondPlan(prev => !prev);
+  };
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AppBar
         position="fixed"
-        sx={{
-          width: '100%',
-          backgroundColor: appBarColor,
-        }}
+        sx={{ width: '100%', backgroundColor: appBarColor }}
       >
         <Toolbar>
           <IconButton
@@ -170,29 +274,38 @@ const App = () => {
         <Grid container spacing={3}>
           <Grid item xs={12} md={8}>
             <Input
-              inputs={inputs}
-              setInputs={setInputs}
+              inputs={plan1Inputs}
+              setInputs={setPlan1Inputs}
               appBarColor={appBarColor}
               disabled={finalNotionalAmount !== null}
+              showSecondPlan={showSecondPlan}
+              onToggleSecondPlan={onToggleSecondPlan}
             />
-
+            {showSecondPlan && plan2Inputs && (
+              <Box sx={{ mt: 2 }}>
+                <Input_2
+                  inputs={plan2Inputs}
+                  setInputs={setPlan2Inputs}
+                  appBarColor={appBarColor}
+                  disabled={finalNotionalAmount !== null}
+                />
+              </Box>
+            )}
             {loading && (
               <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                 <CircularProgress />
               </Box>
             )}
-
             {error && (
               <Alert severity="error" sx={{ mt: 2 }}>
                 {error}
               </Alert>
             )}
-
             {!loading && !error && processedData.length > 0 && (
               <OutputTable
                 outputData={processedData}
-                currencyRate={inputs.currencyRate}
-                numberOfYears={inputs.numberOfYears}
+                currencyRate={plan1Inputs.currencyRate}
+                numberOfYears={plan1Inputs.numberOfYears}
               />
             )}
           </Grid>
@@ -200,50 +313,51 @@ const App = () => {
           <Grid item xs={12} md={4}>
             <Card elevation={3} sx={{ p: 2 }}>
               <UseInflation
-                inflationRate={inputs.inflationRate}
-                currencyRate={inputs.currencyRate}
+                inflationRate={plan1Inputs.inflationRate}
+                currencyRate={plan1Inputs.currencyRate}
                 useInflation={useInflation}
                 setUseInflation={setUseInflation}
                 onInflationRateChange={handleInflationRateChange}
                 onCurrencyRateChange={handleCurrencyRateChange}
                 processedData={processedData}
-                inputs={inputs}
+                inputs={plan1Inputs}
                 numberOfYearAccMP={numberOfYearAccMP}
-                setFinalNotionalAmount={setFinalNotionalAmount} // Pass setter
+                setFinalNotionalAmount={setFinalNotionalAmount}
                 disabled={finalNotionalAmount !== null}
               />
             </Card>
-
             <Card elevation={3} sx={{ mt: 2, p: 2 }}>
               <OutputForm_1
                 processedData={processedData}
-                age={inputs.age}
-                currencyRate={inputs.currencyRate}
+                age={plan1Inputs.age}
+                currencyRate={plan1Inputs.currencyRate}
+                numOfRowInOutputForm_1={numOfRowInOutputForm_1}
               />
             </Card>
-              <Card elevation={3} sx={{ mt: 2, p: 2 }}>
+            <Card elevation={3} sx={{ mt: 2, p: 2 }}>
               <OutputForm_2
-                numberOfYears={inputs.numberOfYears}
+                numberOfYears={plan1Inputs.numberOfYears}
                 numberOfYearAccMP={numberOfYearAccMP}
-                finalNotionalAmount={finalNotionalAmount} // Pass finalNotionalAmount
-                age={inputs.age}
-                currencyRate={inputs.currencyRate}
-              />  
+                finalNotionalAmount={finalNotionalAmount}
+                age={plan1Inputs.age}
+                currencyRate={plan1Inputs.currencyRate}
+                numOfRowInOutputForm_1={numOfRowInOutputForm_1}
+              />
             </Card>
-            {finalNotionalAmount && <Card elevation={3} sx={{ mt: 2, p: 2 }}>
-            {/* { <Card elevation={3} sx={{ mt: 2, p: 2 }}> */}
-            {/* {<Card elevation={3} sx={{ mt: 2, p: 2 }}>   */}
-              <OutputForm_3
-                processedData={processedData}
-                numberOfYears={inputs.numberOfYears}
-                numberOfYearAccMP={numberOfYearAccMP}
-                finalNotionalAmount={finalNotionalAmount} // Pass finalNotionalAmount
-                age={inputs.age}
-                currencyRate={inputs.currencyRate}
-                setFinalNotionalAmount={setFinalNotionalAmount} // Pass setter
-              />  
-            </Card>}
-            
+            {finalNotionalAmount && (
+              <Card elevation={3} sx={{ mt: 2, p: 2 }}>
+                <OutputForm_3
+                  processedData={processedData}
+                  numberOfYears={plan1Inputs.numberOfYears}
+                  numberOfYearAccMP={numberOfYearAccMP}
+                  finalNotionalAmount={finalNotionalAmount}
+                  age={plan1Inputs.age}
+                  currencyRate={plan1Inputs.currencyRate}
+                  setFinalNotionalAmount={setFinalNotionalAmount}
+                  numOfRowInOutputForm_1={numOfRowInOutputForm_1}
+                />
+              </Card>
+            )}
           </Grid>
         </Grid>
       </Container>
