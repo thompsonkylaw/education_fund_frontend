@@ -12,7 +12,7 @@ const numberFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
 });
 
-const ComparisonPopup = ({
+const ComparisonPopup_PDF = ({
   open,
   onClose,
   age1,
@@ -118,7 +118,7 @@ const ComparisonPopup = ({
   
     // Add teal box content (Traditional Medical Insurance)
     doc.setFontSize(14);
-    doc.setTextColor(0, 128, 128); // Teal color
+    doc.setTextColor(42, 157, 143); // Teal color
     doc.setFont('NotoSansCJKtc', 'bold');
     doc.text('傳統醫療保費', 14, 32);
     doc.setFontSize(12);
@@ -131,7 +131,7 @@ const ComparisonPopup = ({
   
     // Add orange box content (Medical Financing Premium)
     doc.setFontSize(14);
-    doc.setTextColor(255, 165, 0); // Orange color
+    doc.setTextColor(244, 162, 97); // Orange color
     doc.setFont('NotoSansCJKtc', 'bold');
     doc.text('醫療融資保費', 100, 32);
     doc.setFontSize(12);
@@ -143,7 +143,7 @@ const ComparisonPopup = ({
     doc.text('4. 有事賠錢，無事儲錢，戶口長期增值', 100, 72);
   
     // Add dark blue box
-    doc.setFillColor(15, 17, 28); // Dark blue
+    doc.setFillColor(38, 70, 83); // Dark blue
     doc.rect(14, 82, 182, 10, 'F');
     doc.setTextColor(255, 255, 255); // White color
     doc.setFontSize(14);
@@ -312,7 +312,7 @@ const ComparisonPopup = ({
         <Grid container spacing={2}>
           {/* Left Box (Teal) */}
           <Grid item xs={6}>
-            <Box sx={{ backgroundColor: 'teal', color: 'white', p: 2, position: 'relative' }}>
+            <Box sx={{ backgroundColor: 'rgb(42, 157, 143)', color: 'white', p: 2, position: 'relative' }}>
               <img
                 src="/cross.png"
                 alt="Cross"
@@ -328,7 +328,7 @@ const ComparisonPopup = ({
 
           {/* Right Box (Orange) */}
           <Grid item xs={6}>
-            <Box sx={{ backgroundColor: 'orange', p: 2, position: 'relative' }}>
+            <Box sx={{ backgroundColor: 'rgb(244, 162, 97)', p: 2, position: 'relative' }}>
               <img
                 src="/tick.png"
                 alt="Tick"
@@ -346,7 +346,7 @@ const ComparisonPopup = ({
 
           {/* Dark Blue Box */}
           <Grid item xs={12}>
-            <Box sx={{ backgroundColor: '#0F111CFF', color: 'white', p: 2, textAlign: 'center' }}>
+            <Box sx={{ backgroundColor: 'rgb(38, 70, 83)', color: 'white', p: 2, textAlign: 'center' }}>
               <Typography variant="h3">實際操作 How does it work?</Typography>
             </Box>
           </Grid>
@@ -387,4 +387,4 @@ const ComparisonPopup = ({
   );
 };
 
-export default ComparisonPopup;
+export default ComparisonPopup_PDF;

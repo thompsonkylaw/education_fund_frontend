@@ -26,60 +26,24 @@ const OutputForm_1 = ({ processedData, age, currencyRate, fontSizeMultiplier = 1
     ageToAccMP[row.age] = row.accumulatedMP; // Assuming accumulatedMP is in HKD
   });
 
-  // Generate decade end ages (e.g., 64, 74, 84, 94, 100 for startAge=55)
-  const decadeEndAges = [];
-  let currentAge = startAge + 9; // First decade ends at startAge + 9
-  while (currentAge <= 100) {
-    if (currentAge in ageToAccMP) {
-      decadeEndAges.push(currentAge);
-    }
-    currentAge += 10;
-  }
-  // Ensure age 100 is included if not already
-  if (decadeEndAges.length > 0 && decadeEndAges[decadeEndAges.length - 1] < 100 && 100 in ageToAccMP) {
-    decadeEndAges.push(100);
-  }
-
   // Generate table rows
   const rows = [];
-  if (startAge + 9 in ageToAccMP) {
-    // First row: e.g., "55-64 歲"
-    const firstEndAge = startAge + 9;
+  let lastEndAge = startAge - 1;
+  let lastAccMP = 0;
+
+  while (lastEndAge < 100) {
+    const rowStart = lastEndAge + 1;
+    if (rowStart > 100) break;
+    const rowEnd = Math.min(rowStart + 9, 100);
+    if (!(rowEnd in ageToAccMP)) break; // Safety check
+    const ageRange = rowStart === rowEnd ? `${rowStart} 歲` : `${rowStart} - ${rowEnd} 歲`;
+    const value = ageToAccMP[rowEnd] - lastAccMP;
     rows.push({
-      ageRange: `${startAge} - ${firstEndAge} 歲`,
-      value: ageToAccMP[firstEndAge],
+      ageRange,
+      value,
     });
-
-    // Track the last decade's accumulatedMP and end age
-    let lastAccMP = ageToAccMP[firstEndAge];
-    let lastEndAge = firstEndAge;
-
-    // Subsequent rows
-    for (let i = 0; i < decadeEndAges.length; i++) {
-      const endAge = decadeEndAges[i];
-      if (endAge > lastEndAge) {
-        const rangeStart = lastEndAge + 1;
-        const rangeEnd = endAge;
-        const value = ageToAccMP[endAge] - lastAccMP;
-        rows.push({
-          ageRange: `${rangeStart} - ${rangeEnd} 歲`,
-          value: value,
-        });
-        lastAccMP = ageToAccMP[endAge];
-        lastEndAge = endAge;
-      }
-    }
-
-    // If lastEndAge < 100, add a final row to 100
-    if (lastEndAge < 100 && 100 in ageToAccMP) {
-      const rangeStart = lastEndAge + 1;
-      const rangeEnd = 100;
-      const value = ageToAccMP[100] - lastAccMP;
-      rows.push({
-        ageRange: `${rangeStart} - ${rangeEnd} 歲`,
-        value: value,
-      });
-    }
+    lastAccMP = ageToAccMP[rowEnd];
+    lastEndAge = rowEnd;
   }
 
   // Define font sizes with multiplier
@@ -98,7 +62,7 @@ const OutputForm_1 = ({ processedData, age, currencyRate, fontSizeMultiplier = 1
               colSpan={2} 
               align="center" 
               sx={{ 
-                backgroundColor: 'teal', 
+                backgroundColor: 'rgb(42, 157, 143)', 
                 color: 'white', 
                 fontWeight: 'bold', 
                 fontSize: headerFooterFontSize 

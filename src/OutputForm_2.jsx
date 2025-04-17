@@ -32,12 +32,15 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
   // Start generating subsequent rows
   let lastRowLastAge = firstRowEndAge;
 
+  // Check if age is a multiple of 10 (i.e., starts with 0, 10, 20, ..., 90)
+  const isMultipleOfTen = age % 10 === 0;
+
   // Add rows until we reach or exceed age 100
   while (lastRowLastAge < 100) {
-    if (lastRowLastAge + 1 < 90) {
+    if (lastRowLastAge + 1 < 90 || (isMultipleOfTen && lastRowLastAge + 1 <= 90)) {
       // Add a 10-year range row
       const startAge = lastRowLastAge + 1;
-      const endAge = lastRowLastAge + 10;
+      const endAge = Math.min(startAge + 9, 100);
       rows.push({
         ageRange: `${startAge} - ${endAge} 歲`,
         value: "HKD $ -",
@@ -52,6 +55,14 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
       });
       lastRowLastAge = 100; // Exit the loop
     }
+  }
+
+  // If age is a multiple of 10 and the last row ends at 100, add an extra row
+  if (isMultipleOfTen && lastRowLastAge === 100) {
+    rows.push({
+      ageRange: " - ",
+      value: " - ",
+    });
   }
 
   // Define font sizes with multiplier
@@ -71,7 +82,7 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
               colSpan={2}
               align="center"
               sx={{ 
-                backgroundColor: 'orange', 
+                backgroundColor: 'rgb(244, 162, 97)', 
                 fontWeight: 'bold', 
                 fontSize: headerFooterFontSize 
               }}
