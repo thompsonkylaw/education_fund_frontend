@@ -1,60 +1,51 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableFooter, Paper, Typography } from '@mui/material';
 
 const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount, currencyRate, numOfRowInOutputForm_1, fontSizeMultiplier = 1 }) => {
-  // Check if finalNotionalAmount is null; if so, show a placeholder message
+  const { t } = useTranslation();
+
   if (finalNotionalAmount === null) {
-    return <Typography>請先完成登錄以獲取名義金額</Typography>;
+    return <Typography>{t('outputForm2.placeholder')}</Typography>;
   }
 
-  // Convert finalNotionalAmount to a number, default to 0 if invalid
   const finalNotionalAmountNum = finalNotionalAmount ? parseFloat(finalNotionalAmount) : 0;
-
-  // Calculate total cost and average monthly cost for the first row
   const totalCost = numberOfYearAccMP + finalNotionalAmountNum * currencyRate;
   const averageMonthly = totalCost / numberOfYears / 12;
 
-  // Format numbers with commas and no decimal places
   const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   const formattedTotalCost = formatter.format(Math.round(totalCost));
   const formattedAverageMonthly = formatter.format(Math.round(averageMonthly));
 
-  // Initialize rows for the table body
   const rows = [];
-
-  // First row: From age to (age + numberOfYears - 1)
   const firstRowEndAge = age + numberOfYears - 1;
+  const firstRowValue = t('outputForm2.firstRowValue', { numberOfYears, averageMonthly: formattedAverageMonthly });
   rows.push({
-    ageRange: `${age} - ${firstRowEndAge} 歲`,
-    value: `首${numberOfYears}年平均每月 HKD $ ${formattedAverageMonthly}`,
+    ageRange: `${age} - ${firstRowEndAge} ${t('common.yearsOld')}`,
+    value: firstRowValue,
   });
 
-  // Start generating subsequent rows
   let lastRowLastAge = firstRowEndAge;
 
-  // Add rows until we reach or exceed age 100
   while (lastRowLastAge < 100) {
     if (lastRowLastAge + 1 <= 90) {
-      // Add a 10-year range row
       const startAge = lastRowLastAge + 1;
       const endAge = Math.min(startAge + 9, 100);
       rows.push({
-        ageRange: `${startAge} - ${endAge} 歲`,
-        value: "HKD $ -",
+        ageRange: `${startAge} - ${endAge} ${t('common.yearsOld')}`,
+        value: t('common.hkdZero'),
       });
       lastRowLastAge = endAge;
     } else {
-      // Add the final row from (lastRowLastAge + 1) to 100
       const startAge = lastRowLastAge + 1;
       rows.push({
-        ageRange: `${startAge} - 100 歲`,
-        value: "HKD $ -",
+        ageRange: `${startAge} - 100 ${t('common.yearsOld')}`,
+        value: t('common.hkdZero'),
       });
-      lastRowLastAge = 100; // Exit the loop
+      lastRowLastAge = 100;
     }
   }
 
-  // Add extra row if rows.length < numOfRowInOutputForm_1
   if (rows.length < numOfRowInOutputForm_1) {
     rows.push({
       ageRange: " - ",
@@ -62,17 +53,14 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
     });
   }
 
-  // Define font sizes with multiplier
-  const baseFontSize = 1;    // Default body font size in rem
-  const headerFontSize = 1.5; // Default header/footer font size in rem
+  const baseFontSize = 1;
+  const headerFontSize = 1.5;
   const cellFontSize = `${baseFontSize * fontSizeMultiplier}rem`;
   const headerFooterFontSize = `${headerFontSize * fontSizeMultiplier}rem`;
 
-  // Render the table
   return (
     <TableContainer component={Paper}>
       <Table>
-        {/* Header */}
         <TableHead>
           <TableRow>
             <TableCell
@@ -84,12 +72,10 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
                 fontSize: headerFooterFontSize 
               }}
             >
-              醫療融資保費
+              {t('outputForm2.header')}
             </TableCell>
           </TableRow>
         </TableHead>
-
-        {/* Body */}
         <TableBody>
           {rows.map((row, index) => (
             <TableRow key={index}>
@@ -103,8 +89,6 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
             </TableRow>
           ))}
         </TableBody>
-
-        {/* Footer */}
         <TableFooter>
           <TableRow>
             <TableCell
@@ -116,7 +100,7 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
                 fontSize: headerFooterFontSize 
               }}
             >
-              {`總成本: HKD $ ${formattedTotalCost}`}
+              {t('outputForm2.footer', { total: formattedTotalCost })}
             </TableCell>
           </TableRow>
         </TableFooter>

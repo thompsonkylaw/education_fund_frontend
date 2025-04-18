@@ -24,6 +24,7 @@ import OutputTable from './OutputTable';
 import OutputForm_1 from './OutputForm_1';
 import OutputForm_2 from './OutputForm_2';
 import OutputForm_3 from './OutputForm_3';
+import LanguageSwitch from './LanguageSwitch';
 
 const theme = createTheme({
   palette: { primary: { main: '#1976d2' }, secondary: { main: '#dc004e' } },
@@ -110,6 +111,7 @@ const App = () => {
           const serverURL = IsProduction
             ? 'https://fastapi-production-a20ab.up.railway.app'
             : 'http://localhost:9002';
+          console.log(plan1Inputs.planFileName)  
           const response = await axios.post(serverURL + '/getData', {
             company: plan1Inputs.company,
             planFileName: plan1Inputs.planFileName,
@@ -358,6 +360,9 @@ const App = () => {
                 />
               </Card>
             )}
+            <Box sx={{ mt: 2 }}>
+            <LanguageSwitch setAppBarColor={setAppBarColor} appBarColor={appBarColor} />
+            </Box>
           </Grid>
         </Grid>
       </Container>

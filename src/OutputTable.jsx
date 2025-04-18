@@ -1,3 +1,4 @@
+//2 plans works
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -10,6 +11,7 @@ import {
   IconButton
 } from '@mui/material';
 import { ExpandLess, ExpandMore } from '@mui/icons-material';
+import { useTranslation } from 'react-i18next';
 
 const numberFormatter = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 0,
@@ -17,6 +19,7 @@ const numberFormatter = new Intl.NumberFormat('en-US', {
 });
 
 const OutputTable = ({ outputData, currencyRate, numberOfYears }) => {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
 
   return (
@@ -24,11 +27,11 @@ const OutputTable = ({ outputData, currencyRate, numberOfYears }) => {
       <Table>
         <TableHead>
           <TableRow>
-            <TableCell>Year</TableCell>
-            <TableCell>Age</TableCell>
-            <TableCell>Medical Premium USD</TableCell>
-            <TableCell>Acc MP USD</TableCell>
-            <TableCell>Acc MP</TableCell>
+            <TableCell>{t('Year')}</TableCell>
+            <TableCell>{t('Age')}</TableCell>
+            <TableCell>{t('Medical Premium USD')}</TableCell>
+            <TableCell>{t('Acc MP USD')}</TableCell>
+            <TableCell>{t('Acc MP')}</TableCell>
             <TableCell align="right">
               <IconButton
                 size="small"
@@ -44,7 +47,7 @@ const OutputTable = ({ outputData, currencyRate, numberOfYears }) => {
           <TableBody>
             {outputData.map((row) => {
               const isDecade = row.yearNumber % 10 === 0;
-              const isFinalYear = row.yearNumber === numberOfYears;
+              const isFinalYear = row.yearNumber === numberOfYears + 1;
 
               return (
                 <TableRow key={row.yearNumber}>

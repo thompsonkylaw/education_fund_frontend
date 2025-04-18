@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   Box,
   Collapse,
@@ -9,7 +10,7 @@ import {
   Typography
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import Login from './Login'; // Adjusted import name to match usage
+import Login from './Login';
 
 const UseInflation = ({ 
   inflationRate,
@@ -22,15 +23,16 @@ const UseInflation = ({
   inputs,
   numberOfYearAccMP,
   setFinalNotionalAmount,
-  disabled// Receive from App.jsx
+  disabled
 }) => {
+  const { t } = useTranslation();
   const [openLoginModal, setOpenLoginModal] = useState(false);
 
   return (
     <Box sx={{ mb: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
         <Typography variant="h6" sx={{ fontWeight: 600 }}>
-          計劃易
+          {t('useInflation.title')}
         </Typography>
         <IconButton 
           onClick={() => setOpenLoginModal(true)}
@@ -52,7 +54,7 @@ const UseInflation = ({
         inputs={inputs}
         numberOfYearAccMP={numberOfYearAccMP}
         useInflation={useInflation}
-        setFinalNotionalAmount={setFinalNotionalAmount} // Pass to Login
+        setFinalNotionalAmount={setFinalNotionalAmount}
       />
       
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, p: 2 }}>
@@ -67,7 +69,7 @@ const UseInflation = ({
           }
           label={
             <Typography variant="body1" sx={{ fontWeight: 500 }}>
-              Use Inflation Adjustment
+              {t('useInflation.useInflationAdjustment')}
             </Typography>
           }
           sx={{ mb: 1 }}
@@ -76,7 +78,7 @@ const UseInflation = ({
         <Collapse in={useInflation}>
           <TextField
             fullWidth
-            label="Inflation Rate (%)"
+            label={t('useInflation.inflationRate')}
             type="number"
             value={inflationRate}
             onChange={(e) => onInflationRateChange(Number(e.target.value))}
@@ -84,13 +86,12 @@ const UseInflation = ({
             variant="outlined"
             margin="normal"
             disabled={disabled}
-            
           />
         </Collapse>
 
         <TextField
           fullWidth
-          label="Currency Rate"
+          label={t('useInflation.currencyRate')}
           type="number"
           value={currencyRate}
           onChange={(e) => onCurrencyRateChange(Number(e.target.value))}

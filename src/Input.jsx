@@ -1,3 +1,4 @@
+//2 plans works
 import React, { useEffect } from 'react';
 import { Box, Card, CardContent, MenuItem, Typography, Select, IconButton, Tooltip } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -61,6 +62,7 @@ const Input = ({ inputs, setInputs, appBarColor, disabled, showSecondPlan, onTog
     const { plan, planCategory, effectiveDate, currency, sexuality, ward } = inputs;
     if (plan && planCategory && effectiveDate && currency && sexuality && ward) {
       let planFileName = `${plan}_${planCategory}_${effectiveDate}_${currency}_${sexuality}_${ward}`;
+      
       planFileName = planFileName.replace(/\//g, '');
       setInputs(prev => ({ ...prev, planFileName }));
     }

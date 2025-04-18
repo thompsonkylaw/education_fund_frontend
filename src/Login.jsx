@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import manulifeSavingPlans from './dropdown/manulife/manulife_saving_plan.json';
 import premiumPaymentPeriodOptions from './dropdown/manulife/premium_payment_period_options.json';
@@ -50,9 +51,9 @@ function Login({
   inputs, 
   numberOfYearAccMP,
   useInflation,
-  setFinalNotionalAmount // Receive from UseInflation
+  setFinalNotionalAmount
 }) {
-  // Login and OTP states
+  const { t } = useTranslation();
   const IsProduction = true;
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
   const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('CHANTSZLUNG');
@@ -65,8 +66,6 @@ function Login({
   const [systemMessage, setSystemMessage] = useState('');
   const [newNotionalAmount, setNewNotionalAmount] = useState('');
   const [pdfDownloadLink, setPdfDownloadLink] = useState('');
-
-  // Customer information states
   const [isCorporateCustomer, setIsCorporateCustomer] = useState(false);
   const [isPolicyHolder, setIsPolicyHolder] = useState(true);
   const [surname, setSurname] = IsProduction ? useState('') : useState('Chann');
@@ -76,8 +75,6 @@ function Login({
   const [insuranceAge, setInsuranceAge] = useState('40');
   const [gender, setGender] = useState('Male');
   const [isSmoker, setIsSmoker] = useState(false);
-  
-  // Plan and payment states
   const [planCategory, setPlanCategory] = useState('全部');
   const [basicPlan, setBasicPlan] = useState('宏摯傳承保障計劃(GS)');
   const [premiumPaymentPeriod, setPremiumPaymentPeriod] = useState('15');
@@ -86,21 +83,16 @@ function Login({
   const [notionalAmount, setNotionalAmount] = useState('20000');
   const [premiumPaymentMethod, setPremiumPaymentMethod] = useState('每年');
   const [getPromotionalDiscount, setGetPromotionalDiscount] = useState(true);
-
-  // Withdrawal states
-  const [fromYear, setFromYear] = useState(inputs.numberOfYears + 1); // Fixed typo: numberOfYear -> numberOfYears
+  const [fromYear, setFromYear] = useState(inputs.numberOfYears + 1);
   const [withdrawalPeriod, setWithdrawalPeriod] = useState('');
   const [annualWithdrawalAmount, setAnnualWithdrawalAmount] = useState(1000);
   const [proposalLanguage, setProposalLanguage] = useState("zh");
   const [availablePaymentPeriods, setAvailablePaymentPeriods] = useState([]);
-
-  // Log states
   const [logs, setLogs] = useState([]);
   const [logDialogOpen, setLogDialogOpen] = useState(false);
   const logRef = useRef(null);
   const shouldShowField = false;
 
-  // Save username and password to localStorage
   useEffect(() => {
     localStorage.setItem('username', username);
   }, [username]);
@@ -109,15 +101,13 @@ function Login({
     localStorage.setItem('password', password);
   }, [password]);
 
-  // Update withdrawal period
   useEffect(() => {
-    if (inputs.age && inputs.numberOfYears) { // Fixed typo: numberOfYear -> numberOfYears
+    if (inputs.age && inputs.numberOfYears) {
       const calculatedWithdrawalPeriod = 100 - inputs.age - inputs.numberOfYears + 2;
       setWithdrawalPeriod(calculatedWithdrawalPeriod);
     }
   }, [inputs.age, inputs.numberOfYears]);
 
-  // Auto-download PDF
   useEffect(() => {
     if (step === 'success' && pdfDownloadLink) {
       // Uncomment to enable auto-download
@@ -130,7 +120,6 @@ function Login({
     }
   }, [step, pdfDownloadLink]);
 
-  // Handle SSE for logs
   const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:9002';
   useEffect(() => {
     if (sessionId) {
@@ -148,14 +137,12 @@ function Login({
     }
   }, [sessionId]);
 
-  // Auto-scroll logs
   useEffect(() => {
     if (logRef.current) {
       logRef.current.scrollTop = logRef.current.scrollHeight;
     }
   }, [logDialogOpen, logs]);
 
-  // Handle close
   const handleClose = () => {
     onClose();
     setStep('login');
@@ -168,7 +155,6 @@ function Login({
     setLogs([]);
   };
 
-  // Handle login
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -186,7 +172,6 @@ function Login({
     setLoading(false);
   };
 
-  // Handle OTP submission
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -226,7 +211,7 @@ function Login({
       } else if (response.data.status === 'success') {
         setPdfDownloadLink(response.data.pdf_link);
         setStep('success');
-        setFinalNotionalAmount(notionalAmount); // No retry, use initial notionalAmount
+        setFinalNotionalAmount(notionalAmount);
       }
     } catch (error) {
       alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
@@ -234,7 +219,6 @@ function Login({
     setLoading(false);
   };
 
-  // Handle retry submission
   const handleRetrySubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -249,7 +233,7 @@ function Login({
       } else if (response.data.status === 'success') {
         setPdfDownloadLink(response.data.pdf_link);
         setStep('success');
-        setFinalNotionalAmount(newNotionalAmount); // Retry succeeded, use newNotionalAmount
+        setFinalNotionalAmount(newNotionalAmount);
       }
     } catch (error) {
       alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
@@ -257,7 +241,6 @@ function Login({
     setLoading(false);
   };
 
-  // Dynamic submit handler
   const handleSubmit = (e) => {
     if (step === 'login') {
       handleLogin(e);
@@ -266,7 +249,6 @@ function Login({
     }
   };
 
-  // Update available payment periods when basicPlan changes
   useEffect(() => {
     if (basicPlan && premiumPaymentPeriodOptions[basicPlan]) {
       setAvailablePaymentPeriods(premiumPaymentPeriodOptions[basicPlan]);
@@ -276,7 +258,6 @@ function Login({
     setPremiumPaymentPeriod('');
   }, [basicPlan]);
 
-  // Numeric formatter without currency symbol
   const numberFormatter = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
@@ -284,7 +265,6 @@ function Login({
 
   const [displayValue, setDisplayValue] = useState('');
 
-  // Handle input change
   const handleChange = (e) => {
     const input = e.target.value.replace(/[^0-9]/g, '');
     if (input === '') {
@@ -300,7 +280,6 @@ function Login({
     }
   };
 
-  // Handle blur to format the value
   const handleBlur = () => {
     if (notionalAmount !== '') {
       const numericValue = parseInt(notionalAmount, 10);
@@ -313,17 +292,22 @@ function Login({
     }
   };
 
-  // Handle focus to show raw number
   const handleFocus = () => {
     if (notionalAmount !== '') {
       setDisplayValue(notionalAmount);
     }
   };
 
+  const languageLabels = {
+    zh: t('login.languageZh'),
+    sc: t('login.languageSc'),
+    en: t('login.languageEn'),
+  };
+
   return (
     <Modal
       open={open}
-      onClose={() => {}} // Prevents closing on backdrop click or escape key
+      onClose={() => {}}
       aria-labelledby="login-modal"
       aria-describedby="insurance-plan-login"
     >
@@ -342,18 +326,17 @@ function Login({
         </IconButton>
 
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-          計劃易 - 登錄
+          {t('login.title')}
         </Typography>
         
         {step === 'login' || step === 'otp' ? (
           <form onSubmit={handleSubmit}>
             <div className="margin-top-20 info-section">
-              {/* Customer Information Fields */}
               <div className="customer-card-container" style={{ display: 'grid', gap: '20px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
                     <TextField
-                      label={<>英文姓氏 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                      label={<>{t('login.surname')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       value={surname}
                       onChange={(e) => setSurname(e.target.value)}
                       required
@@ -365,7 +348,7 @@ function Login({
                   </div>
                   <div>
                     <TextField
-                      label={<>英文名字 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                      label={<>{t('login.givenName')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       value={givenName}
                       onChange={(e) => setGivenName(e.target.value)}
                       required
@@ -379,7 +362,7 @@ function Login({
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
                     <TextField
-                      label="中文姓名"
+                      label={t('login.chineseName')}
                       value={chineseName}
                       onChange={(e) => setChineseName(e.target.value)}
                       fullWidth
@@ -392,7 +375,7 @@ function Login({
                   <div>
                     {shouldShowField && (
                       <TextField
-                        label="投保年齡"
+                        label={t('login.insuranceAge')}
                         value={insuranceAge}
                         onChange={(e) => setInsuranceAge(e.target.value)}
                         fullWidth
@@ -413,7 +396,7 @@ function Login({
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
                     <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>
-                      性別 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                      {t('login.gender')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                     </Typography>
                     <RadioGroup
                       value={gender}
@@ -454,7 +437,7 @@ function Login({
                                 </svg>
                               )}
                             </span>
-                            男
+                            {t('login.genderMale')}
                           </>
                         }
                       />
@@ -491,7 +474,7 @@ function Login({
                                 </svg>
                               )}
                             </span>
-                            女
+                            {t('login.genderFemale')}
                           </>
                         }
                       />
@@ -499,7 +482,7 @@ function Login({
                   </div>
                   <div>
                     <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>
-                      您是否有吸煙習慣? <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                      {t('login.smokingHabit')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                     </Typography>
                     <RadioGroup
                       value={isSmoker.toString()}
@@ -540,7 +523,7 @@ function Login({
                                 </svg>
                               )}
                             </span>
-                            是
+                            {t('login.yes')}
                           </>
                         }
                       />
@@ -577,7 +560,7 @@ function Login({
                                 </svg>
                               )}
                             </span>
-                            否
+                            {t('login.no')}
                           </>
                         }
                       />
@@ -586,18 +569,17 @@ function Login({
                 </Box>
               </div>
 
-              {/* Plan and Payment Fields */}
               <div className="customer-card-container" style={{ marginTop: '20px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                   <div>
                     <FormControl fullWidth>
                       <InputLabel sx={{ fontWeight: '500' }}>
-                        基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                        {t('login.basicPlan')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
                         value={basicPlan}
                         onChange={(e) => setBasicPlan(e.target.value)}
-                        label={<>基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        label={<>{t('login.basicPlan')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                         disabled={loading || step === 'otp'}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
@@ -612,12 +594,12 @@ function Login({
                   <div>
                     <FormControl fullWidth>
                       <InputLabel sx={{ fontWeight: '500' }}>
-                        保費繳付期 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                        {t('login.premiumPaymentPeriod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
                         value={premiumPaymentPeriod}
                         onChange={(e) => setPremiumPaymentPeriod(e.target.value)}
-                        label={<>保費繳付期 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        label={<>{t('login.premiumPaymentPeriod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                         disabled={loading || step === 'otp' || !basicPlan}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                         required
@@ -636,12 +618,12 @@ function Login({
                   <div>
                     <FormControl fullWidth>
                       <InputLabel sx={{ fontWeight: '500' }}>
-                        貨幣 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                        {t('login.currency')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
                         value={currency}
                         onChange={(e) => setCurrency(e.target.value)}
-                        label={<>貨幣 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        label={<>{t('login.currency')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                         disabled={loading || step === 'otp'}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
@@ -651,47 +633,47 @@ function Login({
                     </FormControl>
                   </div>
                   <div>
-                      <TextField
-                        label="名義金額"
-                        value={displayValue}
-                        onChange={handleChange}
-                        onFocus={handleFocus}
-                        onBlur={handleBlur}
-                        required
-                        fullWidth
-                        disabled={loading || step === 'otp'}
-                        InputProps={{
-                          startAdornment: (
-                            <InputAdornment position="start">
-                              {currency === '美元' ? 'USD' : 'HKD'}
-                            </InputAdornment>
-                          ),
-                        }}
-                        sx={{ 
-                          mb: 2, 
-                          '& .MuiInputLabel-asterisk': { color: 'red' },
-                          '& .Mui-error': {
-                            color: 'red', // Custom error color if needed
-                          }
-                        }}
-                        InputLabelProps={{ style: { fontWeight: '500' } }}
-                        placeholder="Enter amount"
-                        error={Number(displayValue?.replace(/[^0-9.-]+/g,"")) < 1500}
-                        helperText={Number(displayValue?.replace(/[^0-9.-]+/g,"")) < 1500 ? "名義金額不得少於 1500" : ""}
-                      />
-                    </div>
+                    <TextField
+                      label={t('login.notionalAmount')}
+                      value={displayValue}
+                      onChange={handleChange}
+                      onFocus={handleFocus}
+                      onBlur={handleBlur}
+                      required
+                      fullWidth
+                      disabled={loading || step === 'otp'}
+                      InputProps={{
+                        startAdornment: (
+                          <InputAdornment position="start">
+                            {currency === '美元' ? 'USD' : 'HKD'}
+                          </InputAdornment>
+                        ),
+                      }}
+                      sx={{ 
+                        mb: 2, 
+                        '& .MuiInputLabel-asterisk': { color: 'red' },
+                        '& .Mui-error': {
+                          color: 'red',
+                        }
+                      }}
+                      InputLabelProps={{ style: { fontWeight: '500' } }}
+                      placeholder={t("login.notioalAmountPlaceHolder")}
+                      error={Number(displayValue?.replace(/[^0-9.-]+/g,"")) < 1500}
+                      helperText={Number(displayValue?.replace(/[^0-9.-]+/g,"")) < 1500 ? t('login.notionalAmountError') : ""}
+                    />
+                  </div>
                 </Box>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                   <div>
                     <FormControl fullWidth>
                       <InputLabel sx={{ fontWeight: '500' }}>
-                        保費繳付方式 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                        {t('login.premiumPaymentMethod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
                         value={premiumPaymentMethod}
                         onChange={(e) => setPremiumPaymentMethod(e.target.value)}
-                        label={<>保費繳付方式 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        label={<>{t('login.premiumPaymentMethod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                         disabled={loading || step === 'otp'}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
@@ -704,7 +686,7 @@ function Login({
                   </div>
                   <div>
                     <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>
-                      建議書語言 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                      {t('login.proposalLanguage')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                     </Typography>
                     <RadioGroup
                       value={proposalLanguage}
@@ -747,9 +729,7 @@ function Login({
                                   </svg>
                                 )}
                               </span>
-                              {lang === 'zh' && '繁體中文'}
-                              {lang === 'sc' && '簡體中文'}
-                              {lang === 'en' && '英文'}
+                              {languageLabels[lang]}
                             </div>
                           }
                         />
@@ -759,12 +739,11 @@ function Login({
                 </div>
               </div>
 
-              {/* Login Fields */}
               <div className="login-fields margin-top-20" style={{ marginTop: '30px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
                     <TextField
-                      label={<>Website URL <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                      label={<>{t('login.websiteUrl')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       type="url"
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
@@ -777,7 +756,7 @@ function Login({
                   </div>
                   <div>
                     <TextField
-                      label={<>Username <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                      label={<>{t('login.username')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required
@@ -789,7 +768,7 @@ function Login({
                   </div>
                   <div>
                     <TextField
-                      label={<>Password <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                      label={<>{t('login.password')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
@@ -803,7 +782,7 @@ function Login({
                 </Box>
                 {step === 'otp' && (
                   <TextField
-                    label={<>OTP Verification <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                    label={<>{t('login.otpVerification')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                     value={otp}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -851,9 +830,9 @@ function Login({
                   {loading ? (
                     <CircularProgress size={24} />
                   ) : step === 'login' ? (
-                    'Login'
+                    t('login.loginButton')
                   ) : (
-                    'Submit OTP'
+                    t('login.submitOtpButton')
                   )}
                 </Button>
 
@@ -864,7 +843,7 @@ function Login({
                     fullWidth
                     sx={{ padding: '12px 24px' }}
                   >
-                    View Logs ({logs.length})
+                    {t('login.viewLogs', { count: logs.length })}
                   </Button>
                 </Box>
               </div>
@@ -873,34 +852,51 @@ function Login({
         ) : step === 'retry' ? (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
-              系統信息
+              {t('login.systemMessage')}
             </Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>
               {systemMessage}
             </Typography>
             <TextField
-              label="New Notional Amount"
-              value={newNotionalAmount}
-              onChange={(e) => {
-                const value = e.target.value;
-                if (value === '' || /^[0-9]*\.?[0-9]*$/.test(value)) {
-                  setNewNotionalAmount(value);
-                }
-              }}
-              fullWidth
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    {currency === '美元' ? 'USD' : 'HKD'}
-                  </InputAdornment>
-                ),
-                inputMode: 'decimal',
-              }}
-              sx={{ mb: 2 }}
-              InputLabelProps={{ style: { fontWeight: '500' } }}
-              placeholder="Enter new amount"
-              type="text"
-            />
+  label={t('login.newNotionalAmount')}
+  value={newNotionalAmount}
+  onChange={(e) => {
+    const value = e.target.value;
+    // Remove all non-digit characters except decimal point
+    const rawValue = value.replace(/[^\d.]/g, '');
+    
+    // Split into whole and decimal parts
+    const parts = rawValue.split('.');
+    let whole = parts[0] || '';
+    const decimal = parts.length > 1 ? `.${parts[1]}` : '';
+    
+    // Format whole number part with commas
+    if (whole) {
+      whole = parseInt(whole, 10).toLocaleString('en-US');
+    }
+    
+    // Combine formatted whole number with decimal part
+    const formattedValue = whole + decimal;
+    
+    // Only update if valid number or empty
+    if (value === '' || /^[0-9,]*\.?[0-9]*$/.test(value)) {
+      setNewNotionalAmount(formattedValue);
+    }
+  }}
+  fullWidth
+  InputProps={{
+    startAdornment: (
+      <InputAdornment position="start">
+        {currency === '美元' ? 'USD' : 'HKD'}
+      </InputAdornment>
+    ),
+    inputMode: 'decimal',
+  }}
+  sx={{ mb: 2 }}
+  InputLabelProps={{ style: { fontWeight: '500' } }}
+  placeholder="Enter new amount"
+  type="text"
+/>
             <Button
               onClick={handleRetrySubmit}
               variant="contained"
@@ -911,18 +907,18 @@ function Login({
                 '&:hover': { backgroundColor: '#0d5f08' } 
               }}
             >
-              {loading ? <CircularProgress size={24} /> : 'Submit'}
+              {loading ? <CircularProgress size={24} /> : t('login.submitButton')}
             </Button>
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Button onClick={() => setLogDialogOpen(true)} variant="outlined" fullWidth>
-                View Logs ({logs.length})
+                {t('login.viewLogs', { count: logs.length })}
               </Button>
             </Box>
           </Box>
         ) : step === 'success' ? (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
-              建議書已成功建立及下載到計劃易系統中!
+              {t('login.successMessage')}
             </Typography>
             <Button
               onClick={handleClose}
@@ -932,19 +928,18 @@ function Login({
                 '&:hover': { backgroundColor: '#0d5f08' } 
               }}
             >
-              完成
+              {t('login.completeButton')}
             </Button>
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Button onClick={() => setLogDialogOpen(true)} variant="outlined" fullWidth>
-                View Logs ({logs.length})
+                {t('login.viewLogs', { count: logs.length })}
               </Button>
             </Box>
           </Box>
         ) : null}
 
-        {/* Log Dialog */}
         <Dialog open={logDialogOpen} onClose={() => setLogDialogOpen(false)} maxWidth="md" fullWidth>
-          <DialogTitle>系統信息</DialogTitle>
+          <DialogTitle>{t('login.systemMessage')}</DialogTitle>
           <DialogContent>
             <Box
               sx={{
@@ -965,7 +960,7 @@ function Login({
             </Box>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setLogDialogOpen(false)}>Close</Button>
+            <Button onClick={() => setLogDialogOpen(false)}>{t('login.completeButton')}</Button>
           </DialogActions>
         </Dialog>
       </Paper>

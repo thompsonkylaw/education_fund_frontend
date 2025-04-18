@@ -6,6 +6,7 @@ import OutputForm_2 from './OutputForm_2';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import html2pdf from 'html2pdf.js';
+import { useTranslation } from 'react-i18next';
 
 // Number formatter for HKD values without decimal places
 const numberFormatter = new Intl.NumberFormat('en-US', {
@@ -26,8 +27,9 @@ const ComparisonPopup = ({
   finalNotionalAmount,
   age,
   currencyRate,
-  numOfRowInOutputForm_1, // Added prop
+  numOfRowInOutputForm_1,
 }) => {
+  const { t } = useTranslation();
   const [fontRegularData, setFontRegularData] = useState(null);
   const [fontBoldData, setFontBoldData] = useState(null);
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -111,7 +113,7 @@ const ComparisonPopup = ({
 
   const generatePDFWithJsPDF = () => {
     if (!fontsLoaded) {
-      alert('字體正在加載中，請稍後再試');
+      alert(t('comparisonPopup.loadingFonts'));
       return;
     }
 
@@ -125,12 +127,13 @@ const ComparisonPopup = ({
     doc.setFont('NotoSansCJKtc', 'normal');
 
     doc.setFontSize(18);
-    doc.text('Manulife 宏利', 14, 22);
+    doc.text(t('comparisonPopup.title'), 14, 22);
 
     const leftX = 14;
     const rightX = 110;
+    const textWidth = 80; // Define maxWidth in mm
 
-    // Set card styling for traditional insurance
+    // Traditional insurance section
     doc.setDrawColor(42, 157, 143);
     doc.setLineWidth(0.5);
     const cardPadding = 5;
@@ -143,16 +146,18 @@ const ComparisonPopup = ({
     doc.setFontSize(14);
     doc.setTextColor(42, 157, 143);
     doc.setFont('NotoSansCJKtc', 'bold');
-    doc.text('傳統醫療保費', leftX + 2, 32);
+    doc.text(t('comparisonPopup.traditionalMedicalPremium'), leftX + 2, 32);
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     doc.setFont('NotoSansCJKtc', 'normal');
-    doc.text('1. 逐年購買，住院賠錢，無事洗錢', leftX + 2, 42);
-    doc.text('2. 年年加價，年輕時保費便宜', leftX + 2, 52);
-    doc.text('3. 年長時保費遞增，退休後保費高昂', leftX + 2, 62);
-    doc.text('4. 消費性產品', leftX + 2, 72);
+    doc.text(t('comparisonPopup.traditionalPoints.0'), leftX + 2, 42, { maxWidth: textWidth });
+  doc.text(t('comparisonPopup.traditionalPoints.1'), leftX + 2, 52, { maxWidth: textWidth });
+  doc.text(t('comparisonPopup.traditionalPoints.2'), leftX + 2, 62, { maxWidth: textWidth });
+  doc.text(t('comparisonPopup.traditionalPoints.3'), leftX + 2, 72, { maxWidth: textWidth });
 
-    // Set card styling for financing insurance
+  // Financing insurance section
+
+    // Financing insurance section
     doc.setDrawColor(244, 162, 97);
     doc.setLineWidth(0.5);
     doc.rect(cardX + 96, cardY, cardWidth, cardHeight);
@@ -160,21 +165,22 @@ const ComparisonPopup = ({
     doc.setFontSize(14);
     doc.setTextColor(244, 162, 97);
     doc.setFont('NotoSansCJKtc', 'bold');
-    doc.text('醫療融資保費', rightX + 3, 32);
+    doc.text(t('comparisonPopup.financingMedicalPremium'), rightX + 3, 32);
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     doc.setFont('NotoSansCJKtc', 'normal');
-    doc.text(`1. 只需${numberOfYears}年完成終生醫療保衛`, rightX + 3, 42);
-    doc.text(`2. 節省${formattedSavingsPercentage}%終身醫療保費$${formattedSavingsInMillions}萬`, rightX + 3, 52);
-    doc.text('3. 全面終身醫療保障至100歲', rightX + 3, 62);
-    doc.text('4. 有事賠錢，無事儲錢，戶口長期增值', rightX + 3, 72);
+    doc.text(t('comparisonPopup.financingPoints.0', { numberOfYears }), rightX + 3, 42, { maxWidth: textWidth });
+    doc.text(t('comparisonPopup.financingPoints.1', { savingsPercentage: formattedSavingsPercentage, savingsInMillions: formattedSavingsInMillions }), rightX + 3, 52, { maxWidth: textWidth });
+    doc.text(t('comparisonPopup.financingPoints.2'), rightX + 3, 62, { maxWidth: textWidth });
+    doc.text(t('comparisonPopup.financingPoints.3'), rightX + 3, 72, { maxWidth: textWidth });
 
+    // How it works section
     doc.setFillColor(15, 17, 28);
     doc.rect(14, 80, 182, 10, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(14);
     doc.setFont('NotoSansCJKtc', 'bold');
-    doc.text('實際操作 How does it work?', 105, 87, { align: 'center' });
+    doc.text(t('comparisonPopup.howItWorks'), 105, 87, { align: 'center' });
 
     doc.setTextColor(0, 0, 0);
 
@@ -196,7 +202,7 @@ const ComparisonPopup = ({
     const rows = [];
     if (startAge + 9 in ageToAccMP) {
       const firstEndAge = startAge + 9;
-      rows.push([`${startAge} - ${firstEndAge} 歲`, `HKD $ ${numberFormatter.format(Math.round(ageToAccMP[firstEndAge]))}`]);
+      rows.push([`${startAge} - ${firstEndAge} ${t('common.yearsOld')}`, `HKD $ ${numberFormatter.format(Math.round(ageToAccMP[firstEndAge]))}`]);
 
       let lastAccMP = ageToAccMP[firstEndAge];
       let lastEndAge = firstEndAge;
@@ -208,8 +214,8 @@ const ComparisonPopup = ({
           const rangeEnd = endAge;
           const value = ageToAccMP[endAge] - lastAccMP;
           rangeStart === 100
-            ? rows.push([`${rangeStart}歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`])
-            : rows.push([`${rangeStart} - ${rangeEnd} 歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`]);
+            ? rows.push([`${rangeStart}${t('common.yearsOld')}`, `HKD $ ${numberFormatter.format(Math.round(value))}`])
+            : rows.push([`${rangeStart} - ${rangeEnd} ${t('common.yearsOld')}`, `HKD $ ${numberFormatter.format(Math.round(value))}`]);
           lastAccMP = ageToAccMP[endAge];
           lastEndAge = endAge;
         }
@@ -220,14 +226,14 @@ const ComparisonPopup = ({
         const rangeEnd = 100;
         const value = ageToAccMP[100] - lastAccMP;
         rangeStart === 100
-          ? rows.push([`${rangeStart}歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`])
-          : rows.push([`${rangeStart} - ${rangeEnd} 歲`, `HKD $ ${numberFormatter.format(Math.round(value))}`]);
+          ? rows.push([`${rangeStart}${t('common.yearsOld')}`, `HKD $ ${numberFormatter.format(Math.round(value))}`])
+          : rows.push([`${rangeStart} - ${rangeEnd} ${t('common.yearsOld')}`, `HKD $ ${numberFormatter.format(Math.round(value))}`]);
       }
     }
 
     autoTable(doc, {
       startY: tablesStartY,
-      head: [['年齡範圍', '傳統醫療保費']],
+      head: [[t('comparisonPopup.ageRange'), t('comparisonPopup.traditionalMedicalPremiumTable')]],
       body: rows,
       theme: 'grid',
       styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
@@ -239,30 +245,29 @@ const ComparisonPopup = ({
 
     const outputForm2Rows = [];
     const firstRowEndAge = age + numberOfYears - 1;
-    outputForm2Rows.push([`${age} - ${firstRowEndAge} 歲`, `首${numberOfYears}年平均每月 HKD $ ${numberFormatter.format(Math.round(financingTotalCost / numberOfYears / 12))}`]);
+    outputForm2Rows.push([`${age} - ${firstRowEndAge} ${t('common.yearsOld')}`, t('outputForm2.firstRowValue', { numberOfYears, averageMonthly: numberFormatter.format(Math.round(financingTotalCost / numberOfYears / 12)) })]);
 
     let lastRowLastAge = firstRowEndAge;
     while (lastRowLastAge < 100) {
       if (lastRowLastAge + 1 < 90) {
         const startAge = lastRowLastAge + 1;
         const endAge = lastRowLastAge + 10;
-        outputForm2Rows.push([`${startAge} - ${endAge} 歲`, "HKD $ -"]);
+        outputForm2Rows.push([`${startAge} - ${endAge} ${t('common.yearsOld')}`, t('common.hkdZero')]);
         lastRowLastAge = endAge;
       } else {
         const startAge = lastRowLastAge + 1;
-        outputForm2Rows.push([`${startAge} - 100 歲`, "HKD $ -"]);
+        outputForm2Rows.push([`${startAge} - 100 ${t('common.yearsOld')}`, t('common.hkdZero')]);
         lastRowLastAge = 100;
       }
     }
 
-    // New row-adding logic: Add an extra row if less than numOfRowInOutputForm_1
     if (outputForm2Rows.length < numOfRowInOutputForm_1) {
-      outputForm2Rows.push(["-", "-"]);
+      outputForm2Rows.push(['-', '-']);
     }
 
     autoTable(doc, {
       startY: tablesStartY,
-      head: [['年齡範圍', '醫療融資保費']],
+      head: [[t('comparisonPopup.ageRange'), t('comparisonPopup.financingMedicalPremiumTable')]],
       body: outputForm2Rows,
       theme: 'grid',
       styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
@@ -275,25 +280,25 @@ const ComparisonPopup = ({
     const yPosition = Math.max(table1FinalY + 10, table2FinalY + 10);
 
     doc.setFont('NotoSansCJKtc', 'bold');
-    doc.text(`總成本: HKD $ ${numberFormatter.format(Math.round(traditionalTotalCost))}`, leftX + 2, yPosition + 3);
-    doc.text(`總成本: HKD $ ${formattedTotalCost}`, rightX + 2, yPosition + 3);
+    doc.text(t('comparisonPopup.totalCost', { total: numberFormatter.format(Math.round(traditionalTotalCost)) }), leftX + 2, yPosition + 3);
+    doc.text(t('comparisonPopup.totalCost', { total: formattedTotalCost }), rightX + 2, yPosition + 3);
 
     doc.setFont('NotoSansCJKtc', 'normal');
-    doc.text(`${age1} 歲戶口價值: HKD $ -`, leftX + 2, yPosition + 13);
-    doc.text(`${age2} 歲戶口價值: HKD $ -`, leftX + 2, yPosition + 20);
-    doc.text(`${age1} 歲戶口價值: HKD $ ${formattedCurrency1}`, rightX + 2, yPosition + 13);
-    doc.text(`${age2} 歲戶口價值: HKD $ ${formattedCurrency2}`, rightX + 2, yPosition + 20);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: '-' }), leftX + 2, yPosition + 13);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: '-' }), leftX + 2, yPosition + 20);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: formattedCurrency1 }), rightX + 2, yPosition + 13);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: formattedCurrency2 }), rightX + 2, yPosition + 20);
 
     const totalPages = doc.getNumberOfPages();
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);
       doc.setFontSize(10);
       doc.setFont('NotoSansCJKtc', 'normal');
-      doc.text(`頁面 ${i}/${totalPages}`, 190, 287, { align: 'right' });
+      doc.text(t('comparisonPopup.page', { current: i, total: totalPages }), 190, 287, { align: 'right' });
     }
 
     const timestamp = getHongKongTimestamp();
-    doc.save(`比較報告_${timestamp}.pdf`);
+    doc.save(`${t('comparisonPopup.downloadReport')}_${timestamp}.pdf`);
   };
 
   const generatePDFWithHtml2pdf = () => {
@@ -307,7 +312,7 @@ const ComparisonPopup = ({
       header.style.fontSize = '24px';
       header.style.marginBottom = '16px';
       header.style.marginTop = '0';
-      header.textContent = 'Manulife 宏利';
+      header.textContent = t('comparisonPopup.title');
 
       wrapper.style.fontSize = '80%';
       wrapper.style.marginTop = '-20px';
@@ -324,11 +329,11 @@ const ComparisonPopup = ({
 
       const timestamp = getHongKongTimestamp();
       html2pdf().from(wrapper).set({
-        filename: `比較報告_${timestamp}.pdf`,
+        filename: `${t('comparisonPopup.downloadReport')}_${timestamp}.pdf`,
         margin: [0.1, 0.2, 0.2, 0.2],
         image: { type: 'jpeg', quality: 2 },
         html2canvas: { scale: 0.8, y: 0 },
-        jsPDF: { unit: 'in', format: 'a3', orientation: 'portrait' }
+        jsPDF: { unit: 'in', format: 'a3', orientation: 'portrait' },
       }).save();
     }
   };
@@ -354,32 +359,33 @@ const ComparisonPopup = ({
             <Grid item xs={6}>
               <Box sx={{ backgroundColor: 'rgb(42, 157, 143)', color: 'white', '& h3, & h5': { color: 'white' }, p: 2, position: 'relative' }}>
                 <img src="/cross.png" alt="Cross" style={{ position: 'absolute', top: 20, right: 8, width: 50, height: 50 }} />
-                <Typography variant="h3">傳統醫療保費</Typography>
-                <Typography variant="h5">1. 逐年購買，住院賠錢，無事洗錢</Typography>
-                <Typography variant="h5">2. 年年加價，年輕時保費便宜</Typography>
-                <Typography variant="h5">3. 年長時保費遞增，退休後保費高昂</Typography>
-                <Typography variant="h5">4. 消費性產品</Typography>
+                <Typography variant="h3">{t('comparisonPopup.traditionalMedicalPremium')}</Typography>
+                {t('comparisonPopup.traditionalPoints', { returnObjects: true }).map((point, index) => (
+                  <Typography variant="h5" key={index}>{point}</Typography>
+                ))}
               </Box>
             </Grid>
             <Grid item xs={6}>
               <Box sx={{ backgroundColor: 'rgb(244, 162, 97)', p: 2, position: 'relative' }}>
                 <img src="/tick.png" alt="Tick" style={{ position: 'absolute', top: 20, right: 8, width: 50, height: 50 }} />
-                <Typography variant="h3">醫療融資保費</Typography>
-                <Typography variant="h5">1. 只需{numberOfYears}年完成終生醫療保衛</Typography>
-                <Typography variant="h5">2. 節省<span style={{ color: 'white' }}>{formattedSavingsPercentage}%</span>終身醫療保費<span style={{ color: 'white' }}>${formattedSavingsInMillions}萬</span></Typography>
-                <Typography variant="h5">3. 全面終身醫療保障至100歲</Typography>
-                <Typography variant="h5">4. 有事賠錢，無事儲錢，戶口長期增值</Typography>
+                <Typography variant="h3">{t('comparisonPopup.financingMedicalPremium')}</Typography>
+                <Typography variant="h5">{t('comparisonPopup.financingPoints.0', { numberOfYears })}</Typography>
+                <Typography variant="h5">
+                  {t('comparisonPopup.financingPoints.1', { savingsPercentage: formattedSavingsPercentage, savingsInMillions: formattedSavingsInMillions })}
+                </Typography>
+                <Typography variant="h5">{t('comparisonPopup.financingPoints.2')}</Typography>
+                <Typography variant="h5">{t('comparisonPopup.financingPoints.3')}</Typography>
               </Box>
             </Grid>
             <Grid item xs={12}>
               <Box sx={{ backgroundColor: 'rgb(38, 70, 83)', color: 'white', p: 2, textAlign: 'center' }}>
-                <Typography variant="h3" sx={{ color: 'white !important' }}>實際操作 How does it work?</Typography>
+                <Typography variant="h3" sx={{ color: 'white !important' }}>{t('comparisonPopup.howItWorks')}</Typography>
               </Box>
             </Grid>
             <Grid item xs={6}>
               <OutputForm_1 processedData={processedData} age={age} currencyRate={currencyRate} fontSizeMultiplier={1.5} />
-              <Typography variant="h4">{age1} 歲戶口價值: HKD $ -</Typography>
-              <Typography variant="h4">{age2} 歲戶口價值: HKD $ -</Typography>
+              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age1, value: '-' })}</Typography>
+              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age2, value: '-' })}</Typography>
             </Grid>
             <Grid item xs={6}>
               <OutputForm_2
@@ -389,18 +395,28 @@ const ComparisonPopup = ({
                 finalNotionalAmount={finalNotionalAmount}
                 currencyRate={currencyRate}
                 fontSizeMultiplier={1.5}
-                numOfRowInOutputForm_1={numOfRowInOutputForm_1} // Pass the prop to OutputForm_2
+                numOfRowInOutputForm_1={numOfRowInOutputForm_1}
               />
-              <Typography variant="h4">{age1} 歲戶口價值: HKD $ {formattedCurrency1}</Typography>
-              <Typography variant="h4">{age2} 歲戶口價值: HKD $ {formattedCurrency2}</Typography>
+              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age1, value: formattedCurrency1 })}</Typography>
+              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age2, value: formattedCurrency2 })}</Typography>
             </Grid>
           </Grid>
         </div>
       </DialogContent>
       <DialogActions>
-        <FormControlLabel control={<Switch checked={isJsPDFEnabled} onChange={(e) => setIsJsPDFEnabled(e.target.checked)} />} label="使用 HTML" />
+        <FormControlLabel
+          control={<Switch checked={isJsPDFEnabled} onChange={(e) => setIsJsPDFEnabled(e.target.checked)} />}
+          label={t('comparisonPopup.useHtml')}
+        />
         <div className="pdf-button-container">
-          <button className="pdf-button" onClick={handleGeneratePDF} title="導出為PDF" disabled={isJsPDFEnabled && !fontsLoaded}>📥 下載報告</button>
+          <button
+            className="pdf-button"
+            onClick={handleGeneratePDF}
+            title={t('comparisonPopup.downloadReport')}
+            disabled={isJsPDFEnabled && !fontsLoaded}
+          >
+            📥 {t('comparisonPopup.downloadReport')}
+          </button>
         </div>
       </DialogActions>
     </Dialog>
