@@ -119,6 +119,7 @@ const App = () => {
             planOption: plan1Inputs.planOption,
             numberOfYears: plan1Inputs.numberOfYears
           });
+          // console.log("xxx",response.data)
           setOutputData1(response.data);
         } catch (err) {
           setError(err.response?.data?.detail || 'Failed to fetch data for Plan 1');
