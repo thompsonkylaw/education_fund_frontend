@@ -74,7 +74,7 @@ const ComparisonPopup = ({
   });
   const traditionalTotalCost = ageToAccMP[100] || 0;
 
-  const finalNotionalAmountNum = finalNotionalAmount ? parseFloat(finalNotionalAmount) : 0;
+  const finalNotionalAmountNum = finalNotionalAmount ? parseFloat(finalNotionalAmount.replace(/,/g, '')) : 0;
   const financingTotalCost = numberOfYearAccMP + finalNotionalAmountNum * currencyRate;
 
   const savingsAmount = traditionalTotalCost - financingTotalCost;

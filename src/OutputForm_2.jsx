@@ -9,13 +9,22 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
     return <Typography>{t('outputForm2.placeholder')}</Typography>;
   }
 
-  const finalNotionalAmountNum = finalNotionalAmount ? parseFloat(finalNotionalAmount) : 0;
+  // const finalNotionalAmountNum = finalNotionalAmount ? parseFloat(finalNotionalAmount) : 0;
+  const finalNotionalAmountNum = finalNotionalAmount ? parseFloat(finalNotionalAmount.replace(/,/g, '')) : 0;
   const totalCost = numberOfYearAccMP + finalNotionalAmountNum * currencyRate;
   const averageMonthly = totalCost / numberOfYears / 12;
 
   const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   const formattedTotalCost = formatter.format(Math.round(totalCost));
   const formattedAverageMonthly = formatter.format(Math.round(averageMonthly));
+  console.log("finalNotionalAmountNum",finalNotionalAmountNum);
+  console.log("finalNotionalAmount",finalNotionalAmount);
+  console.log("numberOfYearAccMP",numberOfYearAccMP);
+  console.log("totalCost",totalCost);
+  console.log("averageMonthly",averageMonthly);
+  console.log("numberOfYears",numberOfYears);
+  console.log("formattedTotalCost",formattedTotalCost);
+  console.log("formattedAverageMonthly",formattedAverageMonthly);
 
   const rows = [];
   const firstRowEndAge = age + numberOfYears - 1;

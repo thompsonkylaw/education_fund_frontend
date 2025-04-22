@@ -32,7 +32,7 @@ const theme = createTheme({
 });
 
 const App = () => {
-  const IsProduction = true;
+  const IsProduction = false;
   const { t } = useTranslation();
 
   // State declarations

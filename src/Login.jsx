@@ -54,7 +54,7 @@ function Login({
   setFinalNotionalAmount
 }) {
   const { t } = useTranslation();
-  const IsProduction = true;
+  const IsProduction = false;
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
   const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('CHANTSZLUNG');
   const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('Ctsz_!376897');
