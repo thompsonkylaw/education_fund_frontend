@@ -100,12 +100,6 @@ function Login({
   const [error, setError] = useState('');
   const logRef = useRef(null);
   const shouldShowField = false;
-  const [remainingTime, setRemainingTime] = useState(120);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const otpInputRef = useRef(null);
-  const [remainingTimeNewNotional, setRemainingTimeNewNotional] = useState(120);
-  const [isTimerRunningNewNotional, setIsTimerRunningNewNotional] = useState(false);
-  const newNotionalInputRef = useRef(null);
 
   useEffect(() => {
     if (inputs.age && inputs.numberOfYears) {
@@ -187,40 +181,6 @@ function Login({
     }
   }, [logDialogOpen, logs]);
 
-  useEffect(() => {
-    if (step === 'otp') {
-      otpInputRef.current?.focus();
-    } else if (step === 'retry') {
-      newNotionalInputRef.current?.focus();
-    }
-  }, [step]);
-
-  useEffect(() => {
-    let timer;
-    if (isTimerRunning && remainingTime > 0) {
-      timer = setInterval(() => {
-        setRemainingTime(prev => prev - 1);
-      }, 1000);
-    } else if (remainingTime === 0) {
-      alert('輸入OTP超時');
-      handleClose();
-    }
-    return () => clearInterval(timer);
-  }, [isTimerRunning, remainingTime]);
-
-  useEffect(() => {
-    let timer;
-    if (isTimerRunningNewNotional && remainingTimeNewNotional > 0) {
-      timer = setInterval(() => {
-        setRemainingTimeNewNotional(prev => prev - 1);
-      }, 1000);
-    } else if (remainingTimeNewNotional === 0) {
-      alert('輸入新的名義金額超時');
-      handleClose();
-    }
-    return () => clearInterval(timer);
-  }, [isTimerRunningNewNotional, remainingTimeNewNotional]);
-
   const handleSetSystemLoginName = () => {
     setError('');
     if (!systemLoginName || !confirmSystemLoginName) {
@@ -262,7 +222,7 @@ function Login({
 
   const handleClosePopup = () => {
     setShowUsernamePopup(false);
-    handleClose();
+    handleClose(); // Close the main login modal as well
   };
 
   const handleClose = () => {
@@ -274,10 +234,7 @@ function Login({
     setOtp('');
     setOtpError('');
     setSessionId('');
-    setIsTimerRunning(false);
-    setRemainingTime(120);
-    setIsTimerRunningNewNotional(false);
-    setRemainingTimeNewNotional(120);
+    // Note: No need to clear logs here; they persist in localStorage
   };
 
   const handleLogin = async (e) => {
@@ -286,6 +243,7 @@ function Login({
     if (!IsProduction) {
       localStorage.setItem('username', username);
     }
+    // Clear logs when a new login attempt is initiated
     setLogs([]);
     localStorage.setItem('loginLogs', JSON.stringify([]));
     try {
@@ -304,7 +262,6 @@ function Login({
 
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
-    setIsTimerRunning(false);
     setLoading(true);
     setOtpError('');
     try {
@@ -339,8 +296,6 @@ function Login({
       } else if (response.data.status === 'retry') {
         setSystemMessage(response.data.system_message);
         setStep('retry');
-        setRemainingTimeNewNotional(120);
-        setIsTimerRunningNewNotional(true);
       } else if (response.data.status === 'success') {
         setPdfDownloadLink(response.data.pdf_link);
         setStep('success');
@@ -354,7 +309,6 @@ function Login({
 
   const handleRetrySubmit = async (e) => {
     e.preventDefault();
-    setIsTimerRunningNewNotional(false);
     setLoading(true);
     try {
       const response = await axios.post(serverURL + '/retry-notional', {
@@ -364,8 +318,6 @@ function Login({
       if (response.data.status === 'retry') {
         setSystemMessage(response.data.system_message);
         setNewNotionalAmount('');
-        setRemainingTimeNewNotional(120);
-        setIsTimerRunningNewNotional(true);
       } else if (response.data.status === 'success') {
         setPdfDownloadLink(response.data.pdf_link);
         setStep('success');
@@ -937,12 +889,6 @@ function Login({
                         }
                       }
                     }}
-                    onFocus={() => {
-                      if (!isTimerRunning) {
-                        setIsTimerRunning(true);
-                        setRemainingTime(120);
-                      }
-                    }}
                     onBlur={() => {
                       if (otp.length !== 6) {
                         setOtpError('OTP must be exactly 6 digits');
@@ -961,8 +907,6 @@ function Login({
                       maxLength: 6,
                       inputMode: 'numeric',
                     }}
-                    placeholder={isTimerRunning ? `剩餘時間: ${remainingTime} 秒` : '請輸入 OTP'}
-                    inputRef={otpInputRef}
                   />
                 )}
 
@@ -1024,12 +968,6 @@ function Login({
                   setNewNotionalAmount(formattedValue);
                 }
               }}
-              onFocus={() => {
-                if (!isTimerRunningNewNotional) {
-                  setIsTimerRunningNewNotional(true);
-                  setRemainingTimeNewNotional(120);
-                }
-              }}
               fullWidth
               InputProps={{
                 startAdornment: (
@@ -1041,8 +979,8 @@ function Login({
               }}
               sx={{ mb: 2 }}
               InputLabelProps={{ style: { fontWeight: '500' } }}
-              placeholder={isTimerRunningNewNotional ? `剩餘時間: ${remainingTimeNewNotional} 秒` : 'Enter new amount'}
-              inputRef={newNotionalInputRef}
+              placeholder="Enter new amount"
+              type="text"
             />
             <Button
               onClick={handleRetrySubmit}
@@ -1089,7 +1027,6 @@ function Login({
           <DialogTitle>{t('setSystemLoginName')}</DialogTitle>
           <DialogContent>
             <TextField
-              id="input_text_field_13"
               label={t('systemLoginName')}
               value={systemLoginName}
               onChange={(e) => setSystemLoginName(e.target.value)}
@@ -1098,7 +1035,6 @@ function Login({
               InputLabelProps={{ style: { fontWeight: '500' } }}
             />
             <TextField
-              id="input_text_field_14"
               label={t('confirmSystemLoginName')}
               value={confirmSystemLoginName}
               onChange={(e) => setConfirmSystemLoginName(e.target.value)}

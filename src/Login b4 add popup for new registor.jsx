@@ -53,9 +53,8 @@ function Login({
   useInflation,
   setFinalNotionalAmount
 }) {
-  const IsProduction = false;
-
   const { t } = useTranslation();
+  const IsProduction = true;
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
   const [username, setUsername] = useState('');
   const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('Ctsz_!376897');
@@ -87,25 +86,16 @@ function Login({
   const [fromYear, setFromYear] = useState(inputs.numberOfYears + 1);
   const [withdrawalPeriod, setWithdrawalPeriod] = useState('');
   const [annualWithdrawalAmount, setAnnualWithdrawalAmount] = useState(1000);
-  const [proposalLanguage, setProposalLanguage] = useState("zh-HK");
+  const [proposalLanguage, setProposalLanguage] = useState("zh");
   const [availablePaymentPeriods, setAvailablePaymentPeriods] = useState([]);
-  const [logs, setLogs] = useState(() => {
-    const storedLogs = localStorage.getItem('loginLogs');
-    return storedLogs ? JSON.parse(storedLogs) : [];
-  });
+  const [logs, setLogs] = useState([]);
   const [logDialogOpen, setLogDialogOpen] = useState(false);
-  const [showUsernamePopup, setShowUsernamePopup] = useState(false);
   const [systemLoginName, setSystemLoginName] = useState('');
   const [confirmSystemLoginName, setConfirmSystemLoginName] = useState('');
+  const [isSystemLoginSet, setIsSystemLoginSet] = useState(false);
   const [error, setError] = useState('');
   const logRef = useRef(null);
   const shouldShowField = false;
-  const [remainingTime, setRemainingTime] = useState(120);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const otpInputRef = useRef(null);
-  const [remainingTimeNewNotional, setRemainingTimeNewNotional] = useState(120);
-  const [isTimerRunningNewNotional, setIsTimerRunningNewNotional] = useState(false);
-  const newNotionalInputRef = useRef(null);
 
   useEffect(() => {
     if (inputs.age && inputs.numberOfYears) {
@@ -127,49 +117,11 @@ function Login({
   }, [step, pdfDownloadLink]);
 
   const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:9002';
-
-  useEffect(() => {
-    if (open) {
-      if (!IsProduction) {
-        const storedUsername = localStorage.getItem('username') || '';
-        setUsername(storedUsername);
-      } else {
-        fetchSystemLoginName();
-      }
-    }
-  }, [open, IsProduction]);
-
-  const fetchSystemLoginName = () => {
-    const apiUrl = window.wpApiSettings.root + 'myplugin/v1/system-login-name';
-    fetch(apiUrl, { 
-      credentials: 'include',
-      headers: {
-        'X-WP-Nonce': window.wpApiSettings.nonce
-      }
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.system_login_name) {
-          setUsername(data.system_login_name);
-        } else {
-          setShowUsernamePopup(true);
-        }
-      })
-      .catch(() => {
-        console.log("IsProduction=",IsProduction);
-        setError(t('Failed_to_fetch_system_login_name'));
-      });
-  };
-
   useEffect(() => {
     if (sessionId) {
       const eventSource = new EventSource(`${serverURL}/logs/${sessionId}`);
       eventSource.onmessage = (event) => {
-        setLogs(prevLogs => {
-          const updatedLogs = [...prevLogs, event.data];
-          localStorage.setItem('loginLogs', JSON.stringify(updatedLogs));
-          return updatedLogs;
-        });
+        setLogs(prevLogs => [...prevLogs, event.data]);
       };
       eventSource.onerror = (error) => {
         console.error("SSE error:", error);
@@ -188,47 +140,36 @@ function Login({
   }, [logDialogOpen, logs]);
 
   useEffect(() => {
-    if (step === 'otp') {
-      otpInputRef.current?.focus();
-    } else if (step === 'retry') {
-      newNotionalInputRef.current?.focus();
-    }
-  }, [step]);
-
-  useEffect(() => {
-    let timer;
-    if (isTimerRunning && remainingTime > 0) {
-      timer = setInterval(() => {
-        setRemainingTime(prev => prev - 1);
-      }, 1000);
-    } else if (remainingTime === 0) {
-      alert('輸入OTP超時');
-      handleClose();
-    }
-    return () => clearInterval(timer);
-  }, [isTimerRunning, remainingTime]);
-
-  useEffect(() => {
-    let timer;
-    if (isTimerRunningNewNotional && remainingTimeNewNotional > 0) {
-      timer = setInterval(() => {
-        setRemainingTimeNewNotional(prev => prev - 1);
-      }, 1000);
-    } else if (remainingTimeNewNotional === 0) {
-      alert('輸入新的名義金額超時');
-      handleClose();
-    }
-    return () => clearInterval(timer);
-  }, [isTimerRunningNewNotional, remainingTimeNewNotional]);
+    const apiUrl = window.wpApiSettings.root + 'myplugin/v1/system-login-name';
+    fetch(apiUrl, { 
+      credentials: 'include',
+      headers: {
+        'X-WP-Nonce': window.wpApiSettings.nonce
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.system_login_name) {
+          setSystemLoginName(data.system_login_name);
+          setUsername(data.system_login_name);
+          setIsSystemLoginSet(true);
+        } else {
+          setIsSystemLoginSet(false);
+        }
+      })
+      .catch(() => {
+        setError('Failed to fetch system login name');
+      });
+  }, []);
 
   const handleSetSystemLoginName = () => {
     setError('');
     if (!systemLoginName || !confirmSystemLoginName) {
-      setError(t('Both_login_name_fields_are_required'));
+      setError('Both login name fields are required');
       return;
     }
     if (systemLoginName !== confirmSystemLoginName) {
-      setError(t('Login_names_do_not_match'));
+      setError('Login names do not match');
       return;
     }
     setLoading(true);
@@ -245,24 +186,19 @@ function Login({
       .then(response => response.json())
       .then(data => {
         if (data.success) {
+          setIsSystemLoginSet(true);
           setUsername(systemLoginName);
-          setShowUsernamePopup(false);
           setError('');
         } else {
-          setError(t('Failed_to_set_system_login_name'));
+          setError('Failed to set system login name');
         }
       })
       .catch(() => {
-        setError(t('Failed_to_connect_to_the_server'));
+        setError('Failed to connect to the server');
       })
       .finally(() => {
         setLoading(false);
       });
-  };
-
-  const handleClosePopup = () => {
-    setShowUsernamePopup(false);
-    handleClose();
   };
 
   const handleClose = () => {
@@ -274,20 +210,12 @@ function Login({
     setOtp('');
     setOtpError('');
     setSessionId('');
-    setIsTimerRunning(false);
-    setRemainingTime(120);
-    setIsTimerRunningNewNotional(false);
-    setRemainingTimeNewNotional(120);
+    setLogs([]);
   };
 
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
-    if (!IsProduction) {
-      localStorage.setItem('username', username);
-    }
-    setLogs([]);
-    localStorage.setItem('loginLogs', JSON.stringify([]));
     try {
       const response = await axios.post(serverURL + '/login', {
         url,
@@ -304,7 +232,6 @@ function Login({
 
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
-    setIsTimerRunning(false);
     setLoading(true);
     setOtpError('');
     try {
@@ -339,8 +266,6 @@ function Login({
       } else if (response.data.status === 'retry') {
         setSystemMessage(response.data.system_message);
         setStep('retry');
-        setRemainingTimeNewNotional(120);
-        setIsTimerRunningNewNotional(true);
       } else if (response.data.status === 'success') {
         setPdfDownloadLink(response.data.pdf_link);
         setStep('success');
@@ -354,7 +279,6 @@ function Login({
 
   const handleRetrySubmit = async (e) => {
     e.preventDefault();
-    setIsTimerRunningNewNotional(false);
     setLoading(true);
     try {
       const response = await axios.post(serverURL + '/retry-notional', {
@@ -364,8 +288,6 @@ function Login({
       if (response.data.status === 'retry') {
         setSystemMessage(response.data.system_message);
         setNewNotionalAmount('');
-        setRemainingTimeNewNotional(120);
-        setIsTimerRunningNewNotional(true);
       } else if (response.data.status === 'success') {
         setPdfDownloadLink(response.data.pdf_link);
         setStep('success');
@@ -435,9 +357,9 @@ function Login({
   };
 
   const languageLabels = {
-    'zh-HK': t('login.languageZh'),
-    'zh-CN': t('login.languageSc'),
-    'en': t('login.languageEn'),
+    zh: t('login.languageZh'),
+    sc: t('login.languageSc'),
+    en: t('login.languageEn'),
   };
 
   return (
@@ -465,6 +387,41 @@ function Login({
           {t('login.title')}
         </Typography>
         
+        {!isSystemLoginSet && (
+          <Box sx={{ mb: 4 }}>
+            <Typography variant="h6" gutterBottom>
+              {t('login.setSystemLoginName')}
+            </Typography>
+            <TextField
+              label={t('login.systemLoginName')}
+              value={systemLoginName}
+              onChange={(e) => setSystemLoginName(e.target.value)}
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              label={t('login.confirmSystemLoginName')}
+              value={confirmSystemLoginName}
+              onChange={(e) => setConfirmSystemLoginName(e.target.value)}
+              fullWidth
+              sx={{ mb: 2 }}
+            />
+            <Button
+              onClick={handleSetSystemLoginName}
+              variant="contained"
+              fullWidth
+              disabled={loading}
+              sx={{ 
+                backgroundColor: loading ? '#ccc' : '#10740AFF', 
+                '&:hover': { backgroundColor: '#0d5f08' } 
+              }}
+            >
+              {loading ? <CircularProgress size={24} /> : t('login.setLoginNameButton')}
+            </Button>
+            {error && <Typography color="error" sx={{ mt: 1 }}>{error}</Typography>}
+          </Box>
+        )}
+
         {step === 'login' || step === 'otp' ? (
           <form onSubmit={handleSubmit}>
             <div className="margin-top-20 info-section">
@@ -472,7 +429,6 @@ function Login({
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
                     <TextField
-                      id="input_text_field_7"
                       label={<>{t('login.surname')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       value={surname}
                       onChange={(e) => setSurname(e.target.value)}
@@ -485,7 +441,6 @@ function Login({
                   </div>
                   <div>
                     <TextField
-                      id="input_text_field_1"
                       label={<>{t('login.givenName')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       value={givenName}
                       onChange={(e) => setGivenName(e.target.value)}
@@ -500,7 +455,6 @@ function Login({
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
                     <TextField
-                      id="input_text_field_2"
                       label={t('login.chineseName')}
                       value={chineseName}
                       onChange={(e) => setChineseName(e.target.value)}
@@ -773,7 +727,6 @@ function Login({
                   </div>
                   <div>
                     <TextField
-                      id="input_text_field_3"
                       label={t('login.notionalAmount')}
                       value={displayValue}
                       onChange={handleChange}
@@ -792,7 +745,9 @@ function Login({
                       sx={{ 
                         mb: 2, 
                         '& .MuiInputLabel-asterisk': { color: 'red' },
-                        '& .Mui-error': { color: 'red' }
+                        '& .Mui-error': {
+                          color: 'red',
+                        }
                       }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                       placeholder={t("login.notioalAmountPlaceHolder")}
@@ -832,7 +787,7 @@ function Login({
                       row
                       sx={{ display: 'flex', gap: '20px', position: 'relative', right: '-12px' }}
                     >
-                      {['zh-HK', 'zh-CN', 'en'].map((lang) => (
+                      {['zh', 'sc', 'en'].map((lang) => (
                         <FormControlLabel
                           key={lang}
                           value={lang}
@@ -881,7 +836,6 @@ function Login({
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
                     <TextField
-                      id="input_text_field_4"
                       label={<>{t('login.websiteUrl')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       type="url"
                       value={url}
@@ -895,7 +849,6 @@ function Login({
                   </div>
                   <div>
                     <TextField
-                      id="input_text_field_5"
                       label={<>{t('login.password')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       type="password"
                       value={password}
@@ -909,13 +862,12 @@ function Login({
                   </div>
                   <div>
                     <TextField
-                      id="input_text_field_6"
                       label={<>{t('login.username')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       value={username}
-                      onChange={(e) => !IsProduction && setUsername(e.target.value)}
+                      onChange={(e) => setUsername(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp' || IsProduction}
+                      disabled={loading || step === 'otp' || isSystemLoginSet}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -923,7 +875,6 @@ function Login({
                 </Box>
                 {step === 'otp' && (
                   <TextField
-                    id="input_text_field_12"
                     label={<>{t('login.otpVerification')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                     value={otp}
                     onChange={(e) => {
@@ -935,12 +886,6 @@ function Login({
                         } else {
                           setOtpError('');
                         }
-                      }
-                    }}
-                    onFocus={() => {
-                      if (!isTimerRunning) {
-                        setIsTimerRunning(true);
-                        setRemainingTime(120);
                       }
                     }}
                     onBlur={() => {
@@ -961,8 +906,6 @@ function Login({
                       maxLength: 6,
                       inputMode: 'numeric',
                     }}
-                    placeholder={isTimerRunning ? `剩餘時間: ${remainingTime} 秒` : '請輸入 OTP'}
-                    inputRef={otpInputRef}
                   />
                 )}
 
@@ -970,10 +913,10 @@ function Login({
                   type="submit"
                   variant="contained"
                   fullWidth
-                  disabled={loading || (IsProduction && !username)}
+                  disabled={loading || !isSystemLoginSet}
                   sx={{ 
                     padding: '12px 24px', 
-                    backgroundColor: (loading || (IsProduction && !username)) ? '#ccc' : '#10740AFF', 
+                    backgroundColor: (loading || !isSystemLoginSet) ? '#ccc' : '#10740AFF', 
                     '&:hover': { backgroundColor: '#0d5f08' } 
                   }}
                 >
@@ -1024,12 +967,6 @@ function Login({
                   setNewNotionalAmount(formattedValue);
                 }
               }}
-              onFocus={() => {
-                if (!isTimerRunningNewNotional) {
-                  setIsTimerRunningNewNotional(true);
-                  setRemainingTimeNewNotional(120);
-                }
-              }}
               fullWidth
               InputProps={{
                 startAdornment: (
@@ -1041,8 +978,8 @@ function Login({
               }}
               sx={{ mb: 2 }}
               InputLabelProps={{ style: { fontWeight: '500' } }}
-              placeholder={isTimerRunningNewNotional ? `剩餘時間: ${remainingTimeNewNotional} 秒` : 'Enter new amount'}
-              inputRef={newNotionalInputRef}
+              placeholder="Enter new amount"
+              type="text"
             />
             <Button
               onClick={handleRetrySubmit}
@@ -1084,37 +1021,6 @@ function Login({
             </Box>
           </Box>
         ) : null}
-
-        <Dialog open={showUsernamePopup} onClose={handleClosePopup}>
-          <DialogTitle>{t('setSystemLoginName')}</DialogTitle>
-          <DialogContent>
-            <TextField
-              id="input_text_field_13"
-              label={t('systemLoginName')}
-              value={systemLoginName}
-              onChange={(e) => setSystemLoginName(e.target.value)}
-              fullWidth
-              sx={{ mb: 2 }}
-              InputLabelProps={{ style: { fontWeight: '500' } }}
-            />
-            <TextField
-              id="input_text_field_14"
-              label={t('confirmSystemLoginName')}
-              value={confirmSystemLoginName}
-              onChange={(e) => setConfirmSystemLoginName(e.target.value)}
-              fullWidth
-              sx={{ mb: 2 }}
-              InputLabelProps={{ style: { fontWeight: '500' } }}
-            />
-            {error && <Typography color="error">{error}</Typography>}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClosePopup}>{t('cancel')}</Button>
-            <Button onClick={handleSetSystemLoginName} disabled={loading}>
-              {loading ? <CircularProgress size={24} /> : t('setLoginNameButton')}
-            </Button>
-          </DialogActions>
-        </Dialog>
 
         <Dialog open={logDialogOpen} onClose={() => setLogDialogOpen(false)} maxWidth="md" fullWidth>
           <DialogTitle>{t('login.systemMessage')}</DialogTitle>

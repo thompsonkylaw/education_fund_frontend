@@ -77,6 +77,7 @@ const UseInflation = ({
         
         <Collapse in={useInflation}>
           <TextField
+            id="input_text_field_8"
             fullWidth
             label={t('useInflation.inflationRate')}
             type="number"
@@ -90,6 +91,7 @@ const UseInflation = ({
         </Collapse>
 
         <TextField
+          id="input_text_field_9"
           fullWidth
           label={t('useInflation.currencyRate')}
           type="number"

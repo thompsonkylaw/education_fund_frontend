@@ -127,7 +127,7 @@ const ComparisonPopup = ({
     doc.setFont('NotoSansCJKtc', 'normal');
 
     doc.setFontSize(18);
-    doc.text(t('comparisonPopup.title'), 14, 22);
+    // doc.text(t('comparisonPopup.title'), 14, 22);
 
     const leftX = 14;
     const rightX = 110;

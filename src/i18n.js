@@ -7,12 +7,11 @@ i18next
   .use(initReactI18next)
   .init({
     fallbackLng: 'en',
-    debug: process.env.NODE_ENV === 'development', // Disable debug in production
-    defaultNS: 'translation', // Set default namespace
+    debug: process.env.NODE_ENV === 'development',
+    defaultNS: 'translation',
     interpolation: {
-      escapeValue: false, // React handles XSS
+      escapeValue: false,
       defaultVariables: {
-        // Fallbacks for interpolated values
         numberOfYears: 0,
         savingsPercentage: 0,
         savingsInMillions: 0,
@@ -26,7 +25,16 @@ i18next
     resources: {
       en: {
         translation: {
-          
+          Failed_to_fetch_system_login_name: 'Failed to fetch system login name',
+          Both_login_name_fields_are_required: 'Both login name fields are required',
+          Login_names_do_not_match: 'Login names do not match',
+          Failed_to_set_system_login_name: 'Failed to set system login name',
+          Failed_to_connect_to_the_server: 'Failed to connect to the server',
+          setSystemLoginName: 'Setup Proposal System Login Name',
+          systemLoginName: 'Login Name',
+          confirmSystemLoginName: 'Confirm Login Name',
+          cancel: 'CANCEL',
+          setLoginNameButton: 'Submit',
           welcome: 'Welcome',
           greeting: 'Hello, {{name}}!',
           Yearth: 'Year {{year}}',
@@ -46,14 +54,13 @@ i18next
           'Add Second Plan': 'Add Second Plan',
           'Remove Second Plan': 'Remove Second Plan',
           Year: 'Year',
-          Age: 'Age',
           'Medical Premium USD': 'Medical Premium(USD)',
           'Acc MP USD': 'Acc MP(USD)',
           'Acc MP': 'Acc MP(HKD)',
           login: {
             notioalAmountPlaceHolder: "Enter Notional Amount",
-            notionalAmountError : 'Not Less Than USD$1500',
-            title: 'PlanEasy - Login',
+            notionalAmountError: 'Not Less Than USD$1500',
+            title: 'Proposal System - Login',
             surname: 'Surname',
             givenName: 'Given Name',
             chineseName: 'Chinese Name',
@@ -79,15 +86,20 @@ i18next
             otpVerification: 'OTP Verification',
             loginButton: 'Login',
             submitOtpButton: 'Submit OTP',
-            viewLogs: 'View Logs ({{count}})',
+            viewLogs: 'View System Message ({{count}})',
             systemMessage: 'System Message',
             newNotionalAmount: 'New Notional Amount',
             submitButton: 'Submit',
             completeButton: 'Complete',
-            successMessage: 'Proposal successfully created and downloaded to PlanEasy system!'
+            successMessage: 'Proposal successfully created and downloaded to the system!',
+            setSystemLoginName: 'Setup Proposal System Login Name',
+            systemLoginName: 'Login Name',
+            confirmSystemLoginName: 'Confirm Login Name',
+            cancel: 'CANCEL',
+            setLoginNameButton: 'Submit',
           },
           useInflation: {
-            title: 'PlanEasy',
+            title: 'Proposal System',
             useInflationAdjustment: 'Use Inflation Adjustment',
             inflationRate: 'Inflation Rate (%)',
             currencyRate: 'Currency Rate'
@@ -114,11 +126,11 @@ i18next
             hkdZero: "HKD $ -"
           },
           comparisonPopup: {
-            "title": "Manulife",
-            "ageRange": "Age Range",
-            "traditionalMedicalPremiumTable": "Traditional Medical Premium",
-            "financingMedicalPremiumTable": "Financing Medical Premium",
-            "page": "Page {{current}} of {{total}}",
+            title: "Manulife",
+            ageRange: "Age Range",
+            traditionalMedicalPremiumTable: "Traditional Medical Premium",
+            financingMedicalPremiumTable: "Financing Medical Premium",
+            page: "Page {{current}} of {{total}}",
             traditionalMedicalPremium: "Traditional Medical Premium",
             financingMedicalPremium: "Medical Financing Premium",
             howItWorks: "How does it work?",
@@ -127,13 +139,13 @@ i18next
             useHtml: "Use HTML",
             downloadReport: "Download Report",
             loadingFonts: "Fonts are loading, please wait",
-            traditionalPoints: [ // Expected to be an array for .map usage
+            traditionalPoints: [
               "Purchase yearly, claim when hospitalized, waste money when not",
               "Premium increases yearly, cheaper when young",
               "Premium increases with age, expensive after retirement",
               "Consumable product"
             ],
-            financingPoints: [ // Expected to be an array for .map usage
+            financingPoints: [
               "Only need {{numberOfYears}} years to complete lifetime medical protection",
               "Save {{savingsPercentage}}% on lifetime medical premium ${{savingsInMillions}} million",
               "Comprehensive lifetime medical protection up to age 100",
@@ -144,6 +156,16 @@ i18next
       },
       "zh-HK": {
         translation: {
+          Failed_to_fetch_system_login_name: '無法取得系統登入名稱',
+          Both_login_name_fields_are_required: '兩個登入名稱欄位均為必填',
+          Login_names_do_not_match: '登入名稱不匹配',
+          Failed_to_set_system_login_name: '無法設置系統登入名稱',
+          Failed_to_connect_to_the_server: '無法連接到伺服器',
+          setSystemLoginName: '請先設定計劃書統登錄名稱',
+          systemLoginName: '登入名稱',
+          confirmSystemLoginName: '確認登入名稱',
+          cancel: '取消',
+          setLoginNameButton: '提交',
           welcome: '歡迎',
           greeting: '你好, {{name}}!',
           Yearth: '第{{year}}年',
@@ -163,14 +185,13 @@ i18next
           'Add Second Plan': '添加第二個計劃',
           'Remove Second Plan': '移除第二個計劃',
           Year: '年',
-          Age: '年齡',
           'Medical Premium USD': '醫療保費(美元)',
           'Acc MP USD': '累積醫療保費(美元)',
           'Acc MP': '累積醫療保費(港元)',
           login: {
             notioalAmountPlaceHolder: "輸入名義金額",
-            notionalAmountError : '不能少於 USD$1500',
-            title: '計劃易 - 登錄',
+            notionalAmountError: '不能少於 USD$1500',
+            title: '計劃書系統 - 登錄',
             surname: '英文姓氏',
             givenName: '英文名字',
             chineseName: '中文姓名',
@@ -196,15 +217,20 @@ i18next
             otpVerification: 'OTP 驗證',
             loginButton: '登錄',
             submitOtpButton: '提交 OTP',
-            viewLogs: '查看日誌 ({{count}})',
+            viewLogs: '查看系統信息 ({{count}})',
             systemMessage: '系統信息',
             newNotionalAmount: '新名義金額',
             submitButton: '提交',
             completeButton: '完成',
-            successMessage: '建議書已成功建立及下載到計劃易系統中!'
+            successMessage: '建議書已成功建立及下載到計劃書系統中!',
+            setSystemLoginName: '設置提案計劃書登入名稱',
+            systemLoginName: '登入名稱',
+            confirmSystemLoginName: '確認登入名稱',
+            cancel: '取消',
+            setLoginNameButton: '提交',
           },
           useInflation: {
-            title: '計劃易',
+            title: '計劃書',
             useInflationAdjustment: '使用通脹調整',
             inflationRate: '通脹率 (%)',
             currencyRate: '匯率'
@@ -231,11 +257,11 @@ i18next
             hkdZero: "HKD $ -"
           },
           comparisonPopup: {
-            "title": "Manulife 宏利",
-    "ageRange": "年齡範圍",
-    "traditionalMedicalPremiumTable": "傳統醫療保費",
-    "financingMedicalPremiumTable": "醫療融資保費",
-    "page": "頁面 {{current}}/{{total}}",
+            title: "Manulife 宏利",
+            ageRange: "年齡範圍",
+            traditionalMedicalPremiumTable: "傳統醫療保費",
+            financingMedicalPremiumTable: "醫療融資保費",
+            page: "頁面 {{current}}/{{total}}",
             traditionalMedicalPremium: "傳統醫療保費",
             financingMedicalPremium: "醫療融資保費",
             howItWorks: "實際操作 How does it work?",
@@ -244,13 +270,13 @@ i18next
             useHtml: "使用 HTML",
             downloadReport: "下載報告",
             loadingFonts: "字體正在加載中，請稍後再試",
-            traditionalPoints: [ // Expected to be an array for .map usage
+            traditionalPoints: [
               "逐年購買，住院賠錢，無事洗錢",
               "年年加價，年輕時保費便宜",
               "年長時保費遞增，退休後保費高昂",
               "消費性產品"
             ],
-            financingPoints: [ // Expected to be an array for .map usage
+            financingPoints: [
               "只需{{numberOfYears}}年完成終生醫療保衛",
               "節省{{savingsPercentage}}%終身醫療保費${{savingsInMillions}}萬",
               "全面終身醫療保障至100歲",
@@ -261,6 +287,16 @@ i18next
       },
       "zh-CN": {
         translation: {
+          Failed_to_fetch_system_login_name: '无法获取系统登录名称',
+          Both_login_name_fields_are_required: '两个登录名称字段均为必填',
+          Login_names_do_not_match: '登录名称不匹配',
+          Failed_to_set_system_login_name: '无法设置系统登录名称',
+          Failed_to_connect_to_the_server: '无法连接到服务器',
+          setSystemLoginName: '请先设定计划书统登录名称',
+          systemLoginName: '登录名称',
+          confirmSystemLoginName: '确认登录名称',
+          cancel: '取消',
+          setLoginNameButton: '提交',
           welcome: '欢迎',
           greeting: '你好, {{name}}!',
           Yearth: '第{{year}}年',
@@ -280,14 +316,13 @@ i18next
           'Add Second Plan': '添加第二个计划',
           'Remove Second Plan': '移除第二个计划',
           Year: '年',
-          Age: '年龄',
           'Medical Premium USD': '医疗保费(美元)',
           'Acc MP USD': '累积医疗保费(美元)',
           'Acc MP': '累积医疗保费(港元)',
           login: {
             notioalAmountPlaceHolder: "输入名义金额",
-            notionalAmountError : '不能少於 USD$1500',
-            title: '计划易 - 登录',
+            notionalAmountError: '不能少于 USD$1500',
+            title: '计划书系统 - 登录',
             surname: '英文姓氏',
             givenName: '英文名字',
             chineseName: '中文姓名',
@@ -313,15 +348,20 @@ i18next
             otpVerification: 'OTP 验证',
             loginButton: '登录',
             submitOtpButton: '提交 OTP',
-            viewLogs: '查看日志 ({{count}})',
+            viewLogs: '查看系统信息 ({{count}})',
             systemMessage: '系统信息',
             newNotionalAmount: '新名义金额',
             submitButton: '提交',
             completeButton: '完成',
-            successMessage: '建议书已成功建立及下载到计划易系统中!'
+            successMessage: '建议书已成功建立及下载到计划书系统中!',
+            setSystemLoginName: '设置提案系统登录名称',
+            systemLoginName: '登录名称',
+            confirmSystemLoginName: '确认登录名称',
+            cancel: '取消',
+            setLoginNameButton: '提交',
           },
           useInflation: {
-            title: '计划易',
+            title: '计划书',
             useInflationAdjustment: '使用通胀调整',
             inflationRate: '通胀率 (%)',
             currencyRate: '汇率'
@@ -348,11 +388,11 @@ i18next
             hkdZero: "HKD $ -"
           },
           comparisonPopup: {
-            "title": "Manulife 宏利",
-    "ageRange": "年龄范围",
-    "traditionalMedicalPremiumTable": "传统医疗保费",
-    "financingMedicalPremiumTable": "医疗融资保费",
-    "page": "页面 {{current}}/{{total}}",
+            title: "Manulife 宏利",
+            ageRange: "年龄范围",
+            traditionalMedicalPremiumTable: "传统医疗保费",
+            financingMedicalPremiumTable: "医疗融资保费",
+            page: "页面 {{current}}/{{total}}",
             traditionalMedicalPremium: "传统医疗保费",
             financingMedicalPremium: "医疗融资保费",
             howItWorks: "实际操作 How does it work?",
@@ -361,13 +401,13 @@ i18next
             useHtml: "使用 HTML",
             downloadReport: "下载报告",
             loadingFonts: "字体正在加载中，请稍后再试",
-            traditionalPoints: [ // Expected to be an array for .map usage
+            traditionalPoints: [
               "逐年购买，住院赔钱，无事洗钱",
               "年年加价，年轻时保费便宜",
               "年长时保费递增，退休后保费高昂",
               "消费性产品"
             ],
-            financingPoints: [ // Expected to be an array for .map usage
+            financingPoints: [
               "只需{{numberOfYears}}年完成终生医疗保卫",
               "节省{{savingsPercentage}}%终生医疗保费${{savingsInMillions}}万",
               "全面终生医疗保障至100岁",

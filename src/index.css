@@ -65,6 +65,9 @@ body > div:nth-child(1){
   background-color:#ffffff;
  }
 
+ #input_text_field_1,#input_text_field_2,#input_text_field_3,#input_text_field_4,#input_text_field_5,#input_text_field_6,#input_text_field_7,#input_text_field_8,#input_text_field_9,#input_text_field_10,#input_text_field_11,#input_text_field_12,#input_text_field_13,#input_text_field_14{
+  padding-top:15px;
+  padding-bottom:15px;
+ }
 
- 
  

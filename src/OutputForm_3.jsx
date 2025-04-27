@@ -38,6 +38,7 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
         </Select>
       </FormControl>
       <TextField
+        id="input_text_field_10"
         label={t('outputForm3.accountValueLabel')}
         type="number"
         value={currency1}
@@ -56,6 +57,7 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
         </Select>
       </FormControl>
       <TextField
+        id="input_text_field_11"
         label={t('outputForm3.accountValueLabel')}
         type="number"
         value={currency2}
