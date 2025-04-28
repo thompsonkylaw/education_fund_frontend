@@ -74,6 +74,7 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
         {t('cash_value')}
       </Typography>
       <TextField
+        id="input_text_field_17"      
         disabled={true}
         label={t('outputForm3.ageLabel')}
         type="number"
@@ -93,6 +94,7 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
         sx={{ m: 1, width: 180 }}
       />
       <TextField
+        id="input_text_field_18"      
         disabled={true}
         label={t('outputForm3.ageLabel')}
         type="number"

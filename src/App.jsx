@@ -117,7 +117,7 @@ const App = () => {
           const serverURL = IsProduction
             ? 'https://fastapi-production-a20ab.up.railway.app'
             : 'http://localhost:9002';
-          console.log(plan1Inputs.planFileName);
+          // console.log(plan1Inputs.planFileName);
           const response = await axios.post(serverURL + '/getData', {
             company: plan1Inputs.company,
             planFileName: plan1Inputs.planFileName,
@@ -370,8 +370,8 @@ const App = () => {
                 numOfRowInOutputForm_1={numOfRowInOutputForm_1}
               />
             </Card>
-            {/* {finalNotionalAmount && ( */}
-            {(
+            {finalNotionalAmount && (
+            
               <Card elevation={3} sx={{ mt: 2, p: 2 }}>
                 <OutputForm_3
                   processedData={processedData}

@@ -358,8 +358,8 @@ function Login({
         setRemainingTimeNewNotional(180);
         setIsTimerRunningNewNotional(true);
       } else if (response.data.status === 'success') {
-        console.log("Age 1 Cash Value:", response.data.age_1_cash_value);
-        console.log("Age 2 Cash Value:", response.data.age_2_cash_value);
+        // console.log("Age 1 Cash Value:", response.data.age_1_cash_value);
+        // console.log("Age 2 Cash Value:", response.data.age_2_cash_value);
         setCashValueInfo({
           age_1: selectedAge1,
           age_2: selectedAge2,
@@ -390,8 +390,8 @@ function Login({
         setRemainingTimeNewNotional(180);
         setIsTimerRunningNewNotional(true);
       } else if (response.data.status === 'success') {
-        console.log("Age 1 Cash Value:", response.data.age_1_cash_value);
-        console.log("Age 2 Cash Value:", response.data.age_2_cash_value);
+        // console.log("Age 1 Cash Value:", response.data.age_1_cash_value);
+        // console.log("Age 2 Cash Value:", response.data.age_2_cash_value);
         setCashValueInfo(prev => ({
           ...prev,
           age_1_cash_value: response.data.age_1_cash_value,
