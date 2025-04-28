@@ -1,5 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import manulifeSavingPlans from './dropdown/manulife/manulife_saving_plan.json';
+import premiumPaymentPeriodOptions from './dropdown/manulife/premium_payment_period_options.json';
+
 import { 
   Modal,
   Box,
@@ -46,22 +50,24 @@ function Login({
   processedData, 
   inputs, 
   numberOfYearAccMP,
-  useInflation 
+  useInflation,
+  setFinalNotionalAmount,
+  disabled
 }) {
-  // Login and OTP states
   const IsProduction = false;
+
+  const { t } = useTranslation();
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
-  const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('CHANTSZLUNG');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('Ctsz_!376897');
   const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
   const [sessionId, setSessionId] = useState('');
   const [step, setStep] = useState('login');
   const [loading, setLoading] = useState(false);
   const [systemMessage, setSystemMessage] = useState('');
   const [newNotionalAmount, setNewNotionalAmount] = useState('');
   const [pdfDownloadLink, setPdfDownloadLink] = useState('');
-
-  // Customer information states
   const [isCorporateCustomer, setIsCorporateCustomer] = useState(false);
   const [isPolicyHolder, setIsPolicyHolder] = useState(true);
   const [surname, setSurname] = IsProduction ? useState('') : useState('Chann');
@@ -71,46 +77,44 @@ function Login({
   const [insuranceAge, setInsuranceAge] = useState('40');
   const [gender, setGender] = useState('Male');
   const [isSmoker, setIsSmoker] = useState(false);
-  
-  // Plan and payment states
   const [planCategory, setPlanCategory] = useState('全部');
   const [basicPlan, setBasicPlan] = useState('宏摯傳承保障計劃(GS)');
-  const [premiumPaymentPeriod, setPremiumPaymentPeriod] = useState(15);
+  const [premiumPaymentPeriod, setPremiumPaymentPeriod] = useState('15');
   const [worryFreeOption, setWorryFreeOption] = useState('否');
   const [currency, setCurrency] = useState('美元');
   const [notionalAmount, setNotionalAmount] = useState('20000');
   const [premiumPaymentMethod, setPremiumPaymentMethod] = useState('每年');
   const [getPromotionalDiscount, setGetPromotionalDiscount] = useState(true);
-
-  // Withdrawal states
-  const [fromYear, setFromYear] = useState(inputs.numberOfYear + 1);
+  const [fromYear, setFromYear] = useState(inputs.numberOfYears + 1);
   const [withdrawalPeriod, setWithdrawalPeriod] = useState('');
   const [annualWithdrawalAmount, setAnnualWithdrawalAmount] = useState(1000);
-  const [proposalLanguage, setProposalLanguage] = useState("zh");
-
-  // Log states
-  const [logs, setLogs] = useState([]);
+  const [proposalLanguage, setProposalLanguage] = useState("zh-HK");
+  const [availablePaymentPeriods, setAvailablePaymentPeriods] = useState([]);
+  const [logs, setLogs] = useState(() => {
+    const storedLogs = localStorage.getItem('loginLogs');
+    return storedLogs ? JSON.parse(storedLogs) : [];
+  });
   const [logDialogOpen, setLogDialogOpen] = useState(false);
+  const [showUsernamePopup, setShowUsernamePopup] = useState(false);
+  const [systemLoginName, setSystemLoginName] = useState('');
+  const [confirmSystemLoginName, setConfirmSystemLoginName] = useState('');
+  const [error, setError] = useState('');
   const logRef = useRef(null);
+  const shouldShowField = false;
+  const [remainingTime, setRemainingTime] = useState(180);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const otpInputRef = useRef(null);
+  const [remainingTimeNewNotional, setRemainingTimeNewNotional] = useState(180);
+  const [isTimerRunningNewNotional, setIsTimerRunningNewNotional] = useState(false);
+  const newNotionalInputRef = useRef(null);
 
-  // Save username and password to localStorage
   useEffect(() => {
-    localStorage.setItem('username', username);
-  }, [username]);
-
-  useEffect(() => {
-    localStorage.setItem('password', password);
-  }, [password]);
-
-  // Update withdrawal period
-  useEffect(() => {
-    if (inputs.age && inputs.numberOfYear) {
-      const calculatedWithdrawalPeriod = 100 - inputs.age - inputs.numberOfYear + 2;
+    if (inputs.age && inputs.numberOfYears) {
+      const calculatedWithdrawalPeriod = 100 - inputs.age - inputs.numberOfYears + 2;
       setWithdrawalPeriod(calculatedWithdrawalPeriod);
     }
-  }, [inputs.age, inputs.numberOfYear]);
+  }, [inputs.age, inputs.numberOfYears]);
 
-  // Auto-download PDF
   useEffect(() => {
     if (step === 'success' && pdfDownloadLink) {
       // Uncomment to enable auto-download
@@ -123,13 +127,50 @@ function Login({
     }
   }, [step, pdfDownloadLink]);
 
-  // Handle SSE for logs
   const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:9002';
+
+  useEffect(() => {
+    if (open) {
+      if (!IsProduction) {
+        const storedUsername = localStorage.getItem('username') || '';
+        setUsername(storedUsername);
+      } else {
+        fetchSystemLoginName();
+      }
+    }
+  }, [open, IsProduction]);
+
+  const fetchSystemLoginName = () => {
+    const apiUrl = window.wpApiSettings.root + 'myplugin/v1/system-login-name';
+    fetch(apiUrl, { 
+      credentials: 'include',
+      headers: {
+        'X-WP-Nonce': window.wpApiSettings.nonce
+      }
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.system_login_name) {
+          setUsername(data.system_login_name);
+        } else {
+          setShowUsernamePopup(true);
+        }
+      })
+      .catch(() => {
+        console.log("IsProduction=",IsProduction);
+        setError(t('Failed_to_fetch_system_login_name'));
+      });
+  };
+
   useEffect(() => {
     if (sessionId) {
       const eventSource = new EventSource(`${serverURL}/logs/${sessionId}`);
       eventSource.onmessage = (event) => {
-        setLogs(prevLogs => [...prevLogs, event.data]);
+        setLogs(prevLogs => {
+          const updatedLogs = [...prevLogs, event.data];
+          localStorage.setItem('loginLogs', JSON.stringify(updatedLogs));
+          return updatedLogs;
+        });
       };
       eventSource.onerror = (error) => {
         console.error("SSE error:", error);
@@ -141,14 +182,90 @@ function Login({
     }
   }, [sessionId]);
 
-  // Auto-scroll logs
   useEffect(() => {
     if (logRef.current) {
       logRef.current.scrollTop = logRef.current.scrollHeight;
     }
-  }, [logDialogOpen,logs]);
+  }, [logDialogOpen, logs]);
 
-  // Handle close
+  useEffect(() => {
+    if (step === 'otp') {
+      otpInputRef.current?.focus();
+    } else if (step === 'retry') {
+      newNotionalInputRef.current?.focus();
+    }
+  }, [step]);
+
+  useEffect(() => {
+    let timer;
+    if (isTimerRunning && remainingTime > 0) {
+      timer = setInterval(() => {
+        setRemainingTime(prev => prev - 1);
+      }, 1000);
+    } else if (remainingTime === 0) {
+      alert('輸入OTP超時');
+      handleClose();
+    }
+    return () => clearInterval(timer);
+  }, [isTimerRunning, remainingTime]);
+
+  useEffect(() => {
+    let timer;
+    if (isTimerRunningNewNotional && remainingTimeNewNotional > 0) {
+      timer = setInterval(() => {
+        setRemainingTimeNewNotional(prev => prev - 1);
+      }, 1000);
+    } else if (remainingTimeNewNotional === 0) {
+      alert('輸入新的名義金額超時');
+      handleClose();
+    }
+    return () => clearInterval(timer);
+  }, [isTimerRunningNewNotional, remainingTimeNewNotional]);
+
+  const handleSetSystemLoginName = () => {
+    setError('');
+    if (!systemLoginName || !confirmSystemLoginName) {
+      setError(t('Both_login_name_fields_are_required'));
+      return;
+    }
+    if (systemLoginName !== confirmSystemLoginName) {
+      setError(t('Login_names_do_not_match'));
+      return;
+    }
+    setLoading(true);
+    const apiUrl = window.wpApiSettings.root + 'myplugin/v1/system-login-name';
+    fetch(apiUrl, {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-WP-Nonce': window.wpApiSettings.nonce
+      },
+      body: JSON.stringify({ system_login_name: systemLoginName }),
+      credentials: 'include'
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          setUsername(systemLoginName);
+          setShowUsernamePopup(false);
+          setError('');
+        } else {
+          setError(t('Failed_to_set_system_login_name'));
+        }
+      })
+      .catch(() => {
+        setError(t('Failed_to_connect_to_the_server'));
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const handleClosePopup = () => {
+    setShowUsernamePopup(false);
+    handleClose();
+  };
+
   const handleClose = () => {
     onClose();
     setStep('login');
@@ -156,14 +273,22 @@ function Login({
     setNewNotionalAmount('');
     setPdfDownloadLink('');
     setOtp('');
+    setOtpError('');
     setSessionId('');
-    setLogs([]);
+    setIsTimerRunning(false);
+    setRemainingTime(180);
+    setIsTimerRunningNewNotional(false);
+    setRemainingTimeNewNotional(180);
   };
 
-  // Handle login
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);
+    if (!IsProduction) {
+      localStorage.setItem('username', username);
+    }
+    setLogs([]);
+    localStorage.setItem('loginLogs', JSON.stringify([]));
     try {
       const response = await axios.post(serverURL + '/login', {
         url,
@@ -178,10 +303,11 @@ function Login({
     setLoading(false);
   };
 
-  // Handle OTP submission
   const handleOtpSubmit = async (e) => {
     e.preventDefault();
+    setIsTimerRunning(false);
     setLoading(true);
+    setOtpError('');
     try {
       const response = await axios.post(serverURL + '/verify-otp', {
         session_id: sessionId,
@@ -203,17 +329,23 @@ function Login({
           basicPlan,
           currency, 
           notionalAmount,
+          premiumPaymentPeriod,
           premiumPaymentMethod,
           useInflation,
           proposalLanguage,
         },
       });
-      if (response.data.status === 'retry') {
+      if (response.data.status === 'otp_failed') {
+        setOtpError(response.data.message);
+      } else if (response.data.status === 'retry') {
         setSystemMessage(response.data.system_message);
         setStep('retry');
+        setRemainingTimeNewNotional(180);
+        setIsTimerRunningNewNotional(true);
       } else if (response.data.status === 'success') {
         setPdfDownloadLink(response.data.pdf_link);
         setStep('success');
+        setFinalNotionalAmount(notionalAmount);
       }
     } catch (error) {
       alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
@@ -221,9 +353,9 @@ function Login({
     setLoading(false);
   };
 
-  // Handle retry submission
   const handleRetrySubmit = async (e) => {
     e.preventDefault();
+    setIsTimerRunningNewNotional(false);
     setLoading(true);
     try {
       const response = await axios.post(serverURL + '/retry-notional', {
@@ -233,9 +365,12 @@ function Login({
       if (response.data.status === 'retry') {
         setSystemMessage(response.data.system_message);
         setNewNotionalAmount('');
+        setRemainingTimeNewNotional(180);
+        setIsTimerRunningNewNotional(true);
       } else if (response.data.status === 'success') {
         setPdfDownloadLink(response.data.pdf_link);
         setStep('success');
+        setFinalNotionalAmount(newNotionalAmount);
       }
     } catch (error) {
       alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
@@ -243,7 +378,6 @@ function Login({
     setLoading(false);
   };
 
-  // Dynamic submit handler
   const handleSubmit = (e) => {
     if (step === 'login') {
       handleLogin(e);
@@ -252,10 +386,65 @@ function Login({
     }
   };
 
+  useEffect(() => {
+    if (basicPlan && premiumPaymentPeriodOptions[basicPlan]) {
+      setAvailablePaymentPeriods(premiumPaymentPeriodOptions[basicPlan]);
+    } else {
+      setAvailablePaymentPeriods([]);
+    }
+    setPremiumPaymentPeriod('');
+  }, [basicPlan]);
+
+  const numberFormatter = new Intl.NumberFormat('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+
+  const [displayValue, setDisplayValue] = useState('');
+
+  const handleChange = (e) => {
+    const input = e.target.value.replace(/[^0-9]/g, '');
+    if (input === '') {
+      setNotionalAmount('');
+      setDisplayValue('');
+      return;
+    }
+
+    const numericValue = parseInt(input, 10);
+    if (!isNaN(numericValue)) {
+      setNotionalAmount(numericValue.toString());
+      setDisplayValue(numberFormatter.format(numericValue));
+    }
+  };
+
+  const handleBlur = () => {
+    if (notionalAmount !== '') {
+      const numericValue = parseInt(notionalAmount, 10);
+      if (!isNaN(numericValue)) {
+        setDisplayValue(numberFormatter.format(numericValue));
+      } else {
+        setNotionalAmount('');
+        setDisplayValue('');
+      }
+    }
+  };
+
+  const handleFocus = () => {
+    if (notionalAmount !== '') {
+      setDisplayValue(notionalAmount);
+    }
+  };
+
+  const languageLabels = {
+    'zh-HK': t('login.languageZh'),
+    'zh-CN': t('login.languageSc'),
+    'en': t('login.languageEn'),
+  };
+
   return (
     <Modal
       open={open}
-      onClose={() => {}} // Prevents closing on backdrop click or escape key
+      onClose={() => {}}
       aria-labelledby="login-modal"
       aria-describedby="insurance-plan-login"
     >
@@ -274,35 +463,36 @@ function Login({
         </IconButton>
 
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
-          計劃易 - 登錄
+          {t('login.title')}
         </Typography>
         
         {step === 'login' || step === 'otp' ? (
           <form onSubmit={handleSubmit}>
             <div className="margin-top-20 info-section">
-              {/* Customer Information Fields */}
               <div className="customer-card-container" style={{ display: 'grid', gap: '20px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
                     <TextField
-                      label={<>英文姓氏 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                      id="input_text_field_7"
+                      label={<>{t('login.surname')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       value={surname}
                       onChange={(e) => setSurname(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp' || disabled}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
                   </div>
                   <div>
                     <TextField
-                      label={<>英文名字 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                      id="input_text_field_1"
+                      label={<>{t('login.givenName')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       value={givenName}
                       onChange={(e) => setGivenName(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp' || disabled}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -311,50 +501,53 @@ function Login({
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
                     <TextField
-                      label="中文姓名"
+                      id="input_text_field_2"
+                      label={t('login.chineseName')}
                       value={chineseName}
                       onChange={(e) => setChineseName(e.target.value)}
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp' || disabled}
                       inputProps={{ maxLength: 10 }}
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
                   </div>
                   <div>
-                    <TextField
-                      label="投保年齡"
-                      value={insuranceAge}
-                      onChange={(e) => setInsuranceAge(e.target.value)}
-                      fullWidth
-                      disabled={loading || step === 'otp'}
-                      sx={{ mb: 2 }}
-                      InputLabelProps={{ style: { fontWeight: '500' } }}
-                      select
-                    >
-                      {Array.from({ length: 83 }, (_, i) => 17 + i).map((num) => (
-                        <MenuItem key={num} value={String(num)}>
-                          {num}
-                        </MenuItem>
-                      ))}
-                    </TextField>
+                    {shouldShowField && (
+                      <TextField
+                        label={t('login.insuranceAge')}
+                        value={insuranceAge}
+                        onChange={(e) => setInsuranceAge(e.target.value)}
+                        fullWidth
+                        disabled={loading || step === 'otp' || disabled}
+                        sx={{ mb: 2 }}
+                        InputLabelProps={{ style: { fontWeight: '500' } }}
+                        select
+                      >
+                        {Array.from({ length: 100 }, (_, i) => 0 + i).map((num) => (
+                          <MenuItem key={num} value={String(num)}>
+                            {num}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+                    )}
                   </div>
                 </Box>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
                     <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>
-                      性別 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                      {t('login.gender')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                     </Typography>
                     <RadioGroup
                       value={gender}
                       onChange={(e) => setGender(e.target.value)}
                       row
-                      sx={{ display: 'flex', gap: '20px' }}
+                      sx={{ display: 'flex', gap: '20px', position: 'relative', right: '-12px' }}
                     >
                       <FormControlLabel
                         value="Male"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp' || disabled}
                         label={
                           <>
                             <span style={{
@@ -384,14 +577,14 @@ function Login({
                                 </svg>
                               )}
                             </span>
-                            男
+                            {t('login.genderMale')}
                           </>
                         }
                       />
                       <FormControlLabel
                         value="Female"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp' || disabled}
                         label={
                           <>
                             <span style={{
@@ -421,7 +614,7 @@ function Login({
                                 </svg>
                               )}
                             </span>
-                            女
+                            {t('login.genderFemale')}
                           </>
                         }
                       />
@@ -429,18 +622,18 @@ function Login({
                   </div>
                   <div>
                     <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>
-                      您是否有吸煙習慣? <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                      {t('login.smokingHabit')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                     </Typography>
                     <RadioGroup
                       value={isSmoker.toString()}
                       onChange={(e) => setIsSmoker(e.target.value === 'true')}
                       row
-                      sx={{ display: 'flex', gap: '20px' }}
+                      sx={{ display: 'flex', gap: '20px', position: 'relative', right: '-12px' }}
                     >
                       <FormControlLabel
                         value="true"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp' || disabled}
                         label={
                           <>
                             <span style={{
@@ -470,14 +663,14 @@ function Login({
                                 </svg>
                               )}
                             </span>
-                            是
+                            {t('login.yes')}
                           </>
                         }
                       />
                       <FormControlLabel
                         value="false"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp' || disabled}
                         label={
                           <>
                             <span style={{
@@ -507,7 +700,7 @@ function Login({
                                 </svg>
                               )}
                             </span>
-                            否
+                            {t('login.no')}
                           </>
                         }
                       />
@@ -516,44 +709,46 @@ function Login({
                 </Box>
               </div>
 
-              {/* Plan and Payment Fields */}
               <div className="customer-card-container" style={{ marginTop: '20px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                   <div>
                     <FormControl fullWidth>
                       <InputLabel sx={{ fontWeight: '500' }}>
-                        計劃類別 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                        {t('login.basicPlan')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
-                        value={planCategory}
-                        onChange={(e) => setPlanCategory(e.target.value)}
-                        label={<>計劃類別 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
+                        value={basicPlan}
+                        onChange={(e) => setBasicPlan(e.target.value)}
+                        label={<>{t('login.basicPlan')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        disabled={loading || step === 'otp' || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
-                        <MenuItem value="全部">全部</MenuItem>
-                        <MenuItem value="退休">退休</MenuItem>
-                        <MenuItem value="危疾">危疾</MenuItem>
-                        <MenuItem value="儲蓄">儲蓄</MenuItem>
-                        <MenuItem value="住院">住院</MenuItem>
-                        <MenuItem value="投資">投資</MenuItem>
+                        {manulifeSavingPlans.map((plan) => (
+                          <MenuItem key={plan} value={plan}>
+                            {plan}
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   </div>
                   <div>
                     <FormControl fullWidth>
                       <InputLabel sx={{ fontWeight: '500' }}>
-                        基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                        {t('login.premiumPaymentPeriod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
-                        value={basicPlan}
-                        onChange={(e) => setBasicPlan(e.target.value)}
-                        label={<>基本計劃 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
+                        value={premiumPaymentPeriod}
+                        onChange={(e) => setPremiumPaymentPeriod(e.target.value)}
+                        label={<>{t('login.premiumPaymentPeriod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        disabled={loading || step === 'otp' || !basicPlan}
                         sx={{ backgroundColor: 'white', color: 'black' }}
+                        required
                       >
-                        <MenuItem value="宏摯傳承保障計劃(GS)">宏摯傳承保障計劃(GS)</MenuItem>
-                        <MenuItem value="更多">更多</MenuItem>
+                        {availablePaymentPeriods.map((period) => (
+                          <MenuItem key={period} value={period}>
+                            {period}年
+                          </MenuItem>
+                        ))}
                       </Select>
                     </FormControl>
                   </div>
@@ -563,13 +758,13 @@ function Login({
                   <div>
                     <FormControl fullWidth>
                       <InputLabel sx={{ fontWeight: '500' }}>
-                        貨幣 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                        {t('login.currency')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
                         value={currency}
                         onChange={(e) => setCurrency(e.target.value)}
-                        label={<>貨幣 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
+                        label={<>{t('login.currency')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        disabled={loading || step === 'otp' || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="美元">美元</MenuItem>
@@ -579,12 +774,15 @@ function Login({
                   </div>
                   <div>
                     <TextField
-                      label="名義金額" 
-                      value={notionalAmount}
-                      onChange={(e) => setNotionalAmount(e.target.value)}
+                      id="input_text_field_3"
+                      label={t('login.notionalAmount')}
+                      value={displayValue}
+                      onChange={handleChange}
+                      onFocus={handleFocus}
+                      onBlur={handleBlur}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp' || disabled}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -592,9 +790,15 @@ function Login({
                           </InputAdornment>
                         ),
                       }}
-                      sx={{ mb: 2, '& .MuiInputLabel-asterisk': { color: 'red' } }}
+                      sx={{ 
+                        mb: 2, 
+                        '& .MuiInputLabel-asterisk': { color: 'red' },
+                        '& .Mui-error': { color: 'red' }
+                      }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
-                      placeholder="Enter amount"
+                      placeholder={t("login.notioalAmountPlaceHolder")}
+                      error={Number(displayValue?.replace(/[^0-9.-]+/g,"")) < 1500}
+                      helperText={Number(displayValue?.replace(/[^0-9.-]+/g,"")) < 1500 ? t('login.notionalAmountError') : ""}
                     />
                   </div>
                 </Box>
@@ -603,13 +807,13 @@ function Login({
                   <div>
                     <FormControl fullWidth>
                       <InputLabel sx={{ fontWeight: '500' }}>
-                        保費繳付方式 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                        {t('login.premiumPaymentMethod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
                         value={premiumPaymentMethod}
                         onChange={(e) => setPremiumPaymentMethod(e.target.value)}
-                        label={<>保費繳付方式 <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
+                        label={<>{t('login.premiumPaymentMethod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        disabled={loading || step === 'otp' || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="每年">每年</MenuItem>
@@ -621,20 +825,20 @@ function Login({
                   </div>
                   <div>
                     <Typography variant="subtitle1" sx={{ fontWeight: '500', mb: 1 }}>
-                      建議書語言 <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                      {t('login.proposalLanguage')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                     </Typography>
                     <RadioGroup
                       value={proposalLanguage}
                       onChange={(e) => setProposalLanguage(e.target.value)}
                       row
-                      sx={{ display: 'flex', gap: '20px' }}
+                      sx={{ display: 'flex', gap: '20px', position: 'relative', right: '-12px' }}
                     >
-                      {['zh', 'sc', 'en'].map((lang) => (
+                      {['zh-HK', 'zh-CN', 'en'].map((lang) => (
                         <FormControlLabel
                           key={lang}
                           value={lang}
                           control={<Radio sx={{ display: 'none' }} />}
-                          disabled={loading || step === 'otp'}
+                          disabled={loading || step === 'otp' || disabled}
                           label={
                             <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                               <span style={{
@@ -664,9 +868,7 @@ function Login({
                                   </svg>
                                 )}
                               </span>
-                              {lang === 'zh' && '繁體中文'}
-                              {lang === 'sc' && '簡體中文'}
-                              {lang === 'en' && '英文'}
+                              {languageLabels[lang]}
                             </div>
                           }
                         />
@@ -676,60 +878,92 @@ function Login({
                 </div>
               </div>
 
-              {/* Login Fields */}
               <div className="login-fields margin-top-20" style={{ marginTop: '30px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
                     <TextField
-                      label={<>Website URL <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                      id="input_text_field_4"
+                      label={<>{t('login.websiteUrl')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       type="url"
                       value={url}
                       onChange={(e) => setUrl(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp' || disabled}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
                   </div>
                   <div>
                     <TextField
-                      label={<>Username <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      required
-                      fullWidth
-                      disabled={loading || step === 'otp'}
-                      sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
-                      InputLabelProps={{ style: { fontWeight: '500' } }}
-                    />
-                  </div>
-                  <div>
-                    <TextField
-                      label={<>Password <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                      id="input_text_field_5"
+                      label={<>{t('login.password')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp' || disabled}
+                      sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
+                      InputLabelProps={{ style: { fontWeight: '500' } }}
+                    />
+                  </div>
+                  <div>
+                    <TextField
+                      id="input_text_field_6"
+                      label={<>{t('login.username')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                      value={username}
+                      onChange={(e) => !IsProduction && setUsername(e.target.value)}
+                      required
+                      fullWidth
+                      disabled={loading || step === 'otp' || IsProduction}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
                   </div>
                 </Box>
-
                 {step === 'otp' && (
                   <TextField
-                    label={<>OTP Verification <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                    id="input_text_field_12"
+                    label={<>{t('login.otpVerification')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                     value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (/^\d*$/.test(value)) {
+                        setOtp(value);
+                        if (value.length !== 6) {
+                          setOtpError('OTP must be exactly 6 digits');
+                        } else {
+                          setOtpError('');
+                        }
+                      }
+                    }}
+                    onFocus={() => {
+                      if (!isTimerRunning) {
+                        setIsTimerRunning(true);
+                        setRemainingTime(180);
+                      }
+                    }}
+                    onBlur={() => {
+                      if (otp.length !== 6) {
+                        setOtpError('OTP must be exactly 6 digits');
+                      } else {
+                        setOtpError('');
+                      }
+                    }}
                     required
                     fullWidth
                     disabled={loading}
-                    
+                    error={!!otpError}
+                    helperText={otpError}
                     sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                     InputLabelProps={{ style: { fontWeight: '500' } }}
+                    inputProps={{
+                      maxLength: 6,
+                      inputMode: 'numeric',
+                    }}
+                    placeholder={isTimerRunning ? `剩餘時間: ${remainingTime} 秒` : '請輸入 OTP'}
+                    inputRef={otpInputRef}
                   />
                 )}
 
@@ -737,50 +971,66 @@ function Login({
                   type="submit"
                   variant="contained"
                   fullWidth
-                  disabled={loading}
+                  disabled={loading || (IsProduction && !username) || disabled}
                   sx={{ 
                     padding: '12px 24px', 
-                    backgroundColor: loading ? '#ccc' : '#10740AFF', 
+                    backgroundColor: (loading || (IsProduction && !username)) ? '#ccc' : '#10740AFF', 
                     '&:hover': { backgroundColor: '#0d5f08' } 
                   }}
                 >
                   {loading ? (
                     <CircularProgress size={24} />
                   ) : step === 'login' ? (
-                    'Login'
+                    t('login.loginButton')
                   ) : (
-                    'Submit OTP'
+                    t('login.submitOtpButton')
                   )}
                 </Button>
 
-               {/* View Logs Button */}
-              <Box sx={{ mt: 2 }}>
-                <Button 
-                  onClick={() => setLogDialogOpen(true)} 
-                  variant="outlined"
-                  fullWidth
-                  sx={{
-                    padding: '12px 24px' // Optional: match padding with the first button
-                  }}
-                >
-                  View Logs ({logs.length})
-                </Button>
-              </Box>
+                <Box sx={{ mt: 2 }}>
+                  <Button 
+                    onClick={() => setLogDialogOpen(true)} 
+                    variant="outlined"
+                    fullWidth
+                    sx={{ padding: '12px 24px' }}
+                  >
+                    {t('login.viewLogs', { count: logs.length })}
+                  </Button>
+                </Box>
               </div>
             </div>
           </form>
         ) : step === 'retry' ? (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
-              系統信息
+              {t('login.systemMessage')}
             </Typography>
             <Typography variant="body1" sx={{ mb: 2 }}>
               {systemMessage}
             </Typography>
             <TextField
-              label="New Notional Amount"
+              label={t('login.newNotionalAmount')}
               value={newNotionalAmount}
-              onChange={(e) => setNewNotionalAmount(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                const rawValue = value.replace(/[^\d.]/g, '');
+                const parts = rawValue.split('.');
+                let whole = parts[0] || '';
+                const decimal = parts.length > 1 ? `.${parts[1]}` : '';
+                if (whole) {
+                  whole = parseInt(whole, 10).toLocaleString('en-US');
+                }
+                const formattedValue = whole + decimal;
+                if (value === '' || /^[0-9,]*\.?[0-9]*$/.test(value)) {
+                  setNewNotionalAmount(formattedValue);
+                }
+              }}
+              onFocus={() => {
+                if (!isTimerRunningNewNotional) {
+                  setIsTimerRunningNewNotional(true);
+                  setRemainingTimeNewNotional(180);
+                }
+              }}
               fullWidth
               InputProps={{
                 startAdornment: (
@@ -788,10 +1038,12 @@ function Login({
                     {currency === '美元' ? 'USD' : 'HKD'}
                   </InputAdornment>
                 ),
+                inputMode: 'decimal',
               }}
               sx={{ mb: 2 }}
               InputLabelProps={{ style: { fontWeight: '500' } }}
-              placeholder="Enter new amount"
+              placeholder={isTimerRunningNewNotional ? `剩餘時間: ${remainingTimeNewNotional} 秒` : 'Enter new amount'}
+              inputRef={newNotionalInputRef}
             />
             <Button
               onClick={handleRetrySubmit}
@@ -803,18 +1055,18 @@ function Login({
                 '&:hover': { backgroundColor: '#0d5f08' } 
               }}
             >
-              {loading ? <CircularProgress size={24} /> : 'Submit'}
+              {loading ? <CircularProgress size={24} /> : t('login.submitButton')}
             </Button>
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Button onClick={() => setLogDialogOpen(true)} variant="outlined" fullWidth>
-                View Logs ({logs.length})
+                {t('login.viewLogs', { count: logs.length })}
               </Button>
             </Box>
           </Box>
         ) : step === 'success' ? (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
-              建議書已成功建立及下載到計劃易系統中!
+              {t('login.successMessage')}
             </Typography>
             <Button
               onClick={handleClose}
@@ -824,40 +1076,70 @@ function Login({
                 '&:hover': { backgroundColor: '#0d5f08' } 
               }}
             >
-              完成
+              {t('login.completeButton')}
             </Button>
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Button onClick={() => setLogDialogOpen(true)} variant="outlined" fullWidth>
-                View Logs ({logs.length})
+                {t('login.viewLogs', { count: logs.length })}
               </Button>
             </Box>
           </Box>
         ) : null}
 
-        {/* Log Dialog */}
-        <Dialog open={logDialogOpen} onClose={() => setLogDialogOpen(false)} maxWidth="md" fullWidth>
-  <DialogTitle>系統信息</DialogTitle>
-  <DialogContent>
-    <Box
-      sx={{
-        maxHeight: '400px',            // Limits the height of the log area
-        overflowY: 'auto',             // Enables scrolling if content overflows
-        border: '1px solid #ccc',      // Adds a single frame around all messages
-        borderRadius: '4px',           // Rounds the corners of the frame
-        padding: '8px',                // Adds spacing inside the frame
-        backgroundColor: '#f9f9f9',    // Optional: light background for contrast
-      }}
-      ref={logRef}
-    >
-      {logs.map((log, index) => (
-        <Typography key={index} sx={{ marginBottom: '8px' }}>
-          {log}
-        </Typography>
-      ))}
-    </Box>
-  </DialogContent>
+        <Dialog open={showUsernamePopup} onClose={handleClosePopup}>
+          <DialogTitle>{t('setSystemLoginName')}</DialogTitle>
+          <DialogContent>
+            <TextField
+              id="input_text_field_13"
+              label={t('systemLoginName')}
+              value={systemLoginName}
+              onChange={(e) => setSystemLoginName(e.target.value)}
+              fullWidth
+              sx={{ mb: 2 }}
+              InputLabelProps={{ style: { fontWeight: '500' } }}
+            />
+            <TextField
+              id="input_text_field_14"
+              label={t('confirmSystemLoginName')}
+              value={confirmSystemLoginName}
+              onChange={(e) => setConfirmSystemLoginName(e.target.value)}
+              fullWidth
+              sx={{ mb: 2 }}
+              InputLabelProps={{ style: { fontWeight: '500' } }}
+            />
+            {error && <Typography color="error">{error}</Typography>}
+          </DialogContent>
           <DialogActions>
-            <Button onClick={() => setLogDialogOpen(false)}>Close</Button>
+            <Button onClick={handleClosePopup}>{t('cancel')}</Button>
+            <Button onClick={handleSetSystemLoginName} disabled={loading}>
+              {loading ? <CircularProgress size={24} /> : t('setLoginNameButton')}
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={logDialogOpen} onClose={() => setLogDialogOpen(false)} maxWidth="md" fullWidth>
+          <DialogTitle>{t('login.systemMessage')}</DialogTitle>
+          <DialogContent>
+            <Box
+              sx={{
+                maxHeight: '400px',
+                overflowY: 'auto',
+                border: '1px solid #ccc',
+                borderRadius: '4px',
+                padding: '8px',
+                backgroundColor: '#f9f9f9',
+              }}
+              ref={logRef}
+            >
+              {logs.map((log, index) => (
+                <Typography key={index} sx={{ marginBottom: '8px' }}>
+                  {log}
+                </Typography>
+              ))}
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setLogDialogOpen(false)}>{t('login.completeButton')}</Button>
           </DialogActions>
         </Dialog>
       </Paper>

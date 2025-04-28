@@ -28,6 +28,8 @@ const ComparisonPopup = ({
   age,
   currencyRate,
   numOfRowInOutputForm_1,
+  plan1Inputs,
+  plan2Inputs
 }) => {
   const { t } = useTranslation();
   const [fontRegularData, setFontRegularData] = useState(null);
@@ -126,12 +128,77 @@ const ComparisonPopup = ({
 
     doc.setFont('NotoSansCJKtc', 'normal');
 
-    doc.setFontSize(18);
-    // doc.text(t('comparisonPopup.title'), 14, 22);
+    // Define starting Y for plan details tables
+    const startY = 15;
+
+    // Determine margins based on whether Plan 2 exists
+    const plan1Margin = plan2Inputs ? { left: 14, right: 110 } : { left: 14, right: 14 };
+    const plan2Margin = { left: 110, right: 14 };
+
+    // Add Plan 1 Details
+    autoTable(doc, {
+      startY: startY,
+      head: [[t('comparisonPopup.plan1Details'), '']],
+      body: [
+        [t('common.company'), plan1Inputs.company],
+        [t('common.plan'), plan1Inputs.plan],
+        [t('common.planCategory'), plan1Inputs.planCategory],
+        [t('common.effectiveDate'), plan1Inputs.effectiveDate],
+        [t('common.currency'), plan1Inputs.currency],
+        [t('common.sexuality'), plan1Inputs.sexuality],
+        [t('common.ward'), plan1Inputs.ward],
+        [t('common.planOption'), plan1Inputs.planOption],
+        [t('common.age'), plan1Inputs.age.toString()],
+        [t('common.numberOfYears'), plan1Inputs.numberOfYears.toString()],
+        [t('common.inflationRate'), `${plan1Inputs.inflationRate}%`],
+        [t('common.currencyRate'), plan1Inputs.currencyRate.toString()],
+      ],
+      theme: 'grid',
+      styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
+      headStyles: { fontStyle: 'bold', fillColor: '#009739' },
+      margin: plan1Margin,
+    });
+
+    let currentY = doc.lastAutoTable.finalY;
+
+    // Add Plan 2 Details if available
+    if (plan2Inputs) {
+      autoTable(doc, {
+        startY: startY,
+        head: [[t('comparisonPopup.plan2Details'), '']],
+        body: [
+          [t('common.company'), plan2Inputs.company],
+          [t('common.plan'), plan2Inputs.plan],
+          [t('common.planCategory'), plan2Inputs.planCategory],
+          [t('common.effectiveDate'), plan2Inputs.effectiveDate],
+          [t('common.currency'), plan2Inputs.currency],
+          [t('common.sexuality'), plan2Inputs.sexuality],
+          [t('common.ward'), plan2Inputs.ward],
+          [t('common.planOption'), plan2Inputs.planOption],
+          [t('common.age'), plan2Inputs.age.toString()],
+          [t('common.numberOfYears'), plan2Inputs.numberOfYears.toString()],
+          [t('common.inflationRate'), `${plan2Inputs.inflationRate}%`],
+          [t('common.currencyRate'), plan2Inputs.currencyRate.toString()],
+        ],
+        theme: 'grid',
+        styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
+        headStyles: { fontStyle: 'bold', fillColor: '#009739' },
+        margin: plan2Margin,
+      });
+      currentY = Math.max(currentY, doc.lastAutoTable.finalY);
+    }
+
+    // Add space after tables
+    currentY += 5;
+
+    // Proceed with the rest of the content
+    const titleY = currentY + 10;
+    const pointsY = titleY + 10;
+    const cardY = titleY - 7;
 
     const leftX = 14;
     const rightX = 110;
-    const textWidth = 80; // Define maxWidth in mm
+    const textWidth = 80;
 
     // Traditional insurance section
     doc.setDrawColor(42, 157, 143);
@@ -140,51 +207,52 @@ const ComparisonPopup = ({
     const cardWidth = 85;
     const cardHeight = 50;
     const cardX = leftX + 5 - cardPadding;
-    const cardY = 40 - cardPadding - 10;
     doc.rect(cardX, cardY, cardWidth, cardHeight);
 
     doc.setFontSize(14);
     doc.setTextColor(42, 157, 143);
     doc.setFont('NotoSansCJKtc', 'bold');
-    doc.text(t('comparisonPopup.traditionalMedicalPremium'), leftX + 2, 32);
+    doc.text(t('comparisonPopup.traditionalMedicalPremium'), leftX + 2, titleY);
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     doc.setFont('NotoSansCJKtc', 'normal');
-    doc.text(t('comparisonPopup.traditionalPoints.0'), leftX + 2, 42, { maxWidth: textWidth });
-  doc.text(t('comparisonPopup.traditionalPoints.1'), leftX + 2, 52, { maxWidth: textWidth });
-  doc.text(t('comparisonPopup.traditionalPoints.2'), leftX + 2, 62, { maxWidth: textWidth });
-  doc.text(t('comparisonPopup.traditionalPoints.3'), leftX + 2, 72, { maxWidth: textWidth });
-
-  // Financing insurance section
+    const traditionalPoints = t('comparisonPopup.traditionalPoints', { returnObjects: true });
+    traditionalPoints.forEach((point, index) => {
+      doc.text(point, leftX + 2, pointsY + index * 10, { maxWidth: textWidth });
+    });
 
     // Financing insurance section
     doc.setDrawColor(244, 162, 97);
-    doc.setLineWidth(0.5);
     doc.rect(cardX + 96, cardY, cardWidth, cardHeight);
 
     doc.setFontSize(14);
     doc.setTextColor(244, 162, 97);
     doc.setFont('NotoSansCJKtc', 'bold');
-    doc.text(t('comparisonPopup.financingMedicalPremium'), rightX + 3, 32);
+    doc.text(t('comparisonPopup.financingMedicalPremium'), rightX + 3, titleY);
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     doc.setFont('NotoSansCJKtc', 'normal');
-    doc.text(t('comparisonPopup.financingPoints.0', { numberOfYears }), rightX + 3, 42, { maxWidth: textWidth });
-    doc.text(t('comparisonPopup.financingPoints.1', { savingsPercentage: formattedSavingsPercentage, savingsInMillions: formattedSavingsInMillions }), rightX + 3, 52, { maxWidth: textWidth });
-    doc.text(t('comparisonPopup.financingPoints.2'), rightX + 3, 62, { maxWidth: textWidth });
-    doc.text(t('comparisonPopup.financingPoints.3'), rightX + 3, 72, { maxWidth: textWidth });
+    const financingPoints = [
+      t('comparisonPopup.financingPoints.0', { numberOfYears }),
+      t('comparisonPopup.financingPoints.1', { savingsPercentage: formattedSavingsPercentage, savingsInMillions: formattedSavingsInMillions }),
+      t('comparisonPopup.financingPoints.2'),
+      t('comparisonPopup.financingPoints.3'),
+    ];
+    financingPoints.forEach((point, index) => {
+      doc.text(point, rightX + 3, pointsY + index * 10, { maxWidth: textWidth });
+    });
 
     // How it works section
+    const howItWorksY = pointsY + 38;
     doc.setFillColor(15, 17, 28);
-    doc.rect(14, 80, 182, 10, 'F');
+    doc.rect(14, howItWorksY, 182, 10, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(14);
     doc.setFont('NotoSansCJKtc', 'bold');
-    doc.text(t('comparisonPopup.howItWorks'), 105, 87, { align: 'center' });
-
+    doc.text(t('comparisonPopup.howItWorks'), 105, howItWorksY + 7, { align: 'center' });
     doc.setTextColor(0, 0, 0);
 
-    const tablesStartY = 93;
+    const tablesStartY = howItWorksY + 13;
 
     const startAge = age;
     const decadeEndAges = [];
@@ -284,8 +352,8 @@ const ComparisonPopup = ({
     doc.text(t('comparisonPopup.totalCost', { total: formattedTotalCost }), rightX + 2, yPosition + 3);
 
     doc.setFont('NotoSansCJKtc', 'normal');
-    doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: '-' }), leftX + 2, yPosition + 13);
-    doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: '-' }), leftX + 2, yPosition + 20);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: '沒有價值' }), leftX + 2, yPosition + 13);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: '沒有價值' }), leftX + 2, yPosition + 20);
     doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: formattedCurrency1 }), rightX + 2, yPosition + 13);
     doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: formattedCurrency2 }), rightX + 2, yPosition + 20);
 

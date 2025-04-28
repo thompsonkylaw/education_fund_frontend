@@ -67,12 +67,6 @@ const App = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [finalNotionalAmount, setFinalNotionalAmount] = useState(null);
-  const [cashValueInfo, setCashValueInfo] = useState({
-    age_1: 65,
-    age_2: 85,
-    age_1_cash_value: 0,
-    age_2_cash_value: 0
-  });
 
   // Save appBarColor to localStorage
   useEffect(() => {
@@ -117,7 +111,7 @@ const App = () => {
           const serverURL = IsProduction
             ? 'https://fastapi-production-a20ab.up.railway.app'
             : 'http://localhost:9002';
-          console.log(plan1Inputs.planFileName);
+          console.log(plan1Inputs.planFileName)  
           const response = await axios.post(serverURL + '/getData', {
             company: plan1Inputs.company,
             planFileName: plan1Inputs.planFileName,
@@ -125,6 +119,7 @@ const App = () => {
             planOption: plan1Inputs.planOption,
             numberOfYears: plan1Inputs.numberOfYears
           });
+          // console.log("xxx",response.data)
           setOutputData1(response.data);
         } catch (err) {
           setError(err.response?.data?.detail || 'Failed to fetch data for Plan 1');
@@ -170,18 +165,12 @@ const App = () => {
     }
   }, [showSecondPlan, plan2Inputs]);
 
-  // Process data for both plans and calculate cashValueInfo
+  // Process data for both plans
   useEffect(() => {
     if (outputData1.length === 0) {
       setProcessedData([]);
       setNumberOfYearAccMP(0);
       setNumOfRowInOutputForm_1(0);
-      setCashValueInfo({
-        age_1: 65,
-        age_2: 85,
-        age_1_cash_value: 0,
-        age_2_cash_value: 0
-      });
       return;
     }
 
@@ -240,16 +229,6 @@ const App = () => {
     setProcessedData(combinedData);
     const finalYearData = combinedData.find(item => item.yearNumber === plan1Inputs.numberOfYears);
     setNumberOfYearAccMP(finalYearData?.accumulatedMP || 0);
-
-    // Update cashValueInfo based on processed data
-    const age1Data = combinedData.find(item => item.age === 65);
-    const age2Data = combinedData.find(item => item.age === 85);
-    setCashValueInfo({
-      age_1: 65,
-      age_2: 85,
-      age_1_cash_value: age1Data ? age1Data.accumulatedMP : 0,
-      age_2_cash_value: age2Data ? age2Data.accumulatedMP : 0
-    });
   }, [outputData1, outputData2, useInflation, plan1Inputs.inflationRate, showSecondPlan, plan1Inputs.numberOfYears, plan1Inputs.age]);
 
   // Save plan1Inputs to localStorage
@@ -348,8 +327,6 @@ const App = () => {
                 numberOfYearAccMP={numberOfYearAccMP}
                 setFinalNotionalAmount={setFinalNotionalAmount}
                 disabled={finalNotionalAmount !== null}
-                cashValueInfo={cashValueInfo}
-                setCashValueInfo = {setCashValueInfo}
               />
             </Card>
             <Card elevation={3} sx={{ mt: 2, p: 2 }}>
@@ -370,8 +347,7 @@ const App = () => {
                 numOfRowInOutputForm_1={numOfRowInOutputForm_1}
               />
             </Card>
-            {/* {finalNotionalAmount && ( */}
-            {(
+            {finalNotionalAmount && (
               <Card elevation={3} sx={{ mt: 2, p: 2 }}>
                 <OutputForm_3
                   processedData={processedData}
@@ -382,14 +358,11 @@ const App = () => {
                   currencyRate={plan1Inputs.currencyRate}
                   setFinalNotionalAmount={setFinalNotionalAmount}
                   numOfRowInOutputForm_1={numOfRowInOutputForm_1}
-                  cashValueInfo={cashValueInfo}
-                  plan1Inputs = {plan1Inputs}
-                  plan2Inputs = {plan2Inputs}
                 />
               </Card>
             )}
             <Box sx={{ mt: 2 }}>
-              <LanguageSwitch setAppBarColor={setAppBarColor} appBarColor={appBarColor} />
+            <LanguageSwitch setAppBarColor={setAppBarColor} appBarColor={appBarColor} />
             </Box>
           </Grid>
         </Grid>

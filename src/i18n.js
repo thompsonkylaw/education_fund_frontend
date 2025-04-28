@@ -25,6 +25,7 @@ i18next
     resources: {
       en: {
         translation: {
+          cash_value: 'Surrender value after withdrawal',
           Failed_to_fetch_system_login_name: 'Failed to fetch system login name',
           Both_login_name_fields_are_required: 'Both login name fields are required',
           Login_names_do_not_match: 'Login names do not match',
@@ -58,6 +59,8 @@ i18next
           'Acc MP USD': 'Acc MP(USD)',
           'Acc MP': 'Acc MP(HKD)',
           login: {
+            age1 : 'First Surrender Value Age',
+            age2 : 'Second Surrender Value Age',
             notioalAmountPlaceHolder: "Enter Notional Amount",
             notionalAmountError: 'Not Less Than USD$1500',
             title: 'Proposal System - Login',
@@ -122,6 +125,18 @@ i18next
             resetConfirmation: "Are you sure you want to reset the form? All inputs will be cleared."
           },
           common: {
+            company: "Company",
+            plan: "Plan",
+            planCategory: "Plan Category",
+            effectiveDate: "Effective Date",
+            currency: "Currency",
+            sexuality: "Sexuality",
+            ward: "Ward",
+            planOption: "Plan Option",
+            age: "Age",
+            numberOfYears: "Number of Years",
+            inflationRate: "Inflation Rate",
+            currencyRate: "Currency Rate",
             yearsOld: "years old",
             hkdZero: "HKD $ -"
           },
@@ -139,6 +154,8 @@ i18next
             useHtml: "Use HTML",
             downloadReport: "Download Report",
             loadingFonts: "Fonts are loading, please wait",
+            plan1Details: "Plan 1 Details",
+            plan2Details: "Plan 2 Details",
             traditionalPoints: [
               "Purchase yearly, claim when hospitalized, waste money when not",
               "Premium increases yearly, cheaper when young",
@@ -156,6 +173,7 @@ i18next
       },
       "zh-HK": {
         translation: {
+          cash_value: '款項提取後的退保價值',
           Failed_to_fetch_system_login_name: '無法取得系統登入名稱',
           Both_login_name_fields_are_required: '兩個登入名稱欄位均為必填',
           Login_names_do_not_match: '登入名稱不匹配',
@@ -189,6 +207,8 @@ i18next
           'Acc MP USD': '累積醫療保費(美元)',
           'Acc MP': '累積醫療保費(港元)',
           login: {
+            age1 : '第一退保報價值歲數',
+            age2 : '第二退保報價值歲數',
             notioalAmountPlaceHolder: "輸入名義金額",
             notionalAmountError: '不能少於 USD$1500',
             title: '計劃書系統 - 登錄',
@@ -253,6 +273,18 @@ i18next
             resetConfirmation: "確定要重設表單嗎？所有輸入將被清除。"
           },
           common: {
+            company: "公司",
+            plan: "計劃",
+            planCategory: "計劃類別",
+            effectiveDate: "生效日期",
+            currency: "貨幣",
+            sexuality: "性別",
+            ward: "病房",
+            planOption: "計劃選項",
+            age: "年齡",
+            numberOfYears: "年數",
+            inflationRate: "通脹率",
+            currencyRate: "匯率",
             yearsOld: "歲",
             hkdZero: "HKD $ -"
           },
@@ -270,6 +302,8 @@ i18next
             useHtml: "使用 HTML",
             downloadReport: "下載報告",
             loadingFonts: "字體正在加載中，請稍後再試",
+            plan1Details: "計劃1詳情",
+            plan2Details: "計劃2詳情",
             traditionalPoints: [
               "逐年購買，住院賠錢，無事洗錢",
               "年年加價，年輕時保費便宜",
@@ -287,6 +321,7 @@ i18next
       },
       "zh-CN": {
         translation: {
+          cash_value: '款项提取后的退保价值',
           Failed_to_fetch_system_login_name: '无法获取系统登录名称',
           Both_login_name_fields_are_required: '两个登录名称字段均为必填',
           Login_names_do_not_match: '登录名称不匹配',
@@ -320,6 +355,8 @@ i18next
           'Acc MP USD': '累积医疗保费(美元)',
           'Acc MP': '累积医疗保费(港元)',
           login: {
+            age1 : '第一退保报价值岁数',
+            age2 : '第二退保报价值岁数',
             notioalAmountPlaceHolder: "输入名义金额",
             notionalAmountError: '不能少于 USD$1500',
             title: '计划书系统 - 登录',
@@ -384,6 +421,18 @@ i18next
             resetConfirmation: "确定要重设表单吗？所有输入将被清除。"
           },
           common: {
+            company: "公司",
+            plan: "计划",
+            planCategory: "计划类别",
+            effectiveDate: "生效日期",
+            currency: "货币",
+            sexuality: "性别",
+            ward: "病房",
+            planOption: "计划选项",
+            age: "年龄",
+            numberOfYears: "年数",
+            inflationRate: "通胀率",
+            currencyRate: "汇率",
             yearsOld: "岁",
             hkdZero: "HKD $ -"
           },
@@ -401,6 +450,8 @@ i18next
             useHtml: "使用 HTML",
             downloadReport: "下载报告",
             loadingFonts: "字体正在加载中，请稍后再试",
+            plan1Details: "计划1详情",
+            plan2Details: "计划2详情",
             traditionalPoints: [
               "逐年购买，住院赔钱，无事洗钱",
               "年年加价，年轻时保费便宜",

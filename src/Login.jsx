@@ -51,9 +51,12 @@ function Login({
   inputs, 
   numberOfYearAccMP,
   useInflation,
-  setFinalNotionalAmount
+  setFinalNotionalAmount,
+  disabled,
+  cashValueInfo,
+  setCashValueInfo
 }) {
-  const IsProduction = false;
+  const IsProduction = true;
 
   const { t } = useTranslation();
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
@@ -100,12 +103,17 @@ function Login({
   const [error, setError] = useState('');
   const logRef = useRef(null);
   const shouldShowField = false;
-  const [remainingTime, setRemainingTime] = useState(120);
+  const [remainingTime, setRemainingTime] = useState(180);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const otpInputRef = useRef(null);
-  const [remainingTimeNewNotional, setRemainingTimeNewNotional] = useState(120);
+  const [remainingTimeNewNotional, setRemainingTimeNewNotional] = useState(180);
   const [isTimerRunningNewNotional, setIsTimerRunningNewNotional] = useState(false);
   const newNotionalInputRef = useRef(null);
+
+  // Age dropdown states and options
+  const [selectedAge1, setSelectedAge1] = useState(cashValueInfo?.age_1 || 1);
+  const [selectedAge2, setSelectedAge2] = useState(cashValueInfo?.age_2 || 1);
+  const ageOptions = Array.from({ length: 100 }, (_, i) => i + 1);
 
   useEffect(() => {
     if (inputs.age && inputs.numberOfYears) {
@@ -275,9 +283,9 @@ function Login({
     setOtpError('');
     setSessionId('');
     setIsTimerRunning(false);
-    setRemainingTime(120);
+    setRemainingTime(180);
     setIsTimerRunningNewNotional(false);
-    setRemainingTimeNewNotional(120);
+    setRemainingTimeNewNotional(180);
   };
 
   const handleLogin = async (e) => {
@@ -316,6 +324,12 @@ function Login({
           inputs,
           totalAccumulatedMP: numberOfYearAccMP,
         },
+        cashValueInfo: {
+          age_1: selectedAge1,
+          age_2: selectedAge2,
+          age_1_cash_value: 0,
+          age_2_cash_value: 0
+        },
         formData: {
           isCorporateCustomer,
           isPolicyHolder,
@@ -332,6 +346,8 @@ function Login({
           premiumPaymentMethod,
           useInflation,
           proposalLanguage,
+          selectedAge1,
+          selectedAge2,
         },
       });
       if (response.data.status === 'otp_failed') {
@@ -339,10 +355,17 @@ function Login({
       } else if (response.data.status === 'retry') {
         setSystemMessage(response.data.system_message);
         setStep('retry');
-        setRemainingTimeNewNotional(120);
+        setRemainingTimeNewNotional(180);
         setIsTimerRunningNewNotional(true);
       } else if (response.data.status === 'success') {
-        setPdfDownloadLink(response.data.pdf_link);
+        console.log("Age 1 Cash Value:", response.data.age_1_cash_value);
+        console.log("Age 2 Cash Value:", response.data.age_2_cash_value);
+        setCashValueInfo({
+          age_1: selectedAge1,
+          age_2: selectedAge2,
+          age_1_cash_value: response.data.age_1_cash_value,
+          age_2_cash_value: response.data.age_2_cash_value
+        });
         setStep('success');
         setFinalNotionalAmount(notionalAmount);
       }
@@ -364,10 +387,16 @@ function Login({
       if (response.data.status === 'retry') {
         setSystemMessage(response.data.system_message);
         setNewNotionalAmount('');
-        setRemainingTimeNewNotional(120);
+        setRemainingTimeNewNotional(180);
         setIsTimerRunningNewNotional(true);
       } else if (response.data.status === 'success') {
-        setPdfDownloadLink(response.data.pdf_link);
+        console.log("Age 1 Cash Value:", response.data.age_1_cash_value);
+        console.log("Age 2 Cash Value:", response.data.age_2_cash_value);
+        setCashValueInfo(prev => ({
+          ...prev,
+          age_1_cash_value: response.data.age_1_cash_value,
+          age_2_cash_value: response.data.age_2_cash_value
+        }));
         setStep('success');
         setFinalNotionalAmount(newNotionalAmount);
       }
@@ -478,7 +507,7 @@ function Login({
                       onChange={(e) => setSurname(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp' || disabled}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -491,7 +520,7 @@ function Login({
                       onChange={(e) => setGivenName(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp' || disabled}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -505,7 +534,7 @@ function Login({
                       value={chineseName}
                       onChange={(e) => setChineseName(e.target.value)}
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp' || disabled}
                       inputProps={{ maxLength: 10 }}
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
@@ -518,7 +547,7 @@ function Login({
                         value={insuranceAge}
                         onChange={(e) => setInsuranceAge(e.target.value)}
                         fullWidth
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp' || disabled}
                         sx={{ mb: 2 }}
                         InputLabelProps={{ style: { fontWeight: '500' } }}
                         select
@@ -546,7 +575,7 @@ function Login({
                       <FormControlLabel
                         value="Male"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp' || disabled}
                         label={
                           <>
                             <span style={{
@@ -583,7 +612,7 @@ function Login({
                       <FormControlLabel
                         value="Female"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp' || disabled}
                         label={
                           <>
                             <span style={{
@@ -632,7 +661,7 @@ function Login({
                       <FormControlLabel
                         value="true"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp' || disabled}
                         label={
                           <>
                             <span style={{
@@ -669,7 +698,7 @@ function Login({
                       <FormControlLabel
                         value="false"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp' || disabled}
                         label={
                           <>
                             <span style={{
@@ -719,7 +748,7 @@ function Login({
                         value={basicPlan}
                         onChange={(e) => setBasicPlan(e.target.value)}
                         label={<>{t('login.basicPlan')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp' || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         {manulifeSavingPlans.map((plan) => (
@@ -763,7 +792,7 @@ function Login({
                         value={currency}
                         onChange={(e) => setCurrency(e.target.value)}
                         label={<>{t('login.currency')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp' || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="美元">美元</MenuItem>
@@ -781,7 +810,7 @@ function Login({
                       onBlur={handleBlur}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp' || disabled}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -812,7 +841,7 @@ function Login({
                         value={premiumPaymentMethod}
                         onChange={(e) => setPremiumPaymentMethod(e.target.value)}
                         label={<>{t('login.premiumPaymentMethod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp'}
+                        disabled={loading || step === 'otp' || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="每年">每年</MenuItem>
@@ -837,7 +866,7 @@ function Login({
                           key={lang}
                           value={lang}
                           control={<Radio sx={{ display: 'none' }} />}
-                          disabled={loading || step === 'otp'}
+                          disabled={loading || step === 'otp' || disabled}
                           label={
                             <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                               <span style={{
@@ -878,7 +907,7 @@ function Login({
               </div>
 
               <div className="login-fields margin-top-20" style={{ marginTop: '30px' }}>
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 2 }}>
                   <div>
                     <TextField
                       id="input_text_field_4"
@@ -888,7 +917,64 @@ function Login({
                       onChange={(e) => setUrl(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
+                      disabled={loading || step === 'otp' || disabled}
+                      sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
+                      InputLabelProps={{ style: { fontWeight: '500' } }}
+                    />
+                  </div>
+                  <div>
+                    <FormControl fullWidth>
+                      <InputLabel sx={{ fontWeight: '500' }}>
+                        {t('login.age1')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                      </InputLabel>
+                      <Select
+                        value={selectedAge1}
+                        onChange={(e) => setSelectedAge1(e.target.value)}
+                        label={<>{t('login.age1')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        disabled={loading || step === 'otp' || disabled}
+                        sx={{ backgroundColor: 'white', color: 'black' }}
+                        inputProps={{ id: 'input_text_field_15' }}
+                      >
+                        {ageOptions.map((age) => (
+                          <MenuItem key={age} value={age}>
+                            {age}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <div>
+                    <FormControl fullWidth>
+                      <InputLabel sx={{ fontWeight: '500' }}>
+                        {t('login.age2')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                      </InputLabel>
+                      <Select
+                        value={selectedAge2}
+                        onChange={(e) => setSelectedAge2(e.target.value)}
+                        label={<>{t('login.age2')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        disabled={loading || step === 'otp' || disabled}
+                        sx={{ backgroundColor: 'white', color: 'black' }}
+                        inputProps={{ id: 'input_text_field_16' }}
+                      >
+                        {ageOptions.map((age) => (
+                          <MenuItem key={age} value={age}>
+                            {age}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                </Box>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                  <div>
+                    <TextField
+                      id="input_text_field_6"
+                      label={<>{t('login.username')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                      value={username}
+                      onChange={(e) => !IsProduction && setUsername(e.target.value)}
+                      required
+                      fullWidth
+                      disabled={loading || step === 'otp' || IsProduction}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -902,20 +988,7 @@ function Login({
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp'}
-                      sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
-                      InputLabelProps={{ style: { fontWeight: '500' } }}
-                    />
-                  </div>
-                  <div>
-                    <TextField
-                      id="input_text_field_6"
-                      label={<>{t('login.username')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                      value={username}
-                      onChange={(e) => !IsProduction && setUsername(e.target.value)}
-                      required
-                      fullWidth
-                      disabled={loading || step === 'otp' || IsProduction}
+                      disabled={loading || step === 'otp' || disabled}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -940,7 +1013,7 @@ function Login({
                     onFocus={() => {
                       if (!isTimerRunning) {
                         setIsTimerRunning(true);
-                        setRemainingTime(120);
+                        setRemainingTime(180);
                       }
                     }}
                     onBlur={() => {
@@ -970,7 +1043,7 @@ function Login({
                   type="submit"
                   variant="contained"
                   fullWidth
-                  disabled={loading || (IsProduction && !username)}
+                  disabled={loading || (IsProduction && !username) || disabled}
                   sx={{ 
                     padding: '12px 24px', 
                     backgroundColor: (loading || (IsProduction && !username)) ? '#ccc' : '#10740AFF', 
@@ -1027,7 +1100,7 @@ function Login({
               onFocus={() => {
                 if (!isTimerRunningNewNotional) {
                   setIsTimerRunningNewNotional(true);
-                  setRemainingTimeNewNotional(120);
+                  setRemainingTimeNewNotional(180);
                 }
               }}
               fullWidth
