@@ -30,14 +30,7 @@ const NumberFormatCustom = React.forwardRef(function NumberFormatCustom(props, r
   );
 });
 
-const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNotionalAmount, age, currencyRate, setFinalNotionalAmount, numOfRowInOutputForm_1, cashValueInfo,plan1Inputs,plan2Inputs,clientInfo }) => {
-  // console.log("clientInfo.surname",clientInfo.surname)
-  // console.log("clientInfo.surname",clientInfo.givenName)
-  // console.log("clientInfo.chineseName",clientInfo.chineseName)
-  // console.log("clientInfo.basicPlan",clientInfo.basicPlan)
-  // console.log("clientInfo.premiumPaymentPeriod",clientInfo.premiumPaymentPeriod)
-  // console.log("finalNotionalAmount",finalNotionalAmount)
-  // console.log("clientInfo.basicPlanCurrency",clientInfo.basicPlanCurrency)
+const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNotionalAmount, age, currencyRate, setFinalNotionalAmount, numOfRowInOutputForm_1, cashValueInfo,plan1Inputs,plan2Inputs }) => {
   const { t } = useTranslation();
 
   const [age1, setAge1] = useState(cashValueInfo.age_1);
@@ -152,9 +145,6 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
         numOfRowInOutputForm_1={numOfRowInOutputForm_1}
         plan1Inputs = {plan1Inputs}
         plan2Inputs = {plan2Inputs}
-        clientInfo = {clientInfo}
-        cashValueInfo={cashValueInfo}
-
       />
     </Box>
   );

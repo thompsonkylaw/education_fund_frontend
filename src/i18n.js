@@ -59,8 +59,9 @@ i18next
           'Acc MP USD': 'Acc MP(USD)',
           'Acc MP': 'Acc MP(HKD)',
           login: {
-            age1 : 'First Surrender Value Age',
-            age2 : 'Second Surrender Value Age',
+            premiumPeriodError: 'Does not match the premium payment period of the medical plan',
+            age1: 'First Surrender Value Age',
+            age2: 'Second Surrender Value Age',
             notioalAmountPlaceHolder: "Enter Notional Amount",
             notionalAmountError: 'Not Less Than USD$1500',
             title: 'Proposal System - Login',
@@ -114,7 +115,7 @@ i18next
           outputForm2: {
             header: "Medical Financing Premium",
             footer: "Total Cost: HKD $ {{total}}",
-            firstRowValue: "First {{numberOfYears}} years average monthly HKD $ {{averageMonthly}}",
+            firstRowValue: "First {{premiumPaymentPeriod}} years average monthly HKD $ {{averageMonthly}}",
             placeholder: "Please complete login to get notional amount"
           },
           outputForm3: {
@@ -138,9 +139,16 @@ i18next
             inflationRate: "Inflation Rate",
             currencyRate: "Currency Rate",
             yearsOld: "years old",
-            hkdZero: "HKD $ -"
+            hkdZero: "HKD $ 0",
+            noValue: "No Value"
           },
           comparisonPopup: {
+            clientInformation: "Client Information",
+            basicPlan: "Basic Saving Plan",
+            premiumPaymentPeriod: "Premium Payment Period",
+            finalNotionalAmount: "Final Notional Amount",
+            plan1Details: "Basic Medical Plan 1 Details",
+            plan2Details: "Basic Medical Plan 2 Details",
             title: "Manulife",
             ageRange: "Age Range",
             traditionalMedicalPremiumTable: "Traditional Medical Premium",
@@ -151,23 +159,22 @@ i18next
             howItWorks: "How does it work?",
             totalCost: "Total Cost: HKD $ {{total}}",
             accountValueAtAge: "Account Value at age {{age}}: HKD $ {{value}}",
-            useHtml: "Use HTML",
-            downloadReport: "Download Report",
+            useHtml: "Use Simple Reports",
+            downloadReport: "Medical_Financing_Plan",
             loadingFonts: "Fonts are loading, please wait",
-            plan1Details: "Plan 1 Details",
-            plan2Details: "Plan 2 Details",
-            traditionalPoints: [
-              "Purchase yearly, claim when hospitalized, waste money when not",
-              "Premium increases yearly, cheaper when young",
-              "Premium increases with age, expensive after retirement",
-              "Consumable product"
-            ],
-            financingPoints: [
-              "Only need {{numberOfYears}} years to complete lifetime medical protection",
-              "Save {{savingsPercentage}}% on lifetime medical premium ${{savingsInMillions}} million",
-              "Comprehensive lifetime medical protection up to age 100",
-              "Claim when needed, save when not, account value increases over time"
-            ]
+            traditionalPoints: {
+              0: "Lifetime premium payment, lifetime coverage",
+              1: "Lifetime medical premium: {{traditionalTotalCost}} total cost",
+              2: "Savings feature: None",
+              3: ""
+            },
+            financingPoints: {
+              0: "Premium payment for {{premiumPaymentPeriod}} years, lifetime coverage",
+              1: "Save {{savingsPercentage}}% (HKD ${{savings}}) on medical premiums",
+              2: "Savings feature: Account value at age {{age}}: HKD ${{formattedAccountValue}}",
+              3: ""
+            },
+            disclaimer:"This document is for reference only and is not intended as any investment advice or consultation."
           }
         }
       },
@@ -207,8 +214,9 @@ i18next
           'Acc MP USD': '累積醫療保費(美元)',
           'Acc MP': '累積醫療保費(港元)',
           login: {
-            age1 : '第一退保報價值歲數',
-            age2 : '第二退保報價值歲數',
+            premiumPeriodError: '與醫療計劃保費繳付期不符',
+            age1: '第一退保報價值歲數',
+            age2: '第二退保報價值歲數',
             notioalAmountPlaceHolder: "輸入名義金額",
             notionalAmountError: '不能少於 USD$1500',
             title: '計劃書系統 - 登錄',
@@ -262,7 +270,7 @@ i18next
           outputForm2: {
             header: "醫療融資保費",
             footer: "總成本: HKD $ {{total}}",
-            firstRowValue: "首{{numberOfYears}}年平均每月 HKD $ {{averageMonthly}}",
+            firstRowValue: "首{{premiumPaymentPeriod}}年平均每月 HKD $ {{averageMonthly}}",
             placeholder: "請先完成登錄以獲取名義金額"
           },
           outputForm3: {
@@ -286,9 +294,16 @@ i18next
             inflationRate: "通脹率",
             currencyRate: "匯率",
             yearsOld: "歲",
-            hkdZero: "HKD $ -"
+            hkdZero: "HKD $ 0",
+            noValue: "沒有價值"
           },
           comparisonPopup: {
+            clientInformation: "客戶信息",
+            basicPlan: "基本儲蓄計劃",
+            premiumPaymentPeriod: "保費繳付期",
+            finalNotionalAmount: "最終名義金額",
+            plan1Details: "基本醫療計劃 1 詳情",
+            plan2Details: "基本醫療計劃 2 詳情",
             title: "Manulife 宏利",
             ageRange: "年齡範圍",
             traditionalMedicalPremiumTable: "傳統醫療保費",
@@ -299,23 +314,22 @@ i18next
             howItWorks: "實際操作 How does it work?",
             totalCost: "總成本: HKD $ {{total}}",
             accountValueAtAge: "{{age}} 歲戶口價值: HKD $ {{value}}",
-            useHtml: "使用 HTML",
-            downloadReport: "下載報告",
+            useHtml: "使用簡單報表",
+            downloadReport: "醫療融資計劃",
             loadingFonts: "字體正在加載中，請稍後再試",
-            plan1Details: "計劃1詳情",
-            plan2Details: "計劃2詳情",
-            traditionalPoints: [
-              "逐年購買，住院賠錢，無事洗錢",
-              "年年加價，年輕時保費便宜",
-              "年長時保費遞增，退休後保費高昂",
-              "消費性產品"
-            ],
-            financingPoints: [
-              "只需{{numberOfYears}}年完成終生醫療保衛",
-              "節省{{savingsPercentage}}%終身醫療保費${{savingsInMillions}}萬",
-              "全面終身醫療保障至100歲",
-              "有事賠錢，無事儲錢，戶口長期增值"
-            ]
+            traditionalPoints: {
+              0: "供款終身，保障終身",
+              1: "終身醫療保費 : HKD${{traditionalTotalCost}}",
+              2: "儲蓄功能 : 沒有",
+              3: ""
+            },
+            financingPoints: {
+              0: "供款{{premiumPaymentPeriod}}年，保障終身",
+              1: "節省{{savingsPercentage}}% (HKD ${{savings}}) 醫療保費",
+              2: "儲蓄功能 : {{age}}歲 戶口價值 : HKD ${{formattedAccountValue}}",
+              3: ""
+            },
+            disclaimer:"以上內容只供參考，並不作為任何投資買賣的意見或諮詢。"
           }
         }
       },
@@ -355,8 +369,9 @@ i18next
           'Acc MP USD': '累积医疗保费(美元)',
           'Acc MP': '累积医疗保费(港元)',
           login: {
-            age1 : '第一退保报价值岁数',
-            age2 : '第二退保报价值岁数',
+            premiumPeriodError: '与医疗计划保费缴付期不符',
+            age1: '第一退保报价值岁数',
+            age2: '第二退保报价值岁数',
             notioalAmountPlaceHolder: "输入名义金额",
             notionalAmountError: '不能少于 USD$1500',
             title: '计划书系统 - 登录',
@@ -370,7 +385,7 @@ i18next
             smokingHabit: '您是否有吸烟习惯?',
             yes: '是',
             no: '否',
-            basicPlan: '基本计划',
+            basicPlan: '基本储蓄计划',
             premiumPaymentPeriod: '保费缴付期',
             currency: '货币',
             notionalAmount: '名义金额',
@@ -410,7 +425,7 @@ i18next
           outputForm2: {
             header: "医疗融资保费",
             footer: "总成本: HKD $ {{total}}",
-            firstRowValue: "首{{numberOfYears}}年平均每月 HKD $ {{averageMonthly}}",
+            firstRowValue: "首{{premiumPaymentPeriod}}年平均每月 HKD $ {{averageMonthly}}",
             placeholder: "请先完成登录以获取名义金额"
           },
           outputForm3: {
@@ -434,9 +449,16 @@ i18next
             inflationRate: "通胀率",
             currencyRate: "汇率",
             yearsOld: "岁",
-            hkdZero: "HKD $ -"
+            hkdZero: "HKD $ 0",
+            noValue: "没有价值"
           },
           comparisonPopup: {
+            clientInformation: "客户信息",
+            basicPlan: "基本计划",
+            premiumPaymentPeriod: "保费缴付期",
+            finalNotionalAmount: "最终名义金额",
+            plan1Details: "基本医疗计划 1 详情",
+            plan2Details: "基本医疗计划 2 详情",
             title: "Manulife 宏利",
             ageRange: "年龄范围",
             traditionalMedicalPremiumTable: "传统医疗保费",
@@ -447,23 +469,22 @@ i18next
             howItWorks: "实际操作 How does it work?",
             totalCost: "总成本: HKD $ {{total}}",
             accountValueAtAge: "{{age}} 岁户口价值: HKD $ {{value}}",
-            useHtml: "使用 HTML",
-            downloadReport: "下载报告",
+            useHtml: "使用简单报表",
+            downloadReport: "医疗融资计划",
             loadingFonts: "字体正在加载中，请稍后再试",
-            plan1Details: "计划1详情",
-            plan2Details: "计划2详情",
-            traditionalPoints: [
-              "逐年购买，住院赔钱，无事洗钱",
-              "年年加价，年轻时保费便宜",
-              "年长时保费递增，退休后保费高昂",
-              "消费性产品"
-            ],
-            financingPoints: [
-              "只需{{numberOfYears}}年完成终生医疗保卫",
-              "节省{{savingsPercentage}}%终生医疗保费${{savingsInMillions}}万",
-              "全面终生医疗保障至100岁",
-              "有事赔钱，无事储钱，户口长期增值"
-            ]
+            traditionalPoints: {
+              0: "逐年购买，住院赔钱，无事洗钱",
+              1: "年年加价，年轻时保费便宜",
+              2: "年长时保费递增，退休后保费高昂",
+              3: "消费性产品"
+            },
+            financingPoints: {
+              0: "只需{{premiumPaymentPeriod}}年完成终生医疗保卫",
+              1: "节省{{savingsPercentage}}% 终生医疗保费 HKD ${{savings}}",
+              2: "全面终生医疗保障至100岁",
+              3: "有事赔钱，无事储钱，户口长期增值"
+            },
+            disclaimer:"以上內容只供參考，並不作為任何投資買賣的意見或諮詢。"
           }
         }
       }

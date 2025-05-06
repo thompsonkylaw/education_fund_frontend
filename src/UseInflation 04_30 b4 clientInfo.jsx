@@ -25,9 +25,7 @@ const UseInflation = ({
   setFinalNotionalAmount,
   disabled,
   cashValueInfo,
-  setCashValueInfo,
-  clientInfo,
-  setClientInfo
+  setCashValueInfo
 }) => {
   const { t } = useTranslation();
   const [openLoginModal, setOpenLoginModal] = useState(false);
@@ -61,9 +59,7 @@ const UseInflation = ({
         setFinalNotionalAmount={setFinalNotionalAmount}
         disabled={disabled}
         cashValueInfo={cashValueInfo}
-        setCashValueInfo={setCashValueInfo}
-        clientInfo={clientInfo}
-        setClientInfo={setClientInfo}
+        setCashValueInfo ={setCashValueInfo}
       />
       
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, p: 2 }}>

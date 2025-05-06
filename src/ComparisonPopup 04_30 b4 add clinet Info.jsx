@@ -8,6 +8,7 @@ import autoTable from 'jspdf-autotable';
 import html2pdf from 'html2pdf.js';
 import { useTranslation } from 'react-i18next';
 
+// Number formatter for HKD values without decimal places
 const numberFormatter = new Intl.NumberFormat('en-US', {
   minimumFractionDigits: 0,
   maximumFractionDigits: 0,
@@ -29,10 +30,9 @@ const ComparisonPopup = ({
   numOfRowInOutputForm_1,
   plan1Inputs,
   plan2Inputs,
-  clientInfo,
-  cashValueInfo
+  clientInfo
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [fontRegularData, setFontRegularData] = useState(null);
   const [fontBoldData, setFontBoldData] = useState(null);
   const [fontsLoaded, setFontsLoaded] = useState(false);
@@ -78,37 +78,17 @@ const ComparisonPopup = ({
   const traditionalTotalCost = ageToAccMP[100] || 0;
 
   const finalNotionalAmountNum = finalNotionalAmount ? parseFloat(finalNotionalAmount.replace(/,/g, '')) : 0;
-  const financingTotalCost = numberOfYearAccMP + cashValueInfo.annual_premium * numberOfYears;
+  const financingTotalCost = numberOfYearAccMP + finalNotionalAmountNum * currencyRate;
 
   const savingsAmount = traditionalTotalCost - financingTotalCost;
   const savingsPercentage = traditionalTotalCost > 0 ? (savingsAmount / traditionalTotalCost) * 100 : 0;
-
-  let formattedSavings, formattedAccountValue1, formattedAccountValue2, formattedFinancingTotalCost, formattedTraditionalTotalCost;
-  if (i18n.language === 'en') {
-    const savingsInK = Math.round(savingsAmount / 1000);
-    formattedSavings = numberFormatter.format(savingsInK) + 'K';
-    const accountValue1InK = Math.round(currency1 / 1000);
-    formattedAccountValue1 = numberFormatter.format(accountValue1InK) + 'K';
-    const accountValue2InK = Math.round(currency2 / 1000);
-    formattedAccountValue2 = numberFormatter.format(accountValue2InK) + 'K';
-    const financingTotalCostInK = Math.round(financingTotalCost / 1000);
-    formattedFinancingTotalCost = numberFormatter.format(financingTotalCostInK) + 'K';
-    const traditionalTotalCostInK = Math.round(traditionalTotalCost / 1000);
-    formattedTraditionalTotalCost = numberFormatter.format(traditionalTotalCostInK) + 'K';
-  } else {
-    const savingsInMillions = Math.round(savingsAmount / 10000);
-    formattedSavings = numberFormatter.format(savingsInMillions) + (i18n.language === 'zh-CN' ? '万' : '萬');
-    const accountValue1InMillions = Math.round(currency1 / 10000);
-    formattedAccountValue1 = numberFormatter.format(accountValue1InMillions) + (i18n.language === 'zh-CN' ? '万' : '萬');
-    const accountValue2InMillions = Math.round(currency2 / 10000);
-    formattedAccountValue2 = numberFormatter.format(accountValue2InMillions) + (i18n.language === 'zh-CN' ? '万' : '萬');
-    const financingTotalCostInMillions = Math.round(financingTotalCost / 10000);
-    formattedFinancingTotalCost = numberFormatter.format(financingTotalCostInMillions) + (i18n.language === 'zh-CN' ? '万' : '萬');
-    const traditionalTotalCostInMillions = Math.round(traditionalTotalCost / 10000);
-    formattedTraditionalTotalCost = numberFormatter.format(traditionalTotalCostInMillions) + (i18n.language === 'zh-CN' ? '万' : '萬');
-  }
+  const savingsInMillions = savingsAmount / 10000;
 
   const formattedSavingsPercentage = numberFormatter.format(Math.round(savingsPercentage));
+  const formattedSavingsInMillions = numberFormatter.format(Math.round(savingsInMillions));
+  const formattedCurrency1 = numberFormatter.format(Math.round(currency1 || 0));
+  const formattedCurrency2 = numberFormatter.format(Math.round(currency2 || 0));
+  const formattedTotalCost = numberFormatter.format(Math.round(financingTotalCost));
 
   const getHongKongTimestamp = () => {
     const now = new Date();
@@ -149,71 +129,30 @@ const ComparisonPopup = ({
 
     doc.setFont('NotoSansCJKtc', 'normal');
 
-    let currentY = 15;
+    // Define starting Y for plan details tables
+    const startY = 15;
 
-    doc.setFontSize(12);
-    doc.setFont('NotoSansCJKtc', 'bold');
-
-    const pageWidth = 210;
-    const margin = 14;
-    const contentWidth = pageWidth - 2 * margin;
-    const fieldWidth = contentWidth / 3;
-
-    const x1 = margin;
-    const x2 = margin + fieldWidth;
-    const x3 = margin + 2 * fieldWidth;
-
-    doc.text(`${t('login.surname')}: ${clientInfo.surname || ''}`, x1, currentY);
-    doc.text(`${t('login.givenName')}: ${clientInfo.givenName || ''}`, x2, currentY);
-    doc.text(`${t('login.chineseName')}: ${clientInfo.chineseName || ''}`, x3, currentY);
-
-    currentY += 5;
-
-    const formattedFinalNotionalAmount = finalNotionalAmount
-      ? numberFormatter.format(parseFloat(finalNotionalAmount.replace(/,/g, '')))
-      : '0';
-
-    autoTable(doc, {
-      startY: currentY,
-      head: [
-        [
-          t('comparisonPopup.basicPlan'),
-          t('comparisonPopup.premiumPaymentPeriod'),
-          t('comparisonPopup.finalNotionalAmount'),
-        ],
-      ],
-      body: [
-        [
-          clientInfo.basicPlan || '',
-          clientInfo.premiumPaymentPeriod || '',
-          clientInfo.basicPlanCurrency == "美元" ? 'USD$' + formattedFinalNotionalAmount : 'HKD$' + formattedFinalNotionalAmount,
-        ],
-      ],
-      theme: 'grid',
-      styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
-      headStyles: { fontStyle: 'bold', fillColor: '#009739' },
-      margin: { left: 14, right: 14 },
-    });
-
-    currentY = doc.lastAutoTable.finalY + 5;
-
-    const planTablesStartY = currentY;
-
+    // Determine margins based on whether Plan 2 exists
     const plan1Margin = plan2Inputs ? { left: 14, right: 110 } : { left: 14, right: 14 };
     const plan2Margin = { left: 110, right: 14 };
 
+    // Add Plan 1 Details
     autoTable(doc, {
-      startY: planTablesStartY,
+      startY: startY,
       head: [[t('comparisonPopup.plan1Details'), '']],
       body: [
         [t('common.company'), plan1Inputs.company],
         [t('common.plan'), plan1Inputs.plan],
         [t('common.planCategory'), plan1Inputs.planCategory],
+        // [t('common.effectiveDate'), plan1Inputs.effectiveDate],
+        // [t('common.currency'), plan1Inputs.currency],
         [t('common.sexuality'), plan1Inputs.sexuality],
         [t('common.ward'), plan1Inputs.ward],
         [t('common.planOption'), plan1Inputs.planOption],
         [t('common.age'), plan1Inputs.age.toString()],
-        [t('common.numberOfYears'), clientInfo.premiumPaymentPeriod.toString()],
+        [t('common.numberOfYears'), plan1Inputs.numberOfYears.toString()],
+        // [t('common.inflationRate'), `${plan1Inputs.inflationRate}%`],
+        // [t('common.currencyRate'), plan1Inputs.currencyRate.toString()],
       ],
       theme: 'grid',
       styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
@@ -221,21 +160,26 @@ const ComparisonPopup = ({
       margin: plan1Margin,
     });
 
-    currentY = doc.lastAutoTable.finalY;
+    let currentY = doc.lastAutoTable.finalY;
 
+    // Add Plan 2 Details if available
     if (plan2Inputs) {
       autoTable(doc, {
-        startY: planTablesStartY,
+        startY: startY,
         head: [[t('comparisonPopup.plan2Details'), '']],
         body: [
           [t('common.company'), plan2Inputs.company],
           [t('common.plan'), plan2Inputs.plan],
           [t('common.planCategory'), plan2Inputs.planCategory],
+          // [t('common.effectiveDate'), plan2Inputs.effectiveDate],
+          // [t('common.currency'), plan2Inputs.currency],
           [t('common.sexuality'), plan2Inputs.sexuality],
           [t('common.ward'), plan2Inputs.ward],
           [t('common.planOption'), plan2Inputs.planOption],
           [t('common.age'), plan2Inputs.age.toString()],
-          [t('common.numberOfYears'), clientInfo.premiumPaymentPeriod.toString()],
+          [t('common.numberOfYears'), plan2Inputs.numberOfYears.toString()],
+          // [t('common.inflationRate'), `${plan2Inputs.inflationRate}%`],
+          // [t('common.currencyRate'), plan2Inputs.currencyRate.toString()],
         ],
         theme: 'grid',
         styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
@@ -245,21 +189,24 @@ const ComparisonPopup = ({
       currentY = Math.max(currentY, doc.lastAutoTable.finalY);
     }
 
+    // Add space after tables
     currentY += 5;
 
-    const titleY = currentY + 7;
-    const pointsY = titleY + 7;
+    // Proceed with the rest of the content
+    const titleY = currentY + 10;
+    const pointsY = titleY + 10;
     const cardY = titleY - 7;
 
     const leftX = 14;
     const rightX = 110;
     const textWidth = 80;
 
+    // Traditional insurance section
     doc.setDrawColor(42, 157, 143);
     doc.setLineWidth(0.5);
     const cardPadding = 5;
     const cardWidth = 85;
-    const cardHeight = 35;
+    const cardHeight = 50;
     const cardX = leftX + 5 - cardPadding;
     doc.rect(cardX, cardY, cardWidth, cardHeight);
 
@@ -270,16 +217,12 @@ const ComparisonPopup = ({
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
     doc.setFont('NotoSansCJKtc', 'normal');
-    const traditionalPoints = [
-      t('comparisonPopup.traditionalPoints.0'),
-      t('comparisonPopup.traditionalPoints.1', { traditionalTotalCost: formattedTraditionalTotalCost }),
-      t('comparisonPopup.traditionalPoints.2'),
-      t('comparisonPopup.traditionalPoints.3'),
-    ];
+    const traditionalPoints = t('comparisonPopup.traditionalPoints', { returnObjects: true });
     traditionalPoints.forEach((point, index) => {
-      doc.text(point, leftX + 2, pointsY + index * 8, { maxWidth: textWidth });
+      doc.text(point, leftX + 2, pointsY + index * 10, { maxWidth: textWidth });
     });
 
+    // Financing insurance section
     doc.setDrawColor(244, 162, 97);
     doc.rect(cardX + 96, cardY, cardWidth, cardHeight);
 
@@ -291,18 +234,17 @@ const ComparisonPopup = ({
     doc.setTextColor(0, 0, 0);
     doc.setFont('NotoSansCJKtc', 'normal');
     const financingPoints = [
-      t('comparisonPopup.financingPoints.0', { premiumPaymentPeriod: clientInfo.premiumPaymentPeriod }),
-      t('comparisonPopup.financingPoints.1', { savingsPercentage: formattedSavingsPercentage, savings: formattedSavings }),
-      i18n.language === 'zh-CN'
-        ? t('comparisonPopup.financingPoints.2')
-        : t('comparisonPopup.financingPoints.2', { age: age1, formattedAccountValue: formattedAccountValue1 }),
+      t('comparisonPopup.financingPoints.0', { numberOfYears }),
+      t('comparisonPopup.financingPoints.1', { savingsPercentage: formattedSavingsPercentage, savingsInMillions: formattedSavingsInMillions }),
+      t('comparisonPopup.financingPoints.2'),
       t('comparisonPopup.financingPoints.3'),
     ];
     financingPoints.forEach((point, index) => {
-      doc.text(point, rightX + 3, pointsY + index * 8, { maxWidth: textWidth });
+      doc.text(point, rightX + 3, pointsY + index * 10, { maxWidth: textWidth });
     });
 
-    const howItWorksY = pointsY + 25;
+    // How it works section
+    const howItWorksY = pointsY + 38;
     doc.setFillColor(15, 17, 28);
     doc.rect(14, howItWorksY, 182, 10, 'F');
     doc.setTextColor(255, 255, 255);
@@ -371,9 +313,8 @@ const ComparisonPopup = ({
     const table1FinalY = doc.lastAutoTable.finalY;
 
     const outputForm2Rows = [];
-    const firstRowEndAge = age + parseInt(clientInfo.premiumPaymentPeriod) - 1;
-    console.log("firstRowEndAge222",firstRowEndAge)
-    outputForm2Rows.push([`${age} - ${firstRowEndAge} ${t('common.yearsOld')}`, t('outputForm2.firstRowValue', { premiumPaymentPeriod: clientInfo.premiumPaymentPeriod, averageMonthly: numberFormatter.format(Math.round(financingTotalCost / clientInfo.premiumPaymentPeriod / 12)) })]);
+    const firstRowEndAge = age + numberOfYears - 1;
+    outputForm2Rows.push([`${age} - ${firstRowEndAge} ${t('common.yearsOld')}`, t('outputForm2.firstRowValue', { numberOfYears, averageMonthly: numberFormatter.format(Math.round(financingTotalCost / numberOfYears / 12)) })]);
 
     let lastRowLastAge = firstRowEndAge;
     while (lastRowLastAge < 100) {
@@ -405,36 +346,28 @@ const ComparisonPopup = ({
 
     const table2FinalY = doc.lastAutoTable.finalY;
 
-    const yPosition = Math.max(table1FinalY + 10, table2FinalY + 10) - 5;
+    const yPosition = Math.max(table1FinalY + 10, table2FinalY + 10);
 
     doc.setFont('NotoSansCJKtc', 'bold');
-    const currencyFormattedTraditionalTotalCost = numberFormatter.format(Math.round(traditionalTotalCost));
-    const currencyFormattedFinancingTotalCost = numberFormatter.format(Math.round(financingTotalCost));
-
-    doc.text(t('comparisonPopup.totalCost', { total: currencyFormattedTraditionalTotalCost }), leftX + 2, yPosition + 3);
-    doc.text(t('comparisonPopup.totalCost', { total: currencyFormattedFinancingTotalCost }), rightX + 2, yPosition + 3);
+    doc.text(t('comparisonPopup.totalCost', { total: numberFormatter.format(Math.round(traditionalTotalCost)) }), leftX + 2, yPosition + 3);
+    doc.text(t('comparisonPopup.totalCost', { total: formattedTotalCost }), rightX + 2, yPosition + 3);
 
     doc.setFont('NotoSansCJKtc', 'normal');
-    doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: '沒有價值' }), leftX + 2, yPosition + 11);
-    doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: '沒有價值' }), leftX + 2, yPosition + 18);
-    doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: formattedAccountValue1 }), rightX + 2, yPosition + 11);
-    doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: formattedAccountValue2 }), rightX + 2, yPosition + 18);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: '沒有價值' }), leftX + 2, yPosition + 13);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: '沒有價值' }), leftX + 2, yPosition + 20);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: formattedCurrency1 }), rightX + 2, yPosition + 13);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: formattedCurrency2 }), rightX + 2, yPosition + 20);
 
-    const pageHeight = 297;
-    const bottomMargin = 10;
-    const disclaimerY = pageHeight - bottomMargin;
-    doc.setFontSize(8);
-    doc.setFont('NotoSansCJKtc', 'normal');
-    doc.setTextColor(0, 0, 0);
-    doc.text(t('comparisonPopup.disclaimer'), pageWidth / 2, disclaimerY, { align: 'center', maxWidth: pageWidth - 2 * margin });
+    // const totalPages = doc.getNumberOfPages();
+    // for (let i = 1; i <= totalPages; i++) {
+    //   doc.setPage(i);
+    //   doc.setFontSize(10);
+    //   doc.setFont('NotoSansCJKtc', 'normal');
+    //   doc.text(t('comparisonPopup.page', { current: i, total: totalPages }), 190, 287, { align: 'right' });
+    // }
 
     const timestamp = getHongKongTimestamp();
-    const pdfBlob = doc.output('blob');
-    const pdfUrl = window.URL.createObjectURL(pdfBlob);
-    window.open(pdfUrl, '_blank');
-    setTimeout(() => {
-      window.URL.revokeObjectURL(pdfUrl);
-    }, 1000);
+    doc.save(`${t('comparisonPopup.downloadReport')}_${timestamp}.pdf`);
   };
 
   const generatePDFWithHtml2pdf = () => {
@@ -442,26 +375,21 @@ const ComparisonPopup = ({
     if (originalElement) {
       const clonedElement = originalElement.cloneNode(true);
       const wrapper = document.createElement('div');
+      const header = document.createElement('div');
+
+      header.style.textAlign = 'center';
+      header.style.fontSize = '24px';
+      header.style.marginBottom = '16px';
+      header.style.marginTop = '0';
+      header.textContent = t('comparisonPopup.title');
 
       wrapper.style.fontSize = '80%';
-      wrapper.style.marginTop = '0';
+      wrapper.style.marginTop = '-20px';
       wrapper.style.padding = '0';
       wrapper.style.position = 'relative';
+      wrapper.style.top = '-10px';
 
-      function wrapTextNodes(node) {
-        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {
-          const span = document.createElement('span');
-          span.className = 'shifted-text';
-          span.style.transform = 'translateY(-15px)';
-          span.style.display = 'inline';
-          span.textContent = node.textContent;
-          node.replaceWith(span);
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          Array.from(node.childNodes).forEach(child => wrapTextNodes(child));
-        }
-      }
-
-      wrapTextNodes(clonedElement);
+      wrapper.appendChild(header);
       wrapper.appendChild(clonedElement);
 
       clonedElement.style.margin = '0';
@@ -469,25 +397,13 @@ const ComparisonPopup = ({
       clonedElement.style.boxSizing = 'border-box';
 
       const timestamp = getHongKongTimestamp();
-      setTimeout(() => {
-        const shiftInPoints = 10;
-        const pointsPerInch = 72;
-        const shiftInInches = shiftInPoints / pointsPerInch;
-        const adjustedTopMargin = 0.1 - shiftInInches;
-
-        html2pdf().from(wrapper).set({
-          margin: [0.5, 0.2, 0.2, 0.2],
-          image: { type: 'jpeg', quality: 1 },
-          html2canvas: { scale: 2, y: 0 },
-          jsPDF: { unit: 'in', format: 'a3', orientation: 'portrait' }
-        }).output('blob').then((pdfBlob) => {
-          const pdfUrl = window.URL.createObjectURL(pdfBlob);
-          window.open(pdfUrl, '_blank');
-          setTimeout(() => {
-            window.URL.revokeObjectURL(pdfUrl);
-          }, 1000);
-        });
-      }, 1000);
+      html2pdf().from(wrapper).set({
+        filename: `${t('comparisonPopup.downloadReport')}_${timestamp}.pdf`,
+        margin: [0.1, 0.2, 0.2, 0.2],
+        image: { type: 'jpeg', quality: 2 },
+        html2canvas: { scale: 0.8, y: 0 },
+        jsPDF: { unit: 'in', format: 'a3', orientation: 'portrait' },
+      }).save();
     }
   };
 
@@ -502,6 +418,9 @@ const ComparisonPopup = ({
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="lg">
       <DialogTitle>
+        {/* <IconButton aria-label="close" onClick={onClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
+          <CloseIcon />
+        </IconButton> */}
       </DialogTitle>
       <DialogContent>
         <div id="pdf-content">
@@ -510,23 +429,20 @@ const ComparisonPopup = ({
               <Box sx={{ backgroundColor: 'rgb(42, 157, 143)', color: 'white', '& h3, & h5': { color: 'white' }, p: 2, position: 'relative' }}>
                 <img src="/cross.png" alt="Cross" style={{ position: 'absolute', top: 20, right: 8, width: 50, height: 50 }} />
                 <Typography variant="h3">{t('comparisonPopup.traditionalMedicalPremium')}</Typography>
-                <Typography variant="h5">{t('comparisonPopup.traditionalPoints.0')}</Typography>
-                <Typography variant="h5">{t('comparisonPopup.traditionalPoints.1', { traditionalTotalCost: formattedTraditionalTotalCost })}</Typography>
-                <Typography variant="h5">{t('comparisonPopup.traditionalPoints.2')}</Typography>
-                <Typography variant="h5">{t('comparisonPopup.traditionalPoints.3')}</Typography>
+                {t('comparisonPopup.traditionalPoints', { returnObjects: true }).map((point, index) => (
+                  <Typography variant="h5" key={index}>{point}</Typography>
+                ))}
               </Box>
             </Grid>
             <Grid item xs={6}>
               <Box sx={{ backgroundColor: 'rgb(244, 162, 97)', p: 2, position: 'relative' }}>
                 <img src="/tick.png" alt="Tick" style={{ position: 'absolute', top: 20, right: 8, width: 50, height: 50 }} />
                 <Typography variant="h3">{t('comparisonPopup.financingMedicalPremium')}</Typography>
-                <Typography variant="h5">{t('comparisonPopup.financingPoints.0', { premiumPaymentPeriod: clientInfo.premiumPaymentPeriod })}</Typography>
-                <Typography variant="h5">{t('comparisonPopup.financingPoints.1', { savingsPercentage: formattedSavingsPercentage, savings: formattedSavings })}</Typography>
-                {i18n.language === 'zh-CN' ? (
-                  <Typography variant="h5">{t('comparisonPopup.financingPoints.2')}</Typography>
-                ) : (
-                  <Typography variant="h5">{t('comparisonPopup.financingPoints.2', { age: age1, formattedAccountValue: formattedAccountValue1 })}</Typography>
-                )}
+                <Typography variant="h5">{t('comparisonPopup.financingPoints.0', { numberOfYears })}</Typography>
+                <Typography variant="h5">
+                  {t('comparisonPopup.financingPoints.1', { savingsPercentage: formattedSavingsPercentage, savingsInMillions: formattedSavingsInMillions })}
+                </Typography>
+                <Typography variant="h5">{t('comparisonPopup.financingPoints.2')}</Typography>
                 <Typography variant="h5">{t('comparisonPopup.financingPoints.3')}</Typography>
               </Box>
             </Grid>
@@ -543,28 +459,24 @@ const ComparisonPopup = ({
             <Grid item xs={6}>
               <OutputForm_2
                 age={age}
-                numberOfYears={clientInfo.premiumPaymentPeriod}
+                numberOfYears={numberOfYears}
                 numberOfYearAccMP={numberOfYearAccMP}
                 finalNotionalAmount={finalNotionalAmount}
                 currencyRate={currencyRate}
                 fontSizeMultiplier={1.5}
                 numOfRowInOutputForm_1={numOfRowInOutputForm_1}
-                cashValueInfo={cashValueInfo}
               />
-              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age1, value: formattedAccountValue1 })}</Typography>
-              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age2, value: formattedAccountValue2 })}</Typography>
+              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age1, value: formattedCurrency1 })}</Typography>
+              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age2, value: formattedCurrency2 })}</Typography>
             </Grid>
           </Grid>
-          <Box sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="h6">{t('comparisonPopup.disclaimer')}</Typography>
-          </Box>
         </div>
       </DialogContent>
       <DialogActions>
-        {/* <FormControlLabel
+        <FormControlLabel
           control={<Switch checked={isJsPDFEnabled} onChange={(e) => setIsJsPDFEnabled(e.target.checked)} />}
           label={t('comparisonPopup.useHtml')}
-        /> */}
+        />
         <div className="pdf-button-container">
           <button
             className="pdf-button"

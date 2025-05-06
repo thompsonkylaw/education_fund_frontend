@@ -71,17 +71,7 @@ const App = () => {
     age_1: 65,
     age_2: 85,
     age_1_cash_value: 0,
-    age_2_cash_value: 0,
-    annual_premium: 0
-  });
-  const [clientInfo, setClientInfo] = useState({
-    surname: "VIP",
-    givenName: "VIP",
-    chineseName: "",
-    basicPlan: '宏摯傳承保障計劃(GS)',
-    // basicPlan: '赤霞珠終身壽險計劃2 基本(LV2)',
-    premiumPaymentPeriod: '15',
-    basicPlanCurrency: '美元'
+    age_2_cash_value: 0
   });
 
   // Save appBarColor to localStorage
@@ -126,7 +116,8 @@ const App = () => {
           setError(null);
           const serverURL = IsProduction
             ? 'https://fastapi-production-a20ab.up.railway.app'
-            : 'http://localhost:9003';
+            : 'http://localhost:9002';
+          // console.log(plan1Inputs.planFileName);
           const response = await axios.post(serverURL + '/getData', {
             company: plan1Inputs.company,
             planFileName: plan1Inputs.planFileName,
@@ -157,7 +148,7 @@ const App = () => {
             setError(null);
             const serverURL = IsProduction
               ? 'https://fastapi-production-a20ab.up.railway.app'
-              : 'http://localhost:9003';
+              : 'http://localhost:9002';
             const response = await axios.post(serverURL + '/getData', {
               company: plan2Inputs.company,
               planFileName: plan2Inputs.planFileName,
@@ -358,9 +349,7 @@ const App = () => {
                 setFinalNotionalAmount={setFinalNotionalAmount}
                 disabled={finalNotionalAmount !== null}
                 cashValueInfo={cashValueInfo}
-                setCashValueInfo={setCashValueInfo}
-                clientInfo={clientInfo}
-                setClientInfo={setClientInfo}
+                setCashValueInfo = {setCashValueInfo}
               />
             </Card>
             <Card elevation={3} sx={{ mt: 2, p: 2 }}>
@@ -373,17 +362,17 @@ const App = () => {
             </Card>
             <Card elevation={3} sx={{ mt: 2, p: 2 }}>
               <OutputForm_2
-                numberOfYears={clientInfo.premiumPaymentPeriod}
+                numberOfYears={plan1Inputs.numberOfYears}
                 numberOfYearAccMP={numberOfYearAccMP}
                 finalNotionalAmount={finalNotionalAmount}
                 age={plan1Inputs.age}
                 currencyRate={plan1Inputs.currencyRate}
                 numOfRowInOutputForm_1={numOfRowInOutputForm_1}
-                cashValueInfo={cashValueInfo}
               />
             </Card>
             {finalNotionalAmount && (
-                <Card elevation={3} sx={{ mt: 2, p: 2 }}>
+            
+              <Card elevation={3} sx={{ mt: 2, p: 2 }}>
                 <OutputForm_3
                   processedData={processedData}
                   numberOfYears={plan1Inputs.numberOfYears}
@@ -394,9 +383,8 @@ const App = () => {
                   setFinalNotionalAmount={setFinalNotionalAmount}
                   numOfRowInOutputForm_1={numOfRowInOutputForm_1}
                   cashValueInfo={cashValueInfo}
-                  plan1Inputs={plan1Inputs}
-                  plan2Inputs={plan2Inputs}
-                  clientInfo={clientInfo}
+                  plan1Inputs = {plan1Inputs}
+                  plan2Inputs = {plan2Inputs}
                 />
               </Card>
             )}

@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableFooter, Paper, Typography } from '@mui/material';
 
-const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount, currencyRate, numOfRowInOutputForm_1, fontSizeMultiplier = 1 }) => {
+const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmount, currencyRate, numOfRowInOutputForm_1, fontSizeMultiplier = 1,cashValueInfo }) => {
   const { t } = useTranslation();
 
   if (finalNotionalAmount === null) {
@@ -11,7 +11,9 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
 
   // const finalNotionalAmountNum = finalNotionalAmount ? parseFloat(finalNotionalAmount) : 0;
   const finalNotionalAmountNum = finalNotionalAmount ? parseFloat(finalNotionalAmount.replace(/,/g, '')) : 0;
-  const totalCost = numberOfYearAccMP + finalNotionalAmountNum * currencyRate;
+  // const totalCost = numberOfYearAccMP + finalNotionalAmountNum * currencyRate;
+  const totalCost = numberOfYearAccMP +  cashValueInfo.annual_premium * numberOfYears;
+  
   const averageMonthly = totalCost / numberOfYears / 12;
 
   const formatter = new Intl.NumberFormat('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
@@ -27,8 +29,9 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
   // console.log("formattedAverageMonthly",formattedAverageMonthly);
 
   const rows = [];
-  const firstRowEndAge = age + numberOfYears - 1;
-  const firstRowValue = t('outputForm2.firstRowValue', { numberOfYears, averageMonthly: formattedAverageMonthly });
+  const firstRowEndAge = parseInt(age) + parseInt(numberOfYears) - 1;
+  console.log("firstRowEndAge111",firstRowEndAge)
+  const firstRowValue = t('outputForm2.firstRowValue', { premiumPaymentPeriod: numberOfYears, averageMonthly: formattedAverageMonthly });
   rows.push({
     ageRange: `${age} - ${firstRowEndAge} ${t('common.yearsOld')}`,
     value: firstRowValue,

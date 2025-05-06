@@ -78,6 +78,7 @@ const ComparisonPopup = ({
   const traditionalTotalCost = ageToAccMP[100] || 0;
 
   const finalNotionalAmountNum = finalNotionalAmount ? parseFloat(finalNotionalAmount.replace(/,/g, '')) : 0;
+  // const financingTotalCost = numberOfYearAccMP + finalNotionalAmountNum * currencyRate;
   const financingTotalCost = numberOfYearAccMP + cashValueInfo.annual_premium * numberOfYears;
 
   const savingsAmount = traditionalTotalCost - financingTotalCost;
@@ -429,12 +430,7 @@ const ComparisonPopup = ({
     doc.text(t('comparisonPopup.disclaimer'), pageWidth / 2, disclaimerY, { align: 'center', maxWidth: pageWidth - 2 * margin });
 
     const timestamp = getHongKongTimestamp();
-    const pdfBlob = doc.output('blob');
-    const pdfUrl = window.URL.createObjectURL(pdfBlob);
-    window.open(pdfUrl, '_blank');
-    setTimeout(() => {
-      window.URL.revokeObjectURL(pdfUrl);
-    }, 1000);
+    doc.save(`${t('comparisonPopup.downloadReport')}_${timestamp}.pdf`);
   };
 
   const generatePDFWithHtml2pdf = () => {
@@ -442,52 +438,58 @@ const ComparisonPopup = ({
     if (originalElement) {
       const clonedElement = originalElement.cloneNode(true);
       const wrapper = document.createElement('div');
-
+  
       wrapper.style.fontSize = '80%';
       wrapper.style.marginTop = '0';
       wrapper.style.padding = '0';
       wrapper.style.position = 'relative';
-
-      function wrapTextNodes(node) {
-        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {
-          const span = document.createElement('span');
-          span.className = 'shifted-text';
-          span.style.transform = 'translateY(-15px)';
-          span.style.display = 'inline';
-          span.textContent = node.textContent;
-          node.replaceWith(span);
-        } else if (node.nodeType === Node.ELEMENT_NODE) {
-          Array.from(node.childNodes).forEach(child => wrapTextNodes(child));
-        }
+      
+      // Function to wrap text nodes in spans
+    function wrapTextNodes(node) {
+      if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {
+        const span = document.createElement('span');
+        span.className = 'shifted-text';
+        span.style.transform = 'translateY(-15px)';
+        span.style.display = 'inline'; // Ensure inline behavior
+        span.textContent = node.textContent;
+        node.replaceWith(span);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        // Process all child nodes, including those in tables
+        Array.from(node.childNodes).forEach(child => wrapTextNodes(child));
       }
+    }
 
-      wrapTextNodes(clonedElement);
+    // Apply text wrapping to cloned element only (not footer)
+    wrapTextNodes(clonedElement);
       wrapper.appendChild(clonedElement);
-
+  
+      // const footer = document.createElement('div');
+      // footer.style.textAlign = 'center';
+      // footer.style.fontSize = '20px';
+      // footer.style.marginTop = '20px';
+      // footer.textContent = t('comparisonPopup.disclaimer');
+      // wrapper.appendChild(footer);
+  
       clonedElement.style.margin = '0';
       clonedElement.style.padding = '0';
       clonedElement.style.boxSizing = 'border-box';
-
+  
       const timestamp = getHongKongTimestamp();
       setTimeout(() => {
         const shiftInPoints = 10;
         const pointsPerInch = 72;
         const shiftInInches = shiftInPoints / pointsPerInch;
         const adjustedTopMargin = 0.1 - shiftInInches;
-
+      
         html2pdf().from(wrapper).set({
-          margin: [0.5, 0.2, 0.2, 0.2],
+          filename: `${t('comparisonPopup.downloadReport')}_Simple_${timestamp}.pdf`,
+          // margin: [adjustedTopMargin, 0.2, 0.2, 0.2], // Compensate for 10px shift
+          margin: [0.5, 0.2, 0.2, 0.2], // Compensate for 10px shift
           image: { type: 'jpeg', quality: 1 },
-          html2canvas: { scale: 2, y: 0 },
+          html2canvas: { scale: 2, y: 0 }, // Optionally adjust y: -10 if margin fix isn’t enough
           jsPDF: { unit: 'in', format: 'a3', orientation: 'portrait' }
-        }).output('blob').then((pdfBlob) => {
-          const pdfUrl = window.URL.createObjectURL(pdfBlob);
-          window.open(pdfUrl, '_blank');
-          setTimeout(() => {
-            window.URL.revokeObjectURL(pdfUrl);
-          }, 1000);
-        });
-      }, 1000);
+        }).save();
+      }, 1000); // Wait 1 second
     }
   };
 
@@ -556,15 +558,17 @@ const ComparisonPopup = ({
             </Grid>
           </Grid>
           <Box sx={{ p: 2, textAlign: 'center' }}>
-            <Typography variant="h6">{t('comparisonPopup.disclaimer')}</Typography>
-          </Box>
+        <Typography variant="h6">{t('comparisonPopup.disclaimer')}</Typography>
+      </Box>
         </div>
       </DialogContent>
+      
+      
       <DialogActions>
-        {/* <FormControlLabel
+        <FormControlLabel
           control={<Switch checked={isJsPDFEnabled} onChange={(e) => setIsJsPDFEnabled(e.target.checked)} />}
           label={t('comparisonPopup.useHtml')}
-        /> */}
+        />
         <div className="pdf-button-container">
           <button
             className="pdf-button"

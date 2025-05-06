@@ -59,7 +59,7 @@ function Login({
   clientInfo,
   setClientInfo
 }) {
-  const IsProduction = false;
+  const IsProduction = true;
   
   const { t } = useTranslation();
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
@@ -164,7 +164,11 @@ function Login({
       eventSource.onmessage = (event) => {
         setLogs(prevLogs => {
           const updatedLogs = [...prevLogs, event.data];
-          localStorage.setItem('loginLogs', JSON.stringify(updatedLogs));
+          // Debounce localStorage write
+          clearTimeout(window.logsSaveTimeout);
+          window.logsSaveTimeout = setTimeout(() => {
+            localStorage.setItem('loginLogs', JSON.stringify(updatedLogs));
+          }, 1000);
           return updatedLogs;
         });
       };
