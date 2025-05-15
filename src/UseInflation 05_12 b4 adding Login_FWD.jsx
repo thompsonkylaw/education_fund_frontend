@@ -10,7 +10,7 @@ import {
   Typography
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import Login from './Login';
+import Login from './Login_Manulife';
 
 const UseInflation = ({ 
   inflationRate,
@@ -24,7 +24,11 @@ const UseInflation = ({
   numberOfYearAccMP,
   setFinalNotionalAmount,
   disabled,
-  cashValueInfo
+  cashValueInfo,
+  setCashValueInfo,
+  clientInfo,
+  setClientInfo,
+  company
 }) => {
   const { t } = useTranslation();
   const [openLoginModal, setOpenLoginModal] = useState(false);
@@ -57,6 +61,11 @@ const UseInflation = ({
         useInflation={useInflation}
         setFinalNotionalAmount={setFinalNotionalAmount}
         disabled={disabled}
+        cashValueInfo={cashValueInfo}
+        setCashValueInfo={setCashValueInfo}
+        clientInfo={clientInfo}
+        setClientInfo={setClientInfo}
+        company={company}
       />
       
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, p: 2 }}>

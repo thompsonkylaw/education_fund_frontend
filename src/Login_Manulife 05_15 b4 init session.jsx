@@ -1,3 +1,4 @@
+//b4 init session
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -25,7 +26,8 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogActions
+  DialogActions,
+  FormHelperText
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
@@ -52,10 +54,15 @@ function Login({
   numberOfYearAccMP,
   useInflation,
   setFinalNotionalAmount,
-  disabled
+  disabled,
+  cashValueInfo,
+  setCashValueInfo,
+  clientInfo,
+  setClientInfo,
+  company
 }) {
   const IsProduction = false;
-
+  
   const { t } = useTranslation();
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
   const [username, setUsername] = useState('');
@@ -70,18 +77,12 @@ function Login({
   const [pdfDownloadLink, setPdfDownloadLink] = useState('');
   const [isCorporateCustomer, setIsCorporateCustomer] = useState(false);
   const [isPolicyHolder, setIsPolicyHolder] = useState(true);
-  const [surname, setSurname] = IsProduction ? useState('') : useState('Chann');
-  const [givenName, setGivenName] = IsProduction ? useState("") : useState('Peterrr');
-  const [chineseName, setChineseName] = useState('');
   const [dob, setDob] = useState('');
   const [insuranceAge, setInsuranceAge] = useState('40');
   const [gender, setGender] = useState('Male');
   const [isSmoker, setIsSmoker] = useState(false);
   const [planCategory, setPlanCategory] = useState('全部');
-  const [basicPlan, setBasicPlan] = useState('宏摯傳承保障計劃(GS)');
-  const [premiumPaymentPeriod, setPremiumPaymentPeriod] = useState('15');
   const [worryFreeOption, setWorryFreeOption] = useState('否');
-  const [currency, setCurrency] = useState('美元');
   const [notionalAmount, setNotionalAmount] = useState('20000');
   const [premiumPaymentMethod, setPremiumPaymentMethod] = useState('每年');
   const [getPromotionalDiscount, setGetPromotionalDiscount] = useState(true);
@@ -107,6 +108,12 @@ function Login({
   const [remainingTimeNewNotional, setRemainingTimeNewNotional] = useState(180);
   const [isTimerRunningNewNotional, setIsTimerRunningNewNotional] = useState(false);
   const newNotionalInputRef = useRef(null);
+  const eventSourceRef = useRef(null);
+  const reconnectIntervalRef = useRef(null);
+
+  const ageOptions = Array.from({ length: 100 }, (_, i) => i + 1);
+  const [selectedAge1, setSelectedAge1] = useState(cashValueInfo?.age_1 || 1);
+  const [selectedAge2, setSelectedAge2] = useState(cashValueInfo?.age_2 || 1);
 
   useEffect(() => {
     if (inputs.age && inputs.numberOfYears) {
@@ -117,17 +124,10 @@ function Login({
 
   useEffect(() => {
     if (step === 'success' && pdfDownloadLink) {
-      // Uncomment to enable auto-download
-      // const link = document.createElement('a');
-      // link.href = pdfDownloadLink;
-      // link.download = 'proposal.pdf';
-      // document.body.appendChild(link);
-      // link.click();
-      // document.body.removeChild(link);
     }
   }, [step, pdfDownloadLink]);
 
-  const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:9002';
+  const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:9003';
 
   useEffect(() => {
     if (open) {
@@ -162,9 +162,14 @@ function Login({
       });
   };
 
-  useEffect(() => {
+  const connectSSE = () => {
     if (sessionId) {
       const eventSource = new EventSource(`${serverURL}/logs/${sessionId}`);
+      eventSourceRef.current = eventSource;
+      eventSource.onopen = () => {
+        console.log("SSE connection opened");
+        clearInterval(reconnectIntervalRef.current);
+      };
       eventSource.onmessage = (event) => {
         setLogs(prevLogs => {
           const updatedLogs = [...prevLogs, event.data];
@@ -175,12 +180,59 @@ function Login({
       eventSource.onerror = (error) => {
         console.error("SSE error:", error);
         eventSource.close();
-      };
-      return () => {
-        eventSource.close();
+        console.log("SSE connection closed due to error");
+        startReconnectTimer();
       };
     }
+  };
+
+  const startReconnectTimer = () => {
+    reconnectIntervalRef.current = setInterval(() => {
+      if (eventSourceRef.current && eventSourceRef.current.readyState === EventSource.CLOSED) {
+        console.log("Attempting to reconnect SSE...");
+        connectSSE();
+      }
+    }, 5000);
+  };
+
+  useEffect(() => {
+    connectSSE();
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        console.log("SSE connection closed on cleanup");
+      }
+      clearInterval(reconnectIntervalRef.current);
+    };
   }, [sessionId]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        if (eventSourceRef.current && eventSourceRef.current.readyState === EventSource.CLOSED) {
+          console.log("Reconnecting SSE on visibility change");
+          connectSSE();
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      if (eventSourceRef.current && eventSourceRef.current.readyState === EventSource.CLOSED) {
+        console.log("Reconnecting SSE on focus");
+        connectSSE();
+      }
+    };
+    window.addEventListener('focus', handleFocus);
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
 
   useEffect(() => {
     if (logRef.current) {
@@ -317,22 +369,31 @@ function Login({
           inputs,
           totalAccumulatedMP: numberOfYearAccMP,
         },
+        cashValueInfo: {
+          age_1: selectedAge1,
+          age_2: selectedAge2,
+          age_1_cash_value: 0,
+          age_2_cash_value: 0,
+          annual_premium: 0
+        },
         formData: {
           isCorporateCustomer,
           isPolicyHolder,
-          surname,
-          givenName,
-          chineseName,
+          surname: clientInfo.surname,
+          givenName: clientInfo.givenName,
+          chineseName: clientInfo.chineseName,
           insuranceAge,
           gender,
           isSmoker,
-          basicPlan,
-          currency, 
+          basicPlan: clientInfo.basicPlan,
+          currency: clientInfo.basicPlanCurrency, 
           notionalAmount,
-          premiumPaymentPeriod,
+          premiumPaymentPeriod: clientInfo.premiumPaymentPeriod,
           premiumPaymentMethod,
           useInflation,
           proposalLanguage,
+          selectedAge1,
+          selectedAge2,
         },
       });
       if (response.data.status === 'otp_failed') {
@@ -343,7 +404,13 @@ function Login({
         setRemainingTimeNewNotional(180);
         setIsTimerRunningNewNotional(true);
       } else if (response.data.status === 'success') {
-        setPdfDownloadLink(response.data.pdf_link);
+        setCashValueInfo({
+          age_1: selectedAge1,
+          age_2: selectedAge2,
+          age_1_cash_value: response.data.age_1_cash_value,
+          age_2_cash_value: response.data.age_2_cash_value,
+          annual_premium: response.data.annual_premium
+        });
         setStep('success');
         setFinalNotionalAmount(notionalAmount);
       }
@@ -368,7 +435,12 @@ function Login({
         setRemainingTimeNewNotional(180);
         setIsTimerRunningNewNotional(true);
       } else if (response.data.status === 'success') {
-        setPdfDownloadLink(response.data.pdf_link);
+        setCashValueInfo(prev => ({
+          ...prev,
+          age_1_cash_value: response.data.age_1_cash_value,
+          age_2_cash_value: response.data.age_2_cash_value,
+          annual_premium: response.data.annual_premium
+        }));
         setStep('success');
         setFinalNotionalAmount(newNotionalAmount);
       }
@@ -387,13 +459,13 @@ function Login({
   };
 
   useEffect(() => {
-    if (basicPlan && premiumPaymentPeriodOptions[basicPlan]) {
-      setAvailablePaymentPeriods(premiumPaymentPeriodOptions[basicPlan]);
+    if (clientInfo.basicPlan && clientInfo.basicPlanCurrency && premiumPaymentPeriodOptions[clientInfo.basicPlan]) {
+      setAvailablePaymentPeriods(premiumPaymentPeriodOptions[clientInfo.basicPlan]);
     } else {
       setAvailablePaymentPeriods([]);
     }
-    setPremiumPaymentPeriod('');
-  }, [basicPlan]);
+    setClientInfo(prev => ({ ...prev, premiumPaymentPeriod: '' }));
+  }, [clientInfo.basicPlan, clientInfo.basicPlanCurrency, premiumPaymentPeriodOptions, setClientInfo]);
 
   const numberFormatter = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,
@@ -441,6 +513,8 @@ function Login({
     'en': t('login.languageEn'),
   };
 
+  const premiumPeriodError = clientInfo.premiumPaymentPeriod && parseInt(clientInfo.premiumPaymentPeriod, 10) !== inputs.numberOfYears;
+
   return (
     <Modal
       open={open}
@@ -475,8 +549,8 @@ function Login({
                     <TextField
                       id="input_text_field_7"
                       label={<>{t('login.surname')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                      value={surname}
-                      onChange={(e) => setSurname(e.target.value)}
+                      value={clientInfo.surname}
+                      onChange={(e) => setClientInfo(prev => ({ ...prev, surname: e.target.value }))}
                       required
                       fullWidth
                       disabled={loading || step === 'otp' || disabled}
@@ -488,8 +562,8 @@ function Login({
                     <TextField
                       id="input_text_field_1"
                       label={<>{t('login.givenName')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                      value={givenName}
-                      onChange={(e) => setGivenName(e.target.value)}
+                      value={clientInfo.givenName}
+                      onChange={(e) => setClientInfo(prev => ({ ...prev, givenName: e.target.value }))}
                       required
                       fullWidth
                       disabled={loading || step === 'otp' || disabled}
@@ -503,8 +577,8 @@ function Login({
                     <TextField
                       id="input_text_field_2"
                       label={t('login.chineseName')}
-                      value={chineseName}
-                      onChange={(e) => setChineseName(e.target.value)}
+                      value={clientInfo.chineseName}
+                      onChange={(e) => setClientInfo(prev => ({ ...prev, chineseName: e.target.value }))}
                       fullWidth
                       disabled={loading || step === 'otp' || disabled}
                       inputProps={{ maxLength: 10 }}
@@ -717,8 +791,8 @@ function Login({
                         {t('login.basicPlan')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
-                        value={basicPlan}
-                        onChange={(e) => setBasicPlan(e.target.value)}
+                        value={clientInfo.basicPlan}
+                        onChange={(e) => setClientInfo(prev => ({ ...prev, basicPlan: e.target.value }))}
                         label={<>{t('login.basicPlan')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                         disabled={loading || step === 'otp' || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
@@ -732,15 +806,15 @@ function Login({
                     </FormControl>
                   </div>
                   <div>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={premiumPeriodError}>
                       <InputLabel sx={{ fontWeight: '500' }}>
                         {t('login.premiumPaymentPeriod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
-                        value={premiumPaymentPeriod}
-                        onChange={(e) => setPremiumPaymentPeriod(e.target.value)}
+                        value={clientInfo.premiumPaymentPeriod}
+                        onChange={(e) => setClientInfo(prev => ({ ...prev, premiumPaymentPeriod: e.target.value }))}
                         label={<>{t('login.premiumPaymentPeriod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp' || !basicPlan}
+                        disabled={loading || step === 'otp' || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                         required
                       >
@@ -750,6 +824,11 @@ function Login({
                           </MenuItem>
                         ))}
                       </Select>
+                      {premiumPeriodError && (
+                        <FormHelperText error>
+                          {t('login.premiumPeriodError')}
+                        </FormHelperText>
+                      )}
                     </FormControl>
                   </div>
                 </Box>
@@ -761,8 +840,8 @@ function Login({
                         {t('login.currency')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
-                        value={currency}
-                        onChange={(e) => setCurrency(e.target.value)}
+                        value={clientInfo.basicPlanCurrency}
+                        onChange={(e) => setClientInfo(prev => ({ ...prev, basicPlanCurrency: e.target.value }))}
                         label={<>{t('login.currency')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                         disabled={loading || step === 'otp' || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
@@ -786,7 +865,7 @@ function Login({
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
-                            {currency === '美元' ? 'USD' : 'HKD'}
+                            {clientInfo.basicPlanCurrency === '美元' ? 'USD' : 'HKD'}
                           </InputAdornment>
                         ),
                       }}
@@ -879,7 +958,7 @@ function Login({
               </div>
 
               <div className="login-fields margin-top-20" style={{ marginTop: '30px' }}>
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 2 }}>
                   <div>
                     <TextField
                       id="input_text_field_4"
@@ -889,7 +968,64 @@ function Login({
                       onChange={(e) => setUrl(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp' || disabled}
+                      disabled={true}
+                      sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
+                      InputLabelProps={{ style: { fontWeight: '500' } }}
+                    />
+                  </div>
+                  <div>
+                    <FormControl fullWidth>
+                      <InputLabel sx={{ fontWeight: '500' }}>
+                        {t('login.age1')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                      </InputLabel>
+                      <Select
+                        value={selectedAge1}
+                        onChange={(e) => setSelectedAge1(e.target.value)}
+                        label={<>{t('login.age1')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        disabled={loading || step === 'otp' || disabled}
+                        sx={{ backgroundColor: 'white', color: 'black' }}
+                        inputProps={{ id: 'input_text_field_15' }}
+                      >
+                        {ageOptions.map((age) => (
+                          <MenuItem key={age} value={age}>
+                            {age}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <div>
+                    <FormControl fullWidth>
+                      <InputLabel sx={{ fontWeight: '500' }}>
+                        {t('login.age2')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
+                      </InputLabel>
+                      <Select
+                        value={selectedAge2}
+                        onChange={(e) => setSelectedAge2(e.target.value)}
+                        label={<>{t('login.age2')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        disabled={loading || step === 'otp' || disabled}
+                        sx={{ backgroundColor: 'white', color: 'black' }}
+                        inputProps={{ id: 'input_text_field_16' }}
+                      >
+                        {ageOptions.map((age) => (
+                          <MenuItem key={age} value={age}>
+                            {age}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </div>
+                </Box>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+                  <div>
+                    <TextField
+                      id="input_text_field_6"
+                      label={<>{t('login.username')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                      value={username}
+                      onChange={(e) => !IsProduction && setUsername(e.target.value)}
+                      required
+                      fullWidth
+                      disabled={loading || step === 'otp' || IsProduction}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -904,19 +1040,6 @@ function Login({
                       required
                       fullWidth
                       disabled={loading || step === 'otp' || disabled}
-                      sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
-                      InputLabelProps={{ style: { fontWeight: '500' } }}
-                    />
-                  </div>
-                  <div>
-                    <TextField
-                      id="input_text_field_6"
-                      label={<>{t('login.username')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                      value={username}
-                      onChange={(e) => !IsProduction && setUsername(e.target.value)}
-                      required
-                      fullWidth
-                      disabled={loading || step === 'otp' || IsProduction}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -971,10 +1094,10 @@ function Login({
                   type="submit"
                   variant="contained"
                   fullWidth
-                  disabled={loading || (IsProduction && !username) || disabled}
+                  disabled={loading || (IsProduction && !username) || disabled || premiumPeriodError}
                   sx={{ 
                     padding: '12px 24px', 
-                    backgroundColor: (loading || (IsProduction && !username)) ? '#ccc' : '#10740AFF', 
+                    backgroundColor: (loading || (IsProduction && !username) || disabled || premiumPeriodError) ? '#ccc' : '#10740AFF', 
                     '&:hover': { backgroundColor: '#0d5f08' } 
                   }}
                 >
@@ -1035,7 +1158,7 @@ function Login({
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
-                    {currency === '美元' ? 'USD' : 'HKD'}
+                    {clientInfo.basicPlanCurrency === '美元' ? 'USD' : 'HKD'}
                   </InputAdornment>
                 ),
                 inputMode: 'decimal',

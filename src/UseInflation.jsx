@@ -10,7 +10,15 @@ import {
   Typography
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
-import Login from './Login';
+import Login_Manulife from './Login_Manulife';
+import Login_FWD from './Login_FWD';
+import Login_AXA from './Login_AXA';
+import Login_Prudential from './Login_Prudential';
+import Login_Chubb from './Login_Chubb';
+import Login_Sunlife from './Login_Sunlife';
+import Login_AIA from './Login_AIA';
+
+
 
 const UseInflation = ({ 
   inflationRate,
@@ -27,10 +35,25 @@ const UseInflation = ({
   cashValueInfo,
   setCashValueInfo,
   clientInfo,
-  setClientInfo
+  setClientInfo,
+  company
 }) => {
   const { t } = useTranslation();
   const [openLoginModal, setOpenLoginModal] = useState(false);
+
+  // Define a mapping of company names to their login components
+  const loginComponents = {
+    'Manulife': Login_Manulife,
+    'FWD': Login_FWD,
+    'AXA': Login_AXA,
+    'Prudential': Login_Prudential,
+    'Chubb': Login_Chubb,
+    'Sunlife': Login_Sunlife,
+    'AIA': Login_AIA
+  };
+
+  // Select the login component based on the company prop, defaulting to Login
+  const SelectedLogin = loginComponents[company] || Login;
 
   return (
     <Box sx={{ mb: 2 }}>
@@ -51,7 +74,8 @@ const UseInflation = ({
         </IconButton>
       </Box>
 
-      <Login
+      {/* Render the dynamically selected login component */}
+      <SelectedLogin
         open={openLoginModal}
         onClose={() => setOpenLoginModal(false)}
         processedData={processedData}
@@ -64,6 +88,7 @@ const UseInflation = ({
         setCashValueInfo={setCashValueInfo}
         clientInfo={clientInfo}
         setClientInfo={setClientInfo}
+        company={company}
       />
       
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, p: 2 }}>

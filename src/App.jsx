@@ -32,16 +32,17 @@ const theme = createTheme({
 });
 
 const App = () => {
-  const IsProduction = true;
+  const IsProduction = false;
   const { t } = useTranslation();
 
   // State declarations
+  const [company, setCompany] = useState(localStorage.getItem('company'));
   const [appBarColor, setAppBarColor] = useState(localStorage.getItem('appBarColor') || 'green');
   const [useInflation, setUseInflation] = useState(false);
   const [plan1Inputs, setPlan1Inputs] = useState(() => {
     const savedInputs = localStorage.getItem('plan1Inputs');
     const defaultInputs = {
-      company: "manulife",
+      company: company,
       plan: "晉悅自願醫保靈活計劃",
       planCategory: "智選",
       effectiveDate: "2024-12-29",
@@ -57,6 +58,7 @@ const App = () => {
     };
     return savedInputs ? { ...defaultInputs, ...JSON.parse(savedInputs) } : defaultInputs;
   });
+  
   const [plan2Inputs, setPlan2Inputs] = useState(null);
   const [showSecondPlan, setShowSecondPlan] = useState(false);
   const [outputData1, setOutputData1] = useState([]);
@@ -89,12 +91,17 @@ const App = () => {
     localStorage.setItem('appBarColor', appBarColor);
   }, [appBarColor]);
 
+  // Save company to localStorage
+  useEffect(() => {
+    localStorage.setItem('company', company);
+  }, [company]);
+
   // Initialize or sync plan2Inputs
   useEffect(() => {
     if (showSecondPlan) {
       if (!plan2Inputs) {
         setPlan2Inputs({
-          company: "manulife",
+          company: company,
           plan: "晉悅自願醫保靈活計劃",
           planCategory: "智選",
           effectiveDate: "2024-12-29",
@@ -126,9 +133,9 @@ const App = () => {
           setError(null);
           const serverURL = IsProduction
             ? 'https://fastapi-production-a20ab.up.railway.app'
-            : 'http://localhost:9003';
+            : 'http://localhost:9005';
           const response = await axios.post(serverURL + '/getData', {
-            company: plan1Inputs.company,
+            company: company,
             planFileName: plan1Inputs.planFileName,
             age: plan1Inputs.age,
             planOption: plan1Inputs.planOption,
@@ -157,7 +164,7 @@ const App = () => {
             setError(null);
             const serverURL = IsProduction
               ? 'https://fastapi-production-a20ab.up.railway.app'
-              : 'http://localhost:9003';
+              : 'http://localhost:9005';
             const response = await axios.post(serverURL + '/getData', {
               company: plan2Inputs.company,
               planFileName: plan2Inputs.planFileName,
@@ -278,7 +285,8 @@ const App = () => {
   const onToggleSecondPlan = () => {
     setShowSecondPlan(prev => !prev);
   };
-
+  
+  console.log('company',company)
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
@@ -361,6 +369,7 @@ const App = () => {
                 setCashValueInfo={setCashValueInfo}
                 clientInfo={clientInfo}
                 setClientInfo={setClientInfo}
+                company={company}
               />
             </Card>
             <Card elevation={3} sx={{ mt: 2, p: 2 }}>
@@ -401,7 +410,11 @@ const App = () => {
               </Card>
             )}
             <Box sx={{ mt: 2 }}>
-              <LanguageSwitch setAppBarColor={setAppBarColor} appBarColor={appBarColor} />
+              <LanguageSwitch 
+                setAppBarColor={setAppBarColor}
+                appBarColor={appBarColor}
+                setCompany={setCompany}
+              />
             </Box>
           </Grid>
         </Grid>

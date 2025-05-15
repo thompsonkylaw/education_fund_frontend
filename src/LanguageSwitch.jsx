@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Grid, Radio, RadioGroup, FormControlLabel, Button, Card, Box, Dialog } from '@mui/material';
 import Setting from './Setting';
 
-function LanguageSwitch({ setAppBarColor, appBarColor }) {
+function LanguageSwitch({ setAppBarColor, appBarColor,setCompany }) {
   const { t, i18n } = useTranslation();
   const [selectedLanguage, setSelectedLanguage] = useState(i18n.language || 'en');
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -55,7 +55,11 @@ function LanguageSwitch({ setAppBarColor, appBarColor }) {
         </Grid>
       </Grid>
       <Dialog open={settingsOpen} onClose={handleCloseSettings}>
-        <Setting setAppBarColor={setAppBarColor} onClose={handleCloseSettings} />
+        <Setting 
+          setAppBarColor={setAppBarColor} 
+          onClose={handleCloseSettings}
+          setCompany={setCompany}
+        />
       </Dialog>
     </Card>
   );
