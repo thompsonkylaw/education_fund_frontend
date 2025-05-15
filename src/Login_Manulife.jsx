@@ -60,7 +60,7 @@ function Login({
   setClientInfo,
   company
 }) {
-  const IsProduction = false;
+  const IsProduction = true;
   
   const { t } = useTranslation();
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
