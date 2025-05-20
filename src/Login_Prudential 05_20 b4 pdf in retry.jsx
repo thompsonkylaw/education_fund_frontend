@@ -1,8 +1,9 @@
+//b4 
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import manulifeSavingPlans from './dropdown/manulife/manulife_saving_plan.json';
-import premiumPaymentPeriodOptions from './dropdown/manulife/premium_payment_period_options.json';
+import prudentialSavingPlans from './dropdown/prudential/prudential_saving_plan.json';
+import premiumPaymentPeriodOptions from './dropdown/prudential/premium_payment_period_options.json';
 
 import { 
   Modal,
@@ -63,11 +64,9 @@ function Login({
   const IsProduction = false;
   
   const { t } = useTranslation();
-  const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
-  const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('CHANTSZLUNG');
-  const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('Ctsz_!376897');
-  const [otp, setOtp] = useState('');
-  const [otpError, setOtpError] = useState('');
+  const [url, setUrl] = useState('https://www.prudential.com.hk/tc/');
+  const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('02987584');
+  const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('Wenwen67');
   const [sessionId, setSessionId] = useState('');
   const [step, setStep] = useState('login');
   const [loading, setLoading] = useState(false);
@@ -75,18 +74,12 @@ function Login({
   const [newNotionalAmount, setNewNotionalAmount] = useState('');
   const [isCorporateCustomer, setIsCorporateCustomer] = useState(false);
   const [isPolicyHolder, setIsPolicyHolder] = useState(true);
-  const [dob, setDob] = useState('');
   const [insuranceAge, setInsuranceAge] = useState('40');
   const [gender, setGender] = useState('Male');
   const [isSmoker, setIsSmoker] = useState(false);
-  const [planCategory, setPlanCategory] = useState('全部');
-  const [worryFreeOption, setWorryFreeOption] = useState('否');
-  const [notionalAmount, setNotionalAmount] = useState('200000');
+  const [notionalAmount, setNotionalAmount] = useState('20000');
   const [premiumPaymentMethod, setPremiumPaymentMethod] = useState('每年');
-  const [getPromotionalDiscount, setGetPromotionalDiscount] = useState(true);
-  const [fromYear, setFromYear] = useState(inputs.numberOfYears + 1);
   const [withdrawalPeriod, setWithdrawalPeriod] = useState('');
-  const [annualWithdrawalAmount, setAnnualWithdrawalAmount] = useState(1000);
   const [proposalLanguage, setProposalLanguage] = useState("zh-HK");
   const [availablePaymentPeriods, setAvailablePaymentPeriods] = useState([]);
   const [logs, setLogs] = useState(() => {
@@ -100,9 +93,6 @@ function Login({
   const [error, setError] = useState('');
   const logRef = useRef(null);
   const shouldShowField = false;
-  const [remainingTime, setRemainingTime] = useState(180);
-  const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const otpInputRef = useRef(null);
   const [remainingTimeNewNotional, setRemainingTimeNewNotional] = useState(180);
   const [isTimerRunningNewNotional, setIsTimerRunningNewNotional] = useState(false);
   const newNotionalInputRef = useRef(null);
@@ -112,8 +102,7 @@ function Login({
   const ageOptions = Array.from({ length: 100 }, (_, i) => i + 1);
   const [selectedAge1, setSelectedAge1] = useState(cashValueInfo?.age_1 || 1);
   const [selectedAge2, setSelectedAge2] = useState(cashValueInfo?.age_2 || 1);
-
-  // Function to handle PDF download
+  
   const handlePdfDownload = (pdfBase64, filename) => {
     const binaryString = atob(pdfBase64);
     const len = binaryString.length;
@@ -131,6 +120,7 @@ function Login({
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
+
 
   useEffect(() => {
     if (inputs.age && inputs.numberOfYears) {
@@ -270,25 +260,10 @@ function Login({
   }, [logDialogOpen, logs]);
 
   useEffect(() => {
-    if (step === 'otp') {
-      otpInputRef.current?.focus();
-    } else if (step === 'retry') {
+    if (step === 'retry') {
       newNotionalInputRef.current?.focus();
     }
   }, [step]);
-
-  useEffect(() => {
-    let timer;
-    if (isTimerRunning && remainingTime > 0) {
-      timer = setInterval(() => {
-        setRemainingTime(prev => prev - 1);
-      }, 1000);
-    } else if (remainingTime === 0) {
-      alert('輸入OTP超時');
-      handleClose();
-    }
-    return () => clearInterval(timer);
-  }, [isTimerRunning, remainingTime]);
 
   useEffect(() => {
     let timer;
@@ -352,11 +327,7 @@ function Login({
     setStep('login');
     setSystemMessage('');
     setNewNotionalAmount('');
-    setOtp('');
-    setOtpError('');
     setSessionId('');
-    setIsTimerRunning(false);
-    setRemainingTime(180);
     setIsTimerRunningNewNotional(false);
     setRemainingTimeNewNotional(180);
   };
@@ -370,28 +341,11 @@ function Login({
     setLogs([]);
     localStorage.setItem('loginLogs', JSON.stringify([]));
     try {
-      await axios.post(serverURL + '/login', {
-        session_id: sessionId,
+      const payload = {
+        session_id: sessionId,  // Include sessionId in the payload
         url,
         username,
         password,
-      });
-      setStep('otp');
-    } catch (error) {
-      alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
-    }
-    setLoading(false);
-  };
-
-  const handleOtpSubmit = async (e) => {
-    e.preventDefault();
-    setIsTimerRunning(false);
-    setLoading(true);
-    setOtpError('');
-    try {
-      const response = await axios.post(serverURL + '/verify-otp', {
-        session_id: sessionId,
-        otp,
         calculation_data: {
           processedData,
           inputs,
@@ -423,14 +377,15 @@ function Login({
           selectedAge1,
           selectedAge2,
         },
-      });
-      if (response.data.status === 'otp_failed') {
-        setOtpError(response.data.message);
-      } else if (response.data.status === 'retry') {
+      };
+      const response = await axios.post(serverURL + '/login', payload);
+      if (response.data.status === 'retry') {
         setSystemMessage(response.data.system_message);
+        setSessionId(response.data.session_id);
         setStep('retry');
         setRemainingTimeNewNotional(180);
         setIsTimerRunningNewNotional(true);
+        
       } else if (response.data.status === 'success') {
         setCashValueInfo({
           age_1: selectedAge1,
@@ -463,6 +418,7 @@ function Login({
         setNewNotionalAmount('');
         setRemainingTimeNewNotional(180);
         setIsTimerRunningNewNotional(true);
+        
       } else if (response.data.status === 'success') {
         setCashValueInfo(prev => ({
           ...prev,
@@ -483,8 +439,8 @@ function Login({
   const handleSubmit = (e) => {
     if (step === 'login') {
       handleLogin(e);
-    } else if (step === 'otp') {
-      handleOtpSubmit(e);
+    } else if (step === 'retry') {
+      handleRetrySubmit(e);
     }
   };
 
@@ -566,12 +522,12 @@ function Login({
           <CloseIcon />
         </IconButton>
 
-        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
+        <Typography variant="h5" gutter gutterBottom sx={{ fontWeight: 600 }}>
           {t('login.title')}
         </Typography>
         
-        {step === 'login' || step === 'otp' ? (
-          <div onSubmit={handleSubmit}>
+        {step === 'login' ? (
+          <form onSubmit={handleSubmit}>
             <div className="margin-top-20 info-section">
               <div className="customer-card-container" style={{ display: 'grid', gap: '20px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
@@ -583,7 +539,7 @@ function Login({
                       onChange={(e) => setClientInfo(prev => ({ ...prev, surname: e.target.value }))}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp' || disabled}
+                      disabled={loading || disabled}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -596,7 +552,7 @@ function Login({
                       onChange={(e) => setClientInfo(prev => ({ ...prev, givenName: e.target.value }))}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp' || disabled}
+                      disabled={loading || disabled}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -610,7 +566,7 @@ function Login({
                       value={clientInfo.chineseName}
                       onChange={(e) => setClientInfo(prev => ({ ...prev, chineseName: e.target.value }))}
                       fullWidth
-                      disabled={loading || step === 'otp' || disabled}
+                      disabled={loading || disabled}
                       inputProps={{ maxLength: 10 }}
                       sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
@@ -623,7 +579,7 @@ function Login({
                         value={insuranceAge}
                         onChange={(e) => setInsuranceAge(e.target.value)}
                         fullWidth
-                        disabled={loading || step === 'otp' || disabled}
+                        disabled={loading || disabled}
                         sx={{ mb: 2 }}
                         InputLabelProps={{ style: { fontWeight: '500' } }}
                         select
@@ -651,7 +607,7 @@ function Login({
                       <FormControlLabel
                         value="Male"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp' || disabled}
+                        disabled={loading || disabled}
                         label={
                           <>
                             <span style={{
@@ -688,7 +644,7 @@ function Login({
                       <FormControlLabel
                         value="Female"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp' || disabled}
+                        disabled={loading || disabled}
                         label={
                           <>
                             <span style={{
@@ -737,7 +693,7 @@ function Login({
                       <FormControlLabel
                         value="true"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp' || disabled}
+                        disabled={loading || disabled}
                         label={
                           <>
                             <span style={{
@@ -774,7 +730,7 @@ function Login({
                       <FormControlLabel
                         value="false"
                         control={<Radio sx={{ display: 'none' }} />}
-                        disabled={loading || step === 'otp' || disabled}
+                        disabled={loading || disabled}
                         label={
                           <>
                             <span style={{
@@ -824,10 +780,10 @@ function Login({
                         value={clientInfo.basicPlan}
                         onChange={(e) => setClientInfo(prev => ({ ...prev, basicPlan: e.target.value }))}
                         label={<>{t('login.basicPlan')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp' || disabled}
+                        disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
-                        {manulifeSavingPlans.map((plan) => (
+                        {prudentialSavingPlans.map((plan) => (
                           <MenuItem key={plan} value={plan}>
                             {plan}
                           </MenuItem>
@@ -844,7 +800,7 @@ function Login({
                         value={clientInfo.premiumPaymentPeriod}
                         onChange={(e) => setClientInfo(prev => ({ ...prev, premiumPaymentPeriod: e.target.value }))}
                         label={<>{t('login.premiumPaymentPeriod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp' || disabled}
+                        disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                         required
                       >
@@ -873,7 +829,7 @@ function Login({
                         value={clientInfo.basicPlanCurrency}
                         onChange={(e) => setClientInfo(prev => ({ ...prev, basicPlanCurrency: e.target.value }))}
                         label={<>{t('login.currency')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp' || disabled}
+                        disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="美元">美元</MenuItem>
@@ -891,7 +847,7 @@ function Login({
                       onBlur={handleBlur}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp' || disabled}
+                      disabled={loading || disabled}
                       InputProps={{
                         startAdornment: (
                           <InputAdornment position="start">
@@ -922,7 +878,7 @@ function Login({
                         value={premiumPaymentMethod}
                         onChange={(e) => setPremiumPaymentMethod(e.target.value)}
                         label={<>{t('login.premiumPaymentMethod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp' || disabled}
+                        disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="每年">每年</MenuItem>
@@ -947,7 +903,7 @@ function Login({
                           key={lang}
                           value={lang}
                           control={<Radio sx={{ display: 'none' }} />}
-                          disabled={loading || step === 'otp' || disabled}
+                          disabled={loading || disabled}
                           label={
                             <div style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                               <span style={{
@@ -1012,7 +968,7 @@ function Login({
                         value={selectedAge1}
                         onChange={(e) => setSelectedAge1(e.target.value)}
                         label={<>{t('login.age1')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp' || disabled}
+                        disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                         inputProps={{ id: 'input_text_field_15' }}
                       >
@@ -1033,7 +989,7 @@ function Login({
                         value={selectedAge2}
                         onChange={(e) => setSelectedAge2(e.target.value)}
                         label={<>{t('login.age2')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                        disabled={loading || step === 'otp' || disabled}
+                        disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                         inputProps={{ id: 'input_text_field_16' }}
                       >
@@ -1055,7 +1011,7 @@ function Login({
                       onChange={(e) => !IsProduction && setUsername(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp' || IsProduction}
+                      disabled={loading || IsProduction}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -1069,75 +1025,25 @@ function Login({
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || step === 'otp' || disabled}
+                      disabled={loading || disabled}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
                   </div>
                 </Box>
-                {step === 'otp' && (
-                  <TextField
-                    id="input_text_field_12"
-                    label={<>{t('login.otpVerification')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                    value={otp}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      if (/^\d*$/.test(value)) {
-                        setOtp(value);
-                        if (value.length !== 6) {
-                          setOtpError('OTP must be exactly 6 digits');
-                        } else {
-                          setOtpError('');
-                        }
-                      }
-                    }}
-                    onFocus={() => {
-                      if (!isTimerRunning) {
-                        setIsTimerRunning(true);
-                        setRemainingTime(180);
-                      }
-                    }}
-                    onBlur={() => {
-                      if (otp.length !== 6) {
-                        setOtpError('OTP must be exactly 6 digits');
-                      } else {
-                        setOtpError('');
-                      }
-                    }}
-                    required
-                    fullWidth
-                    disabled={loading}
-                    error={!!otpError}
-                    helperText={otpError}
-                    sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
-                    InputLabelProps={{ style: { fontWeight: '500' } }}
-                    inputProps={{
-                      maxLength: 6,
-                      inputMode: 'numeric',
-                    }}
-                    placeholder={isTimerRunning ? `剩餘時間: ${remainingTime} 秒` : '請輸入 OTP'}
-                    inputRef={otpInputRef}
-                  />
-                )}
 
                 <Button
-                  onClick={handleSubmit}
+                  type="submit"
                   variant="contained"
                   fullWidth
-                  disabled={loading || (IsProduction && !username) || disabled || premiumPeriodError}
+                  disabled={loading || (IsProduction && !username) || disabled || premiumPeriodError || !sessionId}
                   sx={{ 
                     padding: '12px 24px', 
-                    backgroundColor: (loading || (IsProduction && !username) || disabled || premiumPeriodError) ? '#ccc' : '#10740AFF', 
-                    '&:hover': { backgroundColor: '#0d5f08' } 
+                    backgroundColor: (loading || (IsProduction && !username) || disabled || premiumPeriodError || !sessionId) ? '#ccc' : '#ed1b2e', 
+                    '&:hover': { backgroundColor: '#ed1b2e' } 
                   }}
                 >
-                  {loading ? (
-                    <CircularProgress size={24} />
-                  ) : step === 'login' ? (
-                    t('login.loginButton')
-                  ) : (
-                    t('login.submitOtpButton')
-                  )}
+                  {loading ? <CircularProgress size={24} /> : t('login.submitButton')}
                 </Button>
 
                 <Box sx={{ mt: 2 }}>
@@ -1152,7 +1058,7 @@ function Login({
                 </Box>
               </div>
             </div>
-          </div>
+          </form>
         ) : step === 'retry' ? (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>
@@ -1204,8 +1110,8 @@ function Login({
               fullWidth
               disabled={loading}
               sx={{ 
-                backgroundColor: loading ? '#ccc' : '#10740AFF', 
-                '&:hover': { backgroundColor: '#0d5f08' } 
+                backgroundColor: loading ? '#ccc' : '#ed1b2e', 
+                '&:hover': { backgroundColor: '#ed1b2e' } 
               }}
             >
               {loading ? <CircularProgress size={24} /> : t('login.submitButton')}
@@ -1225,8 +1131,8 @@ function Login({
               onClick={handleClose}
               variant="contained"
               sx={{ 
-                backgroundColor: '#10740AFF', 
-                '&:hover': { backgroundColor: '#0d5f08' } 
+                backgroundColor: '#ed1b2e', 
+                '&:hover': { backgroundColor: '#ed1b2e' } 
               }}
             >
               {t('login.completeButton')}

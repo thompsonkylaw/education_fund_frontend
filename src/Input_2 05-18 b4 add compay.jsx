@@ -1,3 +1,4 @@
+//2 plans works
 import React, { useEffect } from 'react';
 import { Box, Card, CardContent, MenuItem, Typography, Select } from '@mui/material';
 import { useTranslation } from 'react-i18next';
@@ -9,12 +10,9 @@ import manulife_medical_plan_sexuality from './dropdown/manulife/5_manulife_medi
 import manulife_medical_plan_ward from './dropdown/manulife/6_manulife_medical_plan_ward';
 import manulife_medical_plan_option from './dropdown/manulife/7_manulife_medical_plan_option';
 
-const Input_2 = ({ inputs, setInputs, appBarColor, disabled }) => {
+const Input_2 = ({ inputs, setInputs, appBarColor, disabled}) => {
   const { t } = useTranslation();
 
-  // Define the list of insurance companies
-  // const companies = ['Manulife', 'Prudential', 'FWD', 'AIA', 'AXA', 'Chubb', 'Sunlife'];
-  const companies = ['Manulife'];
   // Options for NumberOfYear (kept for consistency, though disabled)
   const numberOfYearsOptions = Array.from({ length: 20 }, (_, i) => i + 1);
 
@@ -59,13 +57,13 @@ const Input_2 = ({ inputs, setInputs, appBarColor, disabled }) => {
 
   // Update planFileName when relevant fields change
   useEffect(() => {
-    const { company, plan, planCategory, effectiveDate, currency, sexuality, ward } = inputs;
-    if (company && plan && planCategory && effectiveDate && currency && sexuality && ward) {
+    const { plan, planCategory, effectiveDate, currency, sexuality, ward } = inputs;
+    if (plan && planCategory && effectiveDate && currency && sexuality && ward) {
       let planFileName = `${plan}_${planCategory}_${effectiveDate}_${currency}_${sexuality}_${ward}`;
       planFileName = planFileName.replace(/\//g, '');
       setInputs(prev => ({ ...prev, planFileName }));
     }
-  }, [inputs.company, inputs.plan, inputs.planCategory, inputs.effectiveDate, inputs.currency, inputs.sexuality, inputs.ward, setInputs]);
+  }, [inputs.plan, inputs.planCategory, inputs.effectiveDate, inputs.currency, inputs.sexuality, inputs.ward, setInputs]);
 
   // Compute options for Plan_Option
   const planOptionOptions = () => {
@@ -87,26 +85,8 @@ const Input_2 = ({ inputs, setInputs, appBarColor, disabled }) => {
     <Box display="grid" gap={1}>
       <Card elevation={1} sx={{ position: 'relative', minHeight: 180 }}>
         <CardContent>
-          {/* First Row: Company, Plan, Plan_Category, Effective_Date, Currency */}
-          <Box display="grid" gap={1} sx={{ gridTemplateColumns: { xs: '1fr', md: 'repeat(5, 1fr)' } }}>
-            <Box>
-              <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
-                {t('Company')}
-              </Typography>
-              <Select
-                fullWidth
-                variant="standard"
-                value={inputs.company || ''}
-                onChange={handleChange('company')}
-                disabled={disabled}
-              >
-                {companies.map((company) => (
-                  <MenuItem key={company} value={company}>
-                    {company}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Box>
+          {/* First Row: Plan, Plan_Category, Effective_Date, Currency */}
+          <Box display="grid" gap={1} sx={{ gridTemplateColumns: { xs: '1fr', md: 'repeat(4, 1fr)' } }}>
             <Box>
               <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
                 {t('Plan')}

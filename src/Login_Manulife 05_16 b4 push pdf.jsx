@@ -60,7 +60,7 @@ function Login({
   setClientInfo,
   company
 }) {
-  const IsProduction = false;
+  const IsProduction = true;
   
   const { t } = useTranslation();
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
@@ -73,6 +73,7 @@ function Login({
   const [loading, setLoading] = useState(false);
   const [systemMessage, setSystemMessage] = useState('');
   const [newNotionalAmount, setNewNotionalAmount] = useState('');
+  const [pdfDownloadLink, setPdfDownloadLink] = useState('');
   const [isCorporateCustomer, setIsCorporateCustomer] = useState(false);
   const [isPolicyHolder, setIsPolicyHolder] = useState(true);
   const [dob, setDob] = useState('');
@@ -81,7 +82,7 @@ function Login({
   const [isSmoker, setIsSmoker] = useState(false);
   const [planCategory, setPlanCategory] = useState('全部');
   const [worryFreeOption, setWorryFreeOption] = useState('否');
-  const [notionalAmount, setNotionalAmount] = useState('200000');
+  const [notionalAmount, setNotionalAmount] = useState('20000');
   const [premiumPaymentMethod, setPremiumPaymentMethod] = useState('每年');
   const [getPromotionalDiscount, setGetPromotionalDiscount] = useState(true);
   const [fromYear, setFromYear] = useState(inputs.numberOfYears + 1);
@@ -113,25 +114,6 @@ function Login({
   const [selectedAge1, setSelectedAge1] = useState(cashValueInfo?.age_1 || 1);
   const [selectedAge2, setSelectedAge2] = useState(cashValueInfo?.age_2 || 1);
 
-  // Function to handle PDF download
-  const handlePdfDownload = (pdfBase64, filename) => {
-    const binaryString = atob(pdfBase64);
-    const len = binaryString.length;
-    const bytes = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-      bytes[i] = binaryString.charCodeAt(i);
-    }
-    const blob = new Blob([bytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
   useEffect(() => {
     if (inputs.age && inputs.numberOfYears) {
       const calculatedWithdrawalPeriod = 100 - inputs.age - inputs.numberOfYears + 2;
@@ -139,7 +121,12 @@ function Login({
     }
   }, [inputs.age, inputs.numberOfYears]);
 
-  const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:7001';
+  useEffect(() => {
+    if (step === 'success' && pdfDownloadLink) {
+    }
+  }, [step, pdfDownloadLink]);
+
+  const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:9005';
 
   // Initialize session when modal opens
   useEffect(() => {
@@ -352,6 +339,7 @@ function Login({
     setStep('login');
     setSystemMessage('');
     setNewNotionalAmount('');
+    setPdfDownloadLink('');
     setOtp('');
     setOtpError('');
     setSessionId('');
@@ -441,7 +429,6 @@ function Login({
         });
         setStep('success');
         setFinalNotionalAmount(notionalAmount);
-        handlePdfDownload(response.data.pdf_base64, response.data.filename);
       }
     } catch (error) {
       alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
@@ -472,7 +459,6 @@ function Login({
         }));
         setStep('success');
         setFinalNotionalAmount(newNotionalAmount);
-        handlePdfDownload(response.data.pdf_base64, response.data.filename);
       }
     } catch (error) {
       alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
@@ -571,7 +557,7 @@ function Login({
         </Typography>
         
         {step === 'login' || step === 'otp' ? (
-          <div onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit}>
             <div className="margin-top-20 info-section">
               <div className="customer-card-container" style={{ display: 'grid', gap: '20px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
@@ -1121,7 +1107,7 @@ function Login({
                 )}
 
                 <Button
-                  onClick={handleSubmit}
+                  type="submit"
                   variant="contained"
                   fullWidth
                   disabled={loading || (IsProduction && !username) || disabled || premiumPeriodError}
@@ -1152,7 +1138,7 @@ function Login({
                 </Box>
               </div>
             </div>
-          </div>
+          </form>
         ) : step === 'retry' ? (
           <Box sx={{ mt: 2 }}>
             <Typography variant="h6" gutterBottom>

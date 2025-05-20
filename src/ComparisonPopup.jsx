@@ -30,13 +30,15 @@ const ComparisonPopup = ({
   plan1Inputs,
   plan2Inputs,
   clientInfo,
-  cashValueInfo
+  cashValueInfo,
+  appBarColor
 }) => {
   const { t, i18n } = useTranslation();
   const [fontRegularData, setFontRegularData] = useState(null);
   const [fontBoldData, setFontBoldData] = useState(null);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [isJsPDFEnabled, setIsJsPDFEnabled] = useState(false);
+
 
   useEffect(() => {
     const loadFonts = async () => {
@@ -191,7 +193,7 @@ const ComparisonPopup = ({
       ],
       theme: 'grid',
       styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
-      headStyles: { fontStyle: 'bold', fillColor: '#009739' },
+      headStyles: { fontStyle: 'bold', fillColor: appBarColor },
       margin: { left: 14, right: 14 },
     });
 
@@ -217,7 +219,7 @@ const ComparisonPopup = ({
       ],
       theme: 'grid',
       styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
-      headStyles: { fontStyle: 'bold', fillColor: '#009739' },
+      headStyles: { fontStyle: 'bold', fillColor: appBarColor },
       margin: plan1Margin,
     });
 
@@ -239,7 +241,7 @@ const ComparisonPopup = ({
         ],
         theme: 'grid',
         styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
-        headStyles: { fontStyle: 'bold', fillColor: '#009739' },
+        headStyles: { fontStyle: 'bold', fillColor: appBarColor },
         margin: plan2Margin,
       });
       currentY = Math.max(currentY, doc.lastAutoTable.finalY);

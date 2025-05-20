@@ -60,7 +60,7 @@ function Login({
   setClientInfo,
   company
 }) {
-  const IsProduction = false;
+  const IsProduction = true;
   
   const { t } = useTranslation();
   const [url, setUrl] = useState('https://www.prudential.com.hk/tc/');
@@ -97,10 +97,47 @@ function Login({
   const newNotionalInputRef = useRef(null);
   const eventSourceRef = useRef(null);
   const reconnectIntervalRef = useRef(null);
+  const [retryPdf, setRetryPdf] = useState(null);
 
-  const ageOptions = Array.from({ length: 100 }, (_, i) => i + 1);
-  const [selectedAge1, setSelectedAge1] = useState(cashValueInfo?.age_1 || 1);
-  const [selectedAge2, setSelectedAge2] = useState(cashValueInfo?.age_2 || 1);
+  const ageOptions = [56, 61, 66, 71, 76, 81, 86, 91, 96, 101];
+
+  const [selectedAge1, setSelectedAge1] = useState(() => {
+    const savedAge1 = localStorage.getItem('selectedAge1');
+    const age = savedAge1 ? parseInt(savedAge1, 10) : 66;
+    return ageOptions.includes(age) ? age : 66;
+  });
+
+  const [selectedAge2, setSelectedAge2] = useState(() => {
+    const savedAge2 = localStorage.getItem('selectedAge2');
+    const age = savedAge2 ? parseInt(savedAge2, 10) : 86;
+    return ageOptions.includes(age) ? age : 86;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('selectedAge1', selectedAge1);
+  }, [selectedAge1]);
+
+  useEffect(() => {
+    localStorage.setItem('selectedAge2', selectedAge2);
+  }, [selectedAge2]);
+
+  const handlePdfDownload = (pdfBase64, filename) => {
+    const binaryString = atob(pdfBase64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     if (inputs.age && inputs.numberOfYears) {
@@ -109,9 +146,8 @@ function Login({
     }
   }, [inputs.age, inputs.numberOfYears]);
 
-  const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:9005';
+  const serverURL = IsProduction ? 'prudentialbackend-production.up.railway.app' : 'http://localhost:7001';
 
-  // Initialize session when modal opens
   useEffect(() => {
     if (open) {
       const initSession = async () => {
@@ -310,6 +346,7 @@ function Login({
     setSessionId('');
     setIsTimerRunningNewNotional(false);
     setRemainingTimeNewNotional(180);
+    setRetryPdf(null);
   };
 
   const handleLogin = async (e) => {
@@ -322,7 +359,7 @@ function Login({
     localStorage.setItem('loginLogs', JSON.stringify([]));
     try {
       const payload = {
-        session_id: sessionId,  // Include sessionId in the payload
+        session_id: sessionId,
         url,
         username,
         password,
@@ -365,6 +402,14 @@ function Login({
         setStep('retry');
         setRemainingTimeNewNotional(180);
         setIsTimerRunningNewNotional(true);
+        if (response.data.pdf_base64) {
+          setRetryPdf({
+            pdf_base64: response.data.pdf_base64,
+            filename: response.data.filename
+          });
+        } else {
+          setRetryPdf(null);
+        }
       } else if (response.data.status === 'success') {
         setCashValueInfo({
           age_1: selectedAge1,
@@ -375,6 +420,8 @@ function Login({
         });
         setStep('success');
         setFinalNotionalAmount(notionalAmount);
+        setRetryPdf(null);
+        handlePdfDownload(response.data.pdf_base64, response.data.filename);
       }
     } catch (error) {
       alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
@@ -396,6 +443,14 @@ function Login({
         setNewNotionalAmount('');
         setRemainingTimeNewNotional(180);
         setIsTimerRunningNewNotional(true);
+        if (response.data.pdf_base64) {
+          setRetryPdf({
+            pdf_base64: response.data.pdf_base64,
+            filename: response.data.filename
+          });
+        } else {
+          setRetryPdf(null);
+        }
       } else if (response.data.status === 'success') {
         setCashValueInfo(prev => ({
           ...prev,
@@ -405,6 +460,8 @@ function Login({
         }));
         setStep('success');
         setFinalNotionalAmount(newNotionalAmount);
+        setRetryPdf(null);
+        handlePdfDownload(response.data.pdf_base64, response.data.filename);
       }
     } catch (error) {
       alert('Error: ' + (error.response?.data?.detail || 'Unknown error'));
@@ -942,7 +999,7 @@ function Login({
                       </InputLabel>
                       <Select
                         value={selectedAge1}
-                        onChange={(e) => setSelectedAge1(e.target.value)}
+                        onChange={(e) => setSelectedAge1(Number(e.target.value))}
                         label={<>{t('login.age1')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                         disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
@@ -963,7 +1020,7 @@ function Login({
                       </InputLabel>
                       <Select
                         value={selectedAge2}
-                        onChange={(e) => setSelectedAge2(e.target.value)}
+                        onChange={(e) => setSelectedAge2(Number(e.target.value))}
                         label={<>{t('login.age2')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                         disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
@@ -1097,6 +1154,26 @@ function Login({
                 {t('login.viewLogs', { count: logs.length })}
               </Button>
             </Box>
+            {retryPdf && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="h6" gutterBottom>
+                  {t('login.retryPdfTitle')}
+                </Typography>
+                <object
+                  data={`data:application/pdf;base64,${retryPdf.pdf_base64}`}
+                  type="application/pdf"
+                  width="100%"
+                  height="600px"
+                >
+                  <p>
+                    {t('login.pdfDisplayError')} 
+                    <a href={`data:application/pdf;base64,${retryPdf.pdf_base64}`} download={retryPdf.filename}>
+                      {t('login.downloadPdf')}
+                    </a>
+                  </p>
+                </object>
+              </Box>
+            )}
           </Box>
         ) : step === 'success' ? (
           <Box sx={{ mt: 2 }}>

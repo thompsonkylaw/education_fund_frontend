@@ -30,7 +30,7 @@ const NumberFormatCustom = React.forwardRef(function NumberFormatCustom(props, r
   );
 });
 
-const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNotionalAmount, age, currencyRate, setFinalNotionalAmount, numOfRowInOutputForm_1, cashValueInfo,plan1Inputs,plan2Inputs,clientInfo }) => {
+const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNotionalAmount, age, currencyRate, setFinalNotionalAmount, numOfRowInOutputForm_1, cashValueInfo,plan1Inputs,plan2Inputs,clientInfo,appBarColor }) => {
   // console.log("clientInfo.surname",clientInfo.surname)
   // console.log("clientInfo.surname",clientInfo.givenName)
   // console.log("clientInfo.chineseName",clientInfo.chineseName)
@@ -154,6 +154,7 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
         plan2Inputs = {plan2Inputs}
         clientInfo = {clientInfo}
         cashValueInfo={cashValueInfo}
+        appBarColor={appBarColor}
 
       />
     </Box>

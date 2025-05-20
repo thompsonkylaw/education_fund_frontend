@@ -34,7 +34,7 @@ const Setting = ({ setAppBarColor, onClose,setCompany }) => {
 
   return (
     <>
-      <DialogTitle>Settings</DialogTitle>
+      <DialogTitle>Settings v1.0.0</DialogTitle>
       <DialogContent>
         <Box>
           {colors.map((color) => (
@@ -52,6 +52,9 @@ const Setting = ({ setAppBarColor, onClose,setCompany }) => {
             </Button>
           ))}
         </Box>
+       
+        
+        
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Close</Button>

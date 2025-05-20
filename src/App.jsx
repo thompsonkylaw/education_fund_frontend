@@ -36,13 +36,13 @@ const App = () => {
   const { t } = useTranslation();
 
   // State declarations
-  const [company, setCompany] = useState(localStorage.getItem('company'));
+  const [company, setCompany] = useState(localStorage.getItem('company') || 'Manulife');
   const [appBarColor, setAppBarColor] = useState(localStorage.getItem('appBarColor') || 'green');
   const [useInflation, setUseInflation] = useState(false);
   const [plan1Inputs, setPlan1Inputs] = useState(() => {
     const savedInputs = localStorage.getItem('plan1Inputs');
     const defaultInputs = {
-      company: company,
+      company: 'Manulife',
       plan: "晉悅自願醫保靈活計劃",
       planCategory: "智選",
       effectiveDate: "2024-12-29",
@@ -101,7 +101,7 @@ const App = () => {
     if (showSecondPlan) {
       if (!plan2Inputs) {
         setPlan2Inputs({
-          company: company,
+          company: 'Manulife',
           plan: "晉悅自願醫保靈活計劃",
           planCategory: "智選",
           effectiveDate: "2024-12-29",
@@ -132,10 +132,11 @@ const App = () => {
           setLoading(true);
           setError(null);
           const serverURL = IsProduction
-            ? 'https://fastapi-production-a20ab.up.railway.app'
-            : 'http://localhost:9005';
+            // ? 'https://fastapi-production-a20ab.up.railway.app'
+            ? 'https://plangetdatabackend-production.up.railway.app'
+            : 'http://localhost:8007';
           const response = await axios.post(serverURL + '/getData', {
-            company: company,
+            company: plan1Inputs.company,
             planFileName: plan1Inputs.planFileName,
             age: plan1Inputs.age,
             planOption: plan1Inputs.planOption,
@@ -164,7 +165,7 @@ const App = () => {
             setError(null);
             const serverURL = IsProduction
               ? 'https://fastapi-production-a20ab.up.railway.app'
-              : 'http://localhost:9005';
+              : 'http://localhost:9007';
             const response = await axios.post(serverURL + '/getData', {
               company: plan2Inputs.company,
               planFileName: plan2Inputs.planFileName,
@@ -406,6 +407,7 @@ const App = () => {
                   plan1Inputs={plan1Inputs}
                   plan2Inputs={plan2Inputs}
                   clientInfo={clientInfo}
+                  appBarColor={appBarColor}
                 />
               </Card>
             )}
