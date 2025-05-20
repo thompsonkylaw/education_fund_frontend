@@ -146,7 +146,7 @@ function Login({
     }
   }, [inputs.age, inputs.numberOfYears]);
 
-  const serverURL = IsProduction ? 'prudentialbackend-production.up.railway.app' : 'http://localhost:7001';
+  const serverURL = IsProduction ? 'https://prudentialbackend-production.up.railway.app' : 'http://localhost:7001';
 
   useEffect(() => {
     if (open) {

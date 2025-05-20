@@ -60,7 +60,7 @@ function Login({
   setClientInfo,
   company
 }) {
-  const IsProduction = false;
+  const IsProduction = true;
   
   const { t } = useTranslation();
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
@@ -81,7 +81,7 @@ function Login({
   const [isSmoker, setIsSmoker] = useState(false);
   const [planCategory, setPlanCategory] = useState('全部');
   const [worryFreeOption, setWorryFreeOption] = useState('否');
-  const [notionalAmount, setNotionalAmount] = useState('200000');
+  const [notionalAmount, setNotionalAmount] = useState('20000');
   const [premiumPaymentMethod, setPremiumPaymentMethod] = useState('每年');
   const [getPromotionalDiscount, setGetPromotionalDiscount] = useState(true);
   const [fromYear, setFromYear] = useState(inputs.numberOfYears + 1);
