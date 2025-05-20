@@ -545,6 +545,26 @@ function Login({
 
   const premiumPeriodError = clientInfo.premiumPaymentPeriod && parseInt(clientInfo.premiumPaymentPeriod, 10) !== inputs.numberOfYears;
 
+  // Disable button logic for login step
+  const isLoginDisabled = step === 'login' && (
+    !clientInfo.surname || // Check if surname is empty
+    !clientInfo.givenName || // Check if givenName is empty
+    !clientInfo.basicPlan || // Check if basicPlan is selected
+    !clientInfo.basicPlanCurrency || // Check if currency is selected
+    !clientInfo.premiumPaymentPeriod || // Check if premium payment period is selected
+    premiumPeriodError || // Check if premium period matches numberOfYears
+    !notionalAmount || // Check if notionalAmount is provided
+    isNaN(Number(notionalAmount)) || // Check if notionalAmount is a valid number
+    Number(notionalAmount) < 1500 || // Check if notionalAmount is at least 1500
+    !premiumPaymentMethod || // Check if payment method is selected
+    !proposalLanguage || // Check if proposal language is selected
+    !username || // Check if username is empty
+    !password // Check if password is empty
+  );
+
+  // Disable button logic for OTP step
+  const isOtpDisabled = step === 'otp' && (otp.length !== 6); // OTP must be exactly 6 digits
+
   return (
     <Modal
       open={open}
@@ -906,8 +926,8 @@ function Login({
                       }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                       placeholder={t("login.notioalAmountPlaceHolder")}
-                      error={Number(displayValue?.replace(/[^0-9.-]+/g,"")) < 1500}
-                      helperText={Number(displayValue?.replace(/[^0-9.-]+/g,"")) < 1500 ? t('login.notionalAmountError') : ""}
+                      error={notionalAmount && (isNaN(Number(notionalAmount)) || Number(notionalAmount) < 1500)}
+                      helperText={notionalAmount && (isNaN(Number(notionalAmount)) || Number(notionalAmount) < 1500) ? t('login.notionalAmountError') : ""}
                     />
                   </div>
                 </Box>
@@ -1124,10 +1144,10 @@ function Login({
                   onClick={handleSubmit}
                   variant="contained"
                   fullWidth
-                  disabled={loading || (IsProduction && !username) || disabled || premiumPeriodError}
+                  disabled={loading || isLoginDisabled || isOtpDisabled || disabled}
                   sx={{ 
                     padding: '12px 24px', 
-                    backgroundColor: (loading || (IsProduction && !username) || disabled || premiumPeriodError) ? '#ccc' : '#10740AFF', 
+                    backgroundColor: (loading || isLoginDisabled || isOtpDisabled || disabled) ? '#ccc' : '#10740AFF', 
                     '&:hover': { backgroundColor: '#0d5f08' } 
                   }}
                 >

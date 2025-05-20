@@ -534,6 +534,25 @@ function Login({
 
   const premiumPeriodError = clientInfo.premiumPaymentPeriod && parseInt(clientInfo.premiumPaymentPeriod, 10) !== inputs.numberOfYears;
 
+  const isFormValid = 
+    clientInfo.surname &&
+    clientInfo.givenName &&
+    clientInfo.basicPlan &&
+    clientInfo.premiumPaymentPeriod &&
+    clientInfo.basicPlanCurrency &&
+    notionalAmount &&
+    Number(notionalAmount) >= 1500 &&
+    premiumPaymentMethod &&
+    proposalLanguage &&
+    selectedAge1 &&
+    selectedAge2 &&
+    password &&
+    (IsProduction ? username : true) &&
+    !premiumPeriodError &&
+    sessionId;
+
+  const buttonDisabled = loading || disabled || !isFormValid;
+
   return (
     <Modal
       open={open}
@@ -1069,10 +1088,10 @@ function Login({
                   type="submit"
                   variant="contained"
                   fullWidth
-                  disabled={loading || (IsProduction && !username) || disabled || premiumPeriodError || !sessionId}
+                  disabled={buttonDisabled}
                   sx={{ 
                     padding: '12px 24px', 
-                    backgroundColor: (loading || (IsProduction && !username) || disabled || premiumPeriodError || !sessionId) ? '#ccc' : '#ed1b2e', 
+                    backgroundColor: buttonDisabled ? '#ccc' : '#ed1b2e', 
                     '&:hover': { backgroundColor: '#ed1b2e' } 
                   }}
                 >
