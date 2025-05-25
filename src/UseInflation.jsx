@@ -18,8 +18,6 @@ import Login_Chubb from './Login_Chubb';
 import Login_Sunlife from './Login_Sunlife';
 import Login_AIA from './Login_AIA';
 
-
-
 const UseInflation = ({ 
   inflationRate,
   currencyRate,
@@ -62,7 +60,10 @@ const UseInflation = ({
           {t('useInflation.title')}
         </Typography>
         <IconButton 
-          onClick={() => setOpenLoginModal(true)}
+          onClick={(e) => {
+            setOpenLoginModal(true);
+            e.currentTarget.blur(); // Remove focus to make the circle disappear
+          }}
           sx={{ 
             color: 'primary.main',
             '&:hover': {

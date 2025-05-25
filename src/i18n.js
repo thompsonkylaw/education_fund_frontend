@@ -59,6 +59,7 @@ i18next
           'Medical Premium USD': 'Medical Premium(USD)',
           'Acc MP USD': 'Acc MP(USD)',
           'Acc MP': 'Acc MP(HKD)',
+          Settings: 'Setting',
           login: {
             premiumPeriodError: 'Does not match the premium payment period of the medical plan',
             age1: 'First Surrender Value Age',
@@ -216,6 +217,7 @@ i18next
           'Medical Premium USD': '醫療保費(美元)',
           'Acc MP USD': '累積醫療保費(美元)',
           'Acc MP': '累積醫療保費(港元)',
+          Settings: 'Setting',
           login: {
             premiumPeriodError: '與醫療計劃保費繳付期不符',
             age1: '第一退保報價值歲數',
@@ -373,6 +375,7 @@ i18next
           'Medical Premium USD': '医疗保费(美元)',
           'Acc MP USD': '累积医疗保费(美元)',
           'Acc MP': '累积医疗保费(港元)',
+          Settings: 'Setting',
           login: {
             premiumPeriodError: '与医疗计划保费缴付期不符',
             age1: '第一退保报价值岁数',

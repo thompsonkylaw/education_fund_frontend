@@ -115,35 +115,8 @@ function Login({
   const [selectedAge1, setSelectedAge1] = useState(cashValueInfo?.age_1 || 1);
   const [selectedAge2, setSelectedAge2] = useState(cashValueInfo?.age_2 || 1);
 
-  const sessionIdRef = useRef(sessionId);
-  const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:7002';
-
-  useEffect(() => {
-    sessionIdRef.current = sessionId;
-  }, [sessionId]);
-
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (sessionIdRef.current) {
-        const data = JSON.stringify({ session_id: sessionIdRef.current });
-        fetch(`${serverURL}/terminate-session`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: data,
-          keepalive: true,
-        });
-      }
-    };
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-    };
-  }, [serverURL]);
-
+  // Function to handle PDF download
   const handlePdfDownload = (pdfBase64, filename) => {
-    // console.log("xxxxxxxxxxxxxxxxxxxxxxxfilename",filename)
     const binaryString = atob(pdfBase64);
     const len = binaryString.length;
     const bytes = new Uint8Array(len);
@@ -152,6 +125,7 @@ function Login({
     }
     const blob = new Blob([bytes], { type: 'application/pdf' });
     const url = window.URL.createObjectURL(blob);
+    // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", url);
     window.open(url, '_blank');
     setTimeout(() => {
       window.URL.revokeObjectURL(url);
@@ -165,6 +139,9 @@ function Login({
     }
   }, [inputs.age, inputs.numberOfYears]);
 
+  const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:7002';
+
+  // Initialize session when modal opens
   useEffect(() => {
     if (open) {
       const initSession = async () => {
@@ -205,6 +182,7 @@ function Login({
         setIsWhitelisted(whitelist.includes(data.user_email));
         if (data.system_login_name) {
           setUsername(data.system_login_name);
+          // console.log("************************************************user_mail", data.user_email);
         } else {
           setShowUsernamePopup(true);
         }
@@ -371,23 +349,24 @@ function Login({
     handleClose();
   };
 
-  const handleClose = async () => {
-    if (sessionId) {
-      try {
-        await axios.post(`${serverURL}/terminate-session`, { session_id: sessionId });
-        console.log("Session terminated successfully");
-      } catch (error) {
-        console.error("Failed to terminate session:", error);
-      }
-    }
-    onClose();
-    setStep('login');
-    setSystemMessage('');
-    setNewNotionalAmount('');
-    setSessionId('');
-    setIsTimerRunningNewNotional(false);
-    setRemainingTimeNewNotional(180);
-  };
+ const handleClose = async () => {
+   if (sessionId) {
+     try {
+       await axios.post(`${serverURL}/terminate-session`, { session_id: sessionId });
+       console.log("Session terminated successfully");
+     } catch (error) {
+       console.error("Failed to terminate session:", error);
+     }
+   }
+   onClose();
+   setStep('login');
+   setSystemMessage('');
+   setNewNotionalAmount('');
+   setSessionId('');
+   setIsTimerRunningNewNotional(false);
+   setRemainingTimeNewNotional(180);
+   setRetryPdf(null);
+ };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -573,6 +552,7 @@ function Login({
 
   const premiumPeriodError = clientInfo.premiumPaymentPeriod && parseInt(clientInfo.premiumPaymentPeriod, 10) !== inputs.numberOfYears;
 
+  // Disable button logic for login step
   const isLoginDisabled = step === 'login' && (
     !clientInfo.surname ||
     !clientInfo.givenName ||
@@ -589,6 +569,7 @@ function Login({
     !password
   );
 
+  // Disable button logic for OTP step
   const isOtpDisabled = step === 'otp' && (otp.length !== 6);
 
   return (
@@ -601,10 +582,7 @@ function Login({
       <Paper sx={modalStyle}>
         <IconButton
           aria-label="close"
-          onClick={(e) => {
-        handleClose();
-        e.currentTarget.blur(); // Remove focus to eliminate the circle
-      }}
+          onClick={handleClose}
           sx={{
             position: 'absolute',
             right: 8,
@@ -865,7 +843,7 @@ function Login({
               <div className="customer-card-container" style={{ marginTop: '20px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                   <div>
-                    <FormControl fullWidth error={!clientInfo.basicPlan}>
+                    <FormControl fullWidth>
                       <InputLabel sx={{ fontWeight: '500' }}>
                         {t('login.basicPlan')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
@@ -882,13 +860,10 @@ function Login({
                           </MenuItem>
                         ))}
                       </Select>
-                      {!clientInfo.basicPlan && (
-                        <FormHelperText error>{t('login.fieldRequired')}</FormHelperText>
-                      )}
                     </FormControl>
                   </div>
                   <div>
-                    <FormControl fullWidth error={!clientInfo.premiumPaymentPeriod || premiumPeriodError}>
+                    <FormControl fullWidth error={premiumPeriodError}>
                       <InputLabel sx={{ fontWeight: '500' }}>
                         {t('login.premiumPaymentPeriod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
@@ -906,9 +881,9 @@ function Login({
                           </MenuItem>
                         ))}
                       </Select>
-                      {(!clientInfo.premiumPaymentPeriod || premiumPeriodError) && (
+                      {premiumPeriodError && (
                         <FormHelperText error>
-                          {premiumPeriodError ? t('login.premiumPeriodError') : t('login.fieldRequired')}
+                          {t('login.premiumPeriodError')}
                         </FormHelperText>
                       )}
                     </FormControl>
@@ -958,14 +933,8 @@ function Login({
                       }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                       placeholder={t("login.notioalAmountPlaceHolder")}
-                      error={!notionalAmount || isNaN(Number(notionalAmount)) || Number(notionalAmount) < 1500}
-                      helperText={
-                        !notionalAmount
-                          ? t('login.fieldRequired')
-                          : (isNaN(Number(notionalAmount)) || Number(notionalAmount) < 1500)
-                            ? t('login.notionalAmountError')
-                            : ""
-                      }
+                      error={notionalAmount && (isNaN(Number(notionalAmount)) || Number(notionalAmount) < 1500)}
+                      helperText={notionalAmount && (isNaN(Number(notionalAmount)) || Number(notionalAmount) < 1500) ? t('login.notionalAmountError') : ""}
                     />
                   </div>
                 </Box>
@@ -1110,6 +1079,7 @@ function Login({
                       id="input_text_field_6"
                       label={<>{t('login.username')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       value={username}
+                      // onChange={(e) => !IsProduction && setUsername(e.target.value)}
                       onChange={(e) => setUsername(e.target.value)}
                       required
                       fullWidth
@@ -1255,16 +1225,14 @@ function Login({
               InputLabelProps={{ style: { fontWeight: '500' } }}
               placeholder={isTimerRunningNewNotional ? `剩餘時間: ${remainingTimeNewNotional} 秒` : 'Enter new amount'}
               inputRef={newNotionalInputRef}
-              error={!newNotionalAmount}
-              helperText={!newNotionalAmount ? t('login.fieldRequired') : ''}
             />
             <Button
               onClick={handleRetrySubmit}
               variant="contained"
               fullWidth
-              disabled={loading || !newNotionalAmount}
+              disabled={loading}
               sx={{ 
-                backgroundColor: (loading || !newNotionalAmount) ? '#ccc' : '#10740AFF', 
+                backgroundColor: loading ? '#ccc' : '#10740AFF', 
                 '&:hover': { backgroundColor: '#0d5f08' } 
               }}
             >

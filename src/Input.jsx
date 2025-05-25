@@ -14,19 +14,14 @@ import manulife_medical_plan_option from './dropdown/manulife/7_manulife_medical
 const Input = ({ inputs, setInputs, appBarColor, disabled, showSecondPlan, onToggleSecondPlan }) => {
   const { t } = useTranslation();
 
-  // Define the list of insurance companies
-  // const companies = ['Manulife', 'Prudential', 'FWD', 'AIA', 'AXA', 'Chubb', 'Sunlife'];
   const companies = ['Manulife'];
 
-  // Options for NumberOfYear
   const numberOfYearsOptions = Array.from({ length: 20 }, (_, i) => i + 1);
 
-  // Handle input changes
   const handleChange = (field) => (event) => {
     setInputs(prev => ({ ...prev, [field]: event.target.value }));
   };
 
-  // Update dependent fields when Plan changes
   useEffect(() => {
     if (inputs.plan) {
       const categories = manulife_medical_plan_catagoary[inputs.plan] || [];
@@ -46,7 +41,6 @@ const Input = ({ inputs, setInputs, appBarColor, disabled, showSecondPlan, onTog
     }
   }, [inputs.plan, setInputs]);
 
-  // Update Plan_Option when Plan, Plan_Category, or Currency changes
   useEffect(() => {
     if (inputs.plan && inputs.planCategory && inputs.currency) {
       const optionData = manulife_medical_plan_option[inputs.plan];
@@ -60,7 +54,6 @@ const Input = ({ inputs, setInputs, appBarColor, disabled, showSecondPlan, onTog
     }
   }, [inputs.plan, inputs.planCategory, inputs.currency, setInputs]);
 
-  // Update planFileName in state when relevant fields change
   useEffect(() => {
     const { company, plan, planCategory, effectiveDate, currency, sexuality, ward } = inputs;
     if (company && plan && planCategory && effectiveDate && currency && sexuality && ward) {
@@ -70,7 +63,6 @@ const Input = ({ inputs, setInputs, appBarColor, disabled, showSecondPlan, onTog
     }
   }, [inputs.company, inputs.plan, inputs.planCategory, inputs.effectiveDate, inputs.currency, inputs.sexuality, inputs.ward, setInputs]);
 
-  // Compute options for Plan_Option
   const planOptionOptions = () => {
     const optionData = manulife_medical_plan_option[inputs.plan] || {};
     if (Array.isArray(optionData)) {
@@ -90,7 +82,6 @@ const Input = ({ inputs, setInputs, appBarColor, disabled, showSecondPlan, onTog
     <Box display="grid" gap={1}>
       <Card elevation={1} sx={{ position: 'relative', minHeight: 180 }}>
         <CardContent>
-          {/* First Row: Company, Plan, Plan_Category, Effective_Date, Currency */}
           <Box display="grid" gap={1} sx={{ gridTemplateColumns: { xs: '1fr', md: 'repeat(5, 1fr)' } }}>
             <Box>
               <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
@@ -181,7 +172,6 @@ const Input = ({ inputs, setInputs, appBarColor, disabled, showSecondPlan, onTog
             </Box>
           </Box>
 
-          {/* Second Row: Sexuality, Ward, Plan_Option, Age, NumberOfYear */}
           <Box display="grid" gap={1} sx={{ gridTemplateColumns: { xs: '1fr', md: 'repeat(5, 1fr)' } }}>
             <Box>
               <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
@@ -277,16 +267,19 @@ const Input = ({ inputs, setInputs, appBarColor, disabled, showSecondPlan, onTog
         </CardContent>
         <Tooltip title={showSecondPlan ? t('Remove Second Plan') : t('Add Second Plan')}>
           <IconButton
-            onClick={onToggleSecondPlan}
+            onClick={(e) => {
+              onToggleSecondPlan();
+              e.currentTarget.blur();
+            }}
             disabled={disabled}
             sx={{
               position: 'absolute',
               bottom: 5,
               right: 15,
-              backgroundColor: showSecondPlan ? '#1b7e43' : 'green',
+              backgroundColor: showSecondPlan ? appBarColor : appBarColor,
               color: 'white',
               '&:hover': {
-                backgroundColor: showSecondPlan ? '#1b7e43' : '#1b7e43',
+                backgroundColor: showSecondPlan ? appBarColor : appBarColor,
               },
               '&.Mui-disabled': {
                 backgroundColor: 'grey.400',

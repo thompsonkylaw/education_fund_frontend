@@ -61,6 +61,7 @@ function Login({
   company
 }) {
   const IsProduction = false;
+  const whitelist = ['thompsonkylaw@gmail.com', 'yuhodiy@gmail.com'];
   
   const { t } = useTranslation();
   const [url, setUrl] = useState('https://smart.fwd.com.hk/landing');
@@ -103,7 +104,7 @@ function Login({
   const newNotionalInputRef = useRef(null);
   const eventSourceRef = useRef(null);
   const reconnectIntervalRef = useRef(null);
-
+  const [isWhitelisted, setIsWhitelisted] = useState(false);
   const ageOptions = Array.from({ length: 100 }, (_, i) => i + 1);
   const [selectedAge1, setSelectedAge1] = useState(cashValueInfo?.age_1 || 1);
   const [selectedAge2, setSelectedAge2] = useState(cashValueInfo?.age_2 || 1);
@@ -116,6 +117,32 @@ function Login({
   }, [inputs.age, inputs.numberOfYears]);
 
   const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:9007';
+    // Update the ref whenever sessionId changes
+    useEffect(() => {
+      sessionIdRef.current = sessionId;
+    }, [sessionId]);
+  
+    // Handle page refresh by calling /terminate-session
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      console.log("Session ID before fetch:", sessionIdRef.current);
+      if (sessionIdRef.current) {
+        const data = JSON.stringify({ session_id: sessionIdRef.current });
+        fetch(`${serverURL}/terminate-session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: data,
+          keepalive: true,
+        });
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [serverURL]);
 
   // Initialize session when modal opens
   useEffect(() => {
@@ -155,14 +182,16 @@ function Login({
     })
       .then(response => response.json())
       .then(data => {
+        setIsWhitelisted(whitelist.includes(data.user_email));
         if (data.system_login_name) {
           setUsername(data.system_login_name);
+          // console.log("************************************************user_mail", data.user_email);
         } else {
           setShowUsernamePopup(true);
         }
       })
       .catch(() => {
-        console.log("IsProduction=",IsProduction);
+        console.log("IsProduction=", IsProduction);
         setError(t('Failed_to_fetch_system_login_name'));
       });
   };
@@ -308,7 +337,15 @@ function Login({
     handleClose();
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
+    if (sessionId) {
+      try {
+        await axios.post(`${serverURL}/terminate-session`, { session_id: sessionId });
+        console.log("Session terminated successfully");
+      } catch (error) {
+        console.error("Failed to terminate session:", error);
+      }
+    }
     onClose();
     setStep('login');
     setSystemMessage('');
@@ -316,6 +353,7 @@ function Login({
     setSessionId('');
     setIsTimerRunningNewNotional(false);
     setRemainingTimeNewNotional(180);
+    setRetryPdf(null);
   };
 
   const handleLogin = async (e) => {
@@ -990,10 +1028,11 @@ function Login({
                       id="input_text_field_6"
                       label={<>{t('login.username')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       value={username}
-                      onChange={(e) => !IsProduction && setUsername(e.target.value)}
+                      // onChange={(e) => !IsProduction && setUsername(e.target.value)}
+                      onChange={(e) => setUsername(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || IsProduction}
+                      disabled={loading || (IsProduction && !isWhitelisted)}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />

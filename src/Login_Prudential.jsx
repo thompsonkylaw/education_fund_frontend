@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import prudentialSavingPlans from './dropdown/prudential/prudential_saving_plan.json';
 import premiumPaymentPeriodOptions from './dropdown/prudential/premium_payment_period_options.json';
+import PdfViewer from './PdfViewer';
 
 import { 
   Modal,
@@ -60,7 +61,8 @@ function Login({
   setClientInfo,
   company
 }) {
-  const IsProduction = true;
+  const IsProduction = false;
+  const whitelist = ['thompsonkylaw@gmail.com', 'yuhodiy@gmail.com'];
   
   const { t } = useTranslation();
   const [url, setUrl] = useState('https://www.prudential.com.hk/tc/');
@@ -98,20 +100,49 @@ function Login({
   const eventSourceRef = useRef(null);
   const reconnectIntervalRef = useRef(null);
   const [retryPdf, setRetryPdf] = useState(null);
-
-  const ageOptions = [56, 61, 66, 71, 76, 81, 86, 91, 96, 101];
+  const [isWhitelisted, setIsWhitelisted] = useState(false);
 
   const [selectedAge1, setSelectedAge1] = useState(() => {
     const savedAge1 = localStorage.getItem('selectedAge1');
-    const age = savedAge1 ? parseInt(savedAge1, 10) : 66;
-    return ageOptions.includes(age) ? age : 66;
+    const age = savedAge1 ? parseInt(savedAge1, 10) : 65;
+    return age >= 1 && age <= 100 ? age : 66;
   });
 
   const [selectedAge2, setSelectedAge2] = useState(() => {
     const savedAge2 = localStorage.getItem('selectedAge2');
-    const age = savedAge2 ? parseInt(savedAge2, 10) : 86;
-    return ageOptions.includes(age) ? age : 86;
+    const age = savedAge2 ? parseInt(savedAge2, 10) : 85;
+    return age >= 1 && age <= 100 ? age : 86;
   });
+
+  const serverURL = IsProduction ? 'https://prudentialbackend-production.up.railway.app' : 'http://localhost:5004';
+  const sessionIdRef = useRef(sessionId);
+
+  useEffect(() => {
+    sessionIdRef.current = sessionId;
+  }, [sessionId]);
+   
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      console.log("Session ID before fetch:", sessionIdRef.current);
+      if (sessionIdRef.current) {
+        const data = JSON.stringify({ session_id: sessionIdRef.current });
+        fetch(`${serverURL}/terminate-session`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: data,
+          keepalive: true,
+        });
+      }
+    };
+  
+    window.addEventListener('beforeunload', handleBeforeUnload);
+  
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [serverURL]);
 
   useEffect(() => {
     localStorage.setItem('selectedAge1', selectedAge1);
@@ -129,14 +160,11 @@ function Login({
       bytes[i] = binaryString.charCodeAt(i);
     }
     const blob = new Blob([bytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const url = window.URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    setTimeout(() => {
+      window.URL.revokeObjectURL(url);
+    }, 1000);
   };
 
   useEffect(() => {
@@ -145,8 +173,6 @@ function Login({
       setWithdrawalPeriod(calculatedWithdrawalPeriod);
     }
   }, [inputs.age, inputs.numberOfYears]);
-
-  const serverURL = IsProduction ? 'https://prudentialbackend-production.up.railway.app' : 'http://localhost:7001';
 
   useEffect(() => {
     if (open) {
@@ -185,6 +211,7 @@ function Login({
     })
       .then(response => response.json())
       .then(data => {
+        setIsWhitelisted(whitelist.includes(data.user_email));
         if (data.system_login_name) {
           setUsername(data.system_login_name);
         } else {
@@ -192,7 +219,7 @@ function Login({
         }
       })
       .catch(() => {
-        console.log("IsProduction=",IsProduction);
+        console.log("IsProduction=", IsProduction);
         setError(t('Failed_to_fetch_system_login_name'));
       });
   };
@@ -338,7 +365,15 @@ function Login({
     handleClose();
   };
 
-  const handleClose = () => {
+  const handleClose = async () => {
+    if (sessionId) {
+      try {
+        await axios.post(`${serverURL}/terminate-session`, { session_id: sessionId });
+        console.log("Session terminated successfully");
+      } catch (error) {
+        console.error("Failed to terminate session:", error);
+      }
+    }
     onClose();
     setStep('login');
     setSystemMessage('');
@@ -533,6 +568,13 @@ function Login({
   };
 
   const premiumPeriodError = clientInfo.premiumPaymentPeriod && parseInt(clientInfo.premiumPaymentPeriod, 10) !== inputs.numberOfYears;
+  const notionalNumeric = notionalAmount ? parseInt(notionalAmount, 10) : 0;
+  const notionalError = !notionalAmount || notionalNumeric < 1500;
+  const notionalHelperText = !notionalAmount
+    ? t('login.fieldRequired')
+    : notionalNumeric < 1500
+    ? t('login.notionalAmountError')
+    : '';
 
   const isFormValid = 
     clientInfo.surname &&
@@ -541,7 +583,7 @@ function Login({
     clientInfo.premiumPaymentPeriod &&
     clientInfo.basicPlanCurrency &&
     notionalAmount &&
-    Number(notionalAmount) >= 1500 &&
+    notionalNumeric >= 1500 &&
     premiumPaymentMethod &&
     proposalLanguage &&
     selectedAge1 &&
@@ -563,7 +605,10 @@ function Login({
       <Paper sx={modalStyle}>
         <IconButton
           aria-label="close"
-          onClick={handleClose}
+          onClick={(e) => {
+            handleClose();
+            e.currentTarget.blur();
+          }}
           sx={{
             position: 'absolute',
             right: 8,
@@ -574,7 +619,7 @@ function Login({
           <CloseIcon />
         </IconButton>
 
-        <Typography variant="h5" gutter gutterBottom sx={{ fontWeight: 600 }}>
+        <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
           {t('login.title')}
         </Typography>
         
@@ -592,6 +637,8 @@ function Login({
                       required
                       fullWidth
                       disabled={loading || disabled}
+                      error={!clientInfo.surname}
+                      helperText={!clientInfo.surname ? t('login.fieldRequired') : ''}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -605,6 +652,8 @@ function Login({
                       required
                       fullWidth
                       disabled={loading || disabled}
+                      error={!clientInfo.givenName}
+                      helperText={!clientInfo.givenName ? t('login.fieldRequired') : ''}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -824,14 +873,14 @@ function Login({
               <div className="customer-card-container" style={{ marginTop: '20px' }}>
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                   <div>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!clientInfo.basicPlan}>
                       <InputLabel sx={{ fontWeight: '500' }}>
                         {t('login.basicPlan')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
                         value={clientInfo.basicPlan}
                         onChange={(e) => setClientInfo(prev => ({ ...prev, basicPlan: e.target.value }))}
-                        label={<>{t('login.basicPlan')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        label={t('login.basicPlan')}
                         disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
@@ -841,20 +890,20 @@ function Login({
                           </MenuItem>
                         ))}
                       </Select>
+                      {!clientInfo.basicPlan && <FormHelperText>{t('login.fieldRequired')}</FormHelperText>}
                     </FormControl>
                   </div>
                   <div>
-                    <FormControl fullWidth error={premiumPeriodError}>
+                    <FormControl fullWidth error={!clientInfo.premiumPaymentPeriod || premiumPeriodError}>
                       <InputLabel sx={{ fontWeight: '500' }}>
                         {t('login.premiumPaymentPeriod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
                         value={clientInfo.premiumPaymentPeriod}
                         onChange={(e) => setClientInfo(prev => ({ ...prev, premiumPaymentPeriod: e.target.value }))}
-                        label={<>{t('login.premiumPaymentPeriod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        label={t('login.premiumPaymentPeriod')}
                         disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
-                        required
                       >
                         {availablePaymentPeriods.map((period) => (
                           <MenuItem key={period} value={period}>
@@ -862,31 +911,32 @@ function Login({
                           </MenuItem>
                         ))}
                       </Select>
-                      {premiumPeriodError && (
-                        <FormHelperText error>
-                          {t('login.premiumPeriodError')}
-                        </FormHelperText>
-                      )}
+                      {!clientInfo.premiumPaymentPeriod ? (
+                        <FormHelperText>{t('login.fieldRequired')}</FormHelperText>
+                      ) : premiumPeriodError ? (
+                        <FormHelperText>{t('login.premiumPeriodError')}</FormHelperText>
+                      ) : null}
                     </FormControl>
                   </div>
                 </Box>
 
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                   <div>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!clientInfo.basicPlanCurrency}>
                       <InputLabel sx={{ fontWeight: '500' }}>
                         {t('login.currency')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
                         value={clientInfo.basicPlanCurrency}
                         onChange={(e) => setClientInfo(prev => ({ ...prev, basicPlanCurrency: e.target.value }))}
-                        label={<>{t('login.currency')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        label={t('login.currency')}
                         disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
                         <MenuItem value="美元">美元</MenuItem>
                         <MenuItem value="港元">港元</MenuItem>
                       </Select>
+                      {!clientInfo.basicPlanCurrency && <FormHelperText>{t('login.fieldRequired')}</FormHelperText>}
                     </FormControl>
                   </div>
                   <div>
@@ -907,29 +957,25 @@ function Login({
                           </InputAdornment>
                         ),
                       }}
-                      sx={{ 
-                        mb: 2, 
-                        '& .MuiInputLabel-asterisk': { color: 'red' },
-                        '& .Mui-error': { color: 'red' }
-                      }}
+                      error={notionalError}
+                      helperText={notionalHelperText}
+                      sx={{ mb: 2 }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                       placeholder={t("login.notioalAmountPlaceHolder")}
-                      error={Number(displayValue?.replace(/[^0-9.-]+/g,"")) < 1500}
-                      helperText={Number(displayValue?.replace(/[^0-9.-]+/g,"")) < 1500 ? t('login.notionalAmountError') : ""}
                     />
                   </div>
                 </Box>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
                   <div>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!premiumPaymentMethod}>
                       <InputLabel sx={{ fontWeight: '500' }}>
                         {t('login.premiumPaymentMethod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
                         value={premiumPaymentMethod}
                         onChange={(e) => setPremiumPaymentMethod(e.target.value)}
-                        label={<>{t('login.premiumPaymentMethod')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        label={t('login.premiumPaymentMethod')}
                         disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                       >
@@ -938,6 +984,7 @@ function Login({
                         <MenuItem value="每季">每季</MenuItem>
                         <MenuItem value="每月">每月</MenuItem>
                       </Select>
+                      {!premiumPaymentMethod && <FormHelperText>{t('login.fieldRequired')}</FormHelperText>}
                     </FormControl>
                   </div>
                   <div>
@@ -1012,45 +1059,47 @@ function Login({
                     />
                   </div>
                   <div>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!selectedAge1}>
                       <InputLabel sx={{ fontWeight: '500' }}>
                         {t('login.age1')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
                         value={selectedAge1}
                         onChange={(e) => setSelectedAge1(Number(e.target.value))}
-                        label={<>{t('login.age1')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        label={t('login.age1')}
                         disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                         inputProps={{ id: 'input_text_field_15' }}
                       >
-                        {ageOptions.map((age) => (
+                        {Array.from({ length: 100 }, (_, i) => i + 1).map((age) => (
                           <MenuItem key={age} value={age}>
                             {age}
                           </MenuItem>
                         ))}
                       </Select>
+                      {!selectedAge1 && <FormHelperText>{t('login.fieldRequired')}</FormHelperText>}
                     </FormControl>
                   </div>
                   <div>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!selectedAge2}>
                       <InputLabel sx={{ fontWeight: '500' }}>
                         {t('login.age2')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span>
                       </InputLabel>
                       <Select
                         value={selectedAge2}
                         onChange={(e) => setSelectedAge2(Number(e.target.value))}
-                        label={<>{t('login.age2')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
+                        label={t('login.age2')}
                         disabled={loading || disabled}
                         sx={{ backgroundColor: 'white', color: 'black' }}
                         inputProps={{ id: 'input_text_field_16' }}
                       >
-                        {ageOptions.map((age) => (
+                        {Array.from({ length: 100 }, (_, i) => i + 1).map((age) => (
                           <MenuItem key={age} value={age}>
                             {age}
                           </MenuItem>
                         ))}
                       </Select>
+                      {!selectedAge2 && <FormHelperText>{t('login.fieldRequired')}</FormHelperText>}
                     </FormControl>
                   </div>
                 </Box>
@@ -1060,10 +1109,12 @@ function Login({
                       id="input_text_field_6"
                       label={<>{t('login.username')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
                       value={username}
-                      onChange={(e) => !IsProduction && setUsername(e.target.value)}
+                      onChange={(e) => setUsername(e.target.value)}
                       required
                       fullWidth
-                      disabled={loading || IsProduction}
+                      disabled={loading || (IsProduction && !isWhitelisted)}
+                      error={!username}
+                      helperText={!username ? t('login.fieldRequired') : ''}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -1078,6 +1129,8 @@ function Login({
                       required
                       fullWidth
                       disabled={loading || disabled}
+                      error={!password}
+                      helperText={!password ? t('login.fieldRequired') : ''}
                       sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                       InputLabelProps={{ style: { fontWeight: '500' } }}
                     />
@@ -1151,18 +1204,19 @@ function Login({
                 ),
                 inputMode: 'decimal',
               }}
+              error={!newNotionalAmount.trim()}
+              helperText={!newNotionalAmount.trim() ? t('login.fieldRequired') : ''}
               sx={{ mb: 2 }}
               InputLabelProps={{ style: { fontWeight: '500' } }}
-              placeholder={isTimerRunningNewNotional ? `剩餘時間: ${remainingTimeNewNotional} 秒` : 'Enter new amount'}
               inputRef={newNotionalInputRef}
             />
             <Button
               onClick={handleRetrySubmit}
               variant="contained"
               fullWidth
-              disabled={loading}
+              disabled={loading || !newNotionalAmount.trim()}
               sx={{ 
-                backgroundColor: loading ? '#ccc' : '#ed1b2e', 
+                backgroundColor: loading || !newNotionalAmount.trim() ? '#ccc' : '#ed1b2e', 
                 '&:hover': { backgroundColor: '#ed1b2e' } 
               }}
             >
@@ -1174,23 +1228,11 @@ function Login({
               </Button>
             </Box>
             {retryPdf && (
-              <Box sx={{ mt: 2 }}>
+              <Box sx={{ mt: 2, border: '1px solid #ccc', borderRadius: '4px', padding: '8px' }}>
                 <Typography variant="h6" gutterBottom>
                   {t('login.retryPdfTitle')}
                 </Typography>
-                <object
-                  data={`data:application/pdf;base64,${retryPdf.pdf_base64}`}
-                  type="application/pdf"
-                  width="100%"
-                  height="600px"
-                >
-                  <p>
-                    {t('login.pdfDisplayError')} 
-                    <a href={`data:application/pdf;base64,${retryPdf.pdf_base64}`} download={retryPdf.filename}>
-                      {t('login.downloadPdf')}
-                    </a>
-                  </p>
-                </object>
+                <PdfViewer pdfBase64={retryPdf.pdf_base64} />
               </Box>
             )}
           </Box>

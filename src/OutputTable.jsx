@@ -1,4 +1,3 @@
-//2 plans works
 import React, { useState } from 'react';
 import { 
   Table, 
@@ -35,7 +34,10 @@ const OutputTable = ({ outputData, currencyRate, numberOfYears }) => {
             <TableCell align="right">
               <IconButton
                 size="small"
-                onClick={() => setExpanded(!expanded)}
+                onClick={(e) => {
+                  setExpanded(!expanded);
+                  e.currentTarget.blur(); // Removes focus to eliminate the circle
+                }}
                 sx={{ p: 0 }}
               >
                 {expanded ? <ExpandLess /> : <ExpandMore />}

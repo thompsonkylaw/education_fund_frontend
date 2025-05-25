@@ -34,7 +34,8 @@ const Setting = ({ setAppBarColor, onClose,setCompany }) => {
 
   return (
     <>
-      <DialogTitle>Settings v1.0.0</DialogTitle>
+      <DialogTitle>Settings v1.0.8</DialogTitle>
+      
       <DialogContent>
         <Box>
           {colors.map((color) => (
