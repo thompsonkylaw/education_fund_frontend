@@ -103,7 +103,8 @@ i18next
             confirmSystemLoginName: 'Confirm Login Name',
             cancel: 'CANCEL',
             setLoginNameButton: 'Submit',
-            retryPdfTitle: "Pre-View"
+            retryPdfTitle: "Pre-View",
+            fieldRequired: "Please Enter A Value"
           },
           useInflation: {
             title: 'Proposal System',
@@ -262,6 +263,7 @@ i18next
             cancel: '取消',
             setLoginNameButton: '提交',
             retryPdfTitle: "預覽",
+            fieldRequired: "請輸入數值"
           },
           useInflation: {
             title: '計劃書',
@@ -420,6 +422,7 @@ i18next
             cancel: '取消',
             setLoginNameButton: '提交',
             retryPdfTitle: "预览",
+            fieldRequired: "请输入数值"
           },
           useInflation: {
             title: '计划书',

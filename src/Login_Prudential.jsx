@@ -59,9 +59,10 @@ function Login({
   setCashValueInfo,
   clientInfo,
   setClientInfo,
-  company
+  company,
+  IsProduction_Login
 }) {
-  const IsProduction = false;
+  const IsProduction = IsProduction_Login;
   const whitelist = ['thompsonkylaw@gmail.com', 'yuhodiy@gmail.com'];
   
   const { t } = useTranslation();
@@ -162,6 +163,12 @@ function Login({
     const blob = new Blob([bytes], { type: 'application/pdf' });
     const url = window.URL.createObjectURL(blob);
     window.open(url, '_blank');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     setTimeout(() => {
       window.URL.revokeObjectURL(url);
     }, 1000);
@@ -1043,21 +1050,7 @@ function Login({
               </div>
 
               <div className="login-fields margin-top-20" style={{ marginTop: '30px' }}>
-                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 2 }}>
-                  <div>
-                    <TextField
-                      id="input_text_field_4"
-                      label={<>{t('login.websiteUrl')} <span className="mandatory-tick" style={{ color: 'red' }}>*</span></>}
-                      type="url"
-                      value={url}
-                      onChange={(e) => setUrl(e.target.value)}
-                      required
-                      fullWidth
-                      disabled={true}
-                      sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
-                      InputLabelProps={{ style: { fontWeight: '500' } }}
-                    />
-                  </div>
+                <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                   <div>
                     <FormControl fullWidth error={!selectedAge1}>
                       <InputLabel sx={{ fontWeight: '500' }}>
@@ -1068,7 +1061,7 @@ function Login({
                         onChange={(e) => setSelectedAge1(Number(e.target.value))}
                         label={t('login.age1')}
                         disabled={loading || disabled}
-                        sx={{ backgroundColor: 'white', color: 'black' }}
+                        sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                         inputProps={{ id: 'input_text_field_15' }}
                       >
                         {Array.from({ length: 100 }, (_, i) => i + 1).map((age) => (
@@ -1090,7 +1083,7 @@ function Login({
                         onChange={(e) => setSelectedAge2(Number(e.target.value))}
                         label={t('login.age2')}
                         disabled={loading || disabled}
-                        sx={{ backgroundColor: 'white', color: 'black' }}
+                        sx={{ mb: 2, '& .MuiInputLabel-asterisk': { display: 'none' } }}
                         inputProps={{ id: 'input_text_field_16' }}
                       >
                         {Array.from({ length: 100 }, (_, i) => i + 1).map((age) => (

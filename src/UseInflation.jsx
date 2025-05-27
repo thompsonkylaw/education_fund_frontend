@@ -34,8 +34,10 @@ const UseInflation = ({
   setCashValueInfo,
   clientInfo,
   setClientInfo,
-  company
+  company,
+  IsProduction_Login
 }) => {
+  
   const { t } = useTranslation();
   const [openLoginModal, setOpenLoginModal] = useState(false);
 
@@ -90,6 +92,7 @@ const UseInflation = ({
         clientInfo={clientInfo}
         setClientInfo={setClientInfo}
         company={company}
+        IsProduction_Login = {IsProduction_Login}
       />
       
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, p: 2 }}>

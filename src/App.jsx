@@ -33,6 +33,8 @@ const theme = createTheme({
 
 const App = () => {
   const IsProduction = true;
+  // const [IsProduction_Login,setIsProduction_Login] = useState();
+  const IsProduction_Login = false
   const { t } = useTranslation();
 
   // State declarations
@@ -85,6 +87,7 @@ const App = () => {
     premiumPaymentPeriod: '15',
     basicPlanCurrency: '美元'
   });
+
 
   // Save appBarColor to localStorage
   useEffect(() => {
@@ -371,6 +374,7 @@ const App = () => {
                 clientInfo={clientInfo}
                 setClientInfo={setClientInfo}
                 company={company}
+                IsProduction_Login={IsProduction_Login}
               />
             </Card>
             <Card elevation={3} sx={{ mt: 2, p: 2 }}>
@@ -408,6 +412,7 @@ const App = () => {
                   plan2Inputs={plan2Inputs}
                   clientInfo={clientInfo}
                   appBarColor={appBarColor}
+                  
                 />
               </Card>
             )}

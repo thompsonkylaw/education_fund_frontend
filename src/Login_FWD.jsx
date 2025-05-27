@@ -58,9 +58,11 @@ function Login({
   setCashValueInfo,
   clientInfo,
   setClientInfo,
-  company
+  company,
+  IsProduction_Login
 }) {
-  const IsProduction = false;
+  const IsProduction =  IsProduction_Login;
+;
   const whitelist = ['thompsonkylaw@gmail.com', 'yuhodiy@gmail.com'];
   
   const { t } = useTranslation();
@@ -73,7 +75,9 @@ function Login({
   // const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('5295725@FWD');
   // const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('50768');//invilid account
   // const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('0768324@FWD');
+  
   const [sessionId, setSessionId] = useState('');
+  const sessionIdRef = useRef(sessionId);
   const [step, setStep] = useState('login');
   const [loading, setLoading] = useState(false);
   const [systemMessage, setSystemMessage] = useState('');
