@@ -34,13 +34,15 @@ const theme = createTheme({
 const App = () => {
   const IsProduction = true;
   // const [IsProduction_Login,setIsProduction_Login] = useState();
-  const IsProduction_Login = false
+  const IsProduction_Login = true
   const { t } = useTranslation();
 
   // State declarations
   const [company, setCompany] = useState(localStorage.getItem('company') || 'Manulife');
   const [appBarColor, setAppBarColor] = useState(localStorage.getItem('appBarColor') || 'green');
   const [useInflation, setUseInflation] = useState(false);
+  const [pdfBase64,setpdfBase64] = useState();
+  const [filename,setfilename] = useState();
   const [plan1Inputs, setPlan1Inputs] = useState(() => {
     const savedInputs = localStorage.getItem('plan1Inputs');
     const defaultInputs = {
@@ -375,6 +377,10 @@ const App = () => {
                 setClientInfo={setClientInfo}
                 company={company}
                 IsProduction_Login={IsProduction_Login}
+                pdfBase64={pdfBase64}
+                setpdfBase64={setpdfBase64}
+                filename={filename}
+                setfilename={setfilename}
               />
             </Card>
             <Card elevation={3} sx={{ mt: 2, p: 2 }}>
@@ -397,6 +403,7 @@ const App = () => {
               />
             </Card>
             {finalNotionalAmount && (
+              
                 <Card elevation={3} sx={{ mt: 2, p: 2 }}>
                 <OutputForm_3
                   processedData={processedData}
@@ -412,6 +419,8 @@ const App = () => {
                   plan2Inputs={plan2Inputs}
                   clientInfo={clientInfo}
                   appBarColor={appBarColor}
+                  pdfBase64={pdfBase64}
+                  filename={filename}
                   
                 />
               </Card>

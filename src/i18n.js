@@ -120,14 +120,16 @@ i18next
             header: "Medical Financing Premium",
             footer: "Total Cost: HKD $ {{total}}",
             firstRowValue: "First {{premiumPaymentPeriod}} years average monthly HKD $ {{averageMonthly}}",
-            placeholder: "Please complete login to get notional amount"
+            placeholder: "Please complete login to get notional amount",
+            
           },
           outputForm3: {
             ageLabel: "Age",
             accountValueLabel: "Account Value: HKD $",
             compareButton: "Compare Now",
             resetButton: "Reset Form",
-            resetConfirmation: "Are you sure you want to reset the form? All inputs will be cleared."
+            resetConfirmation: "Are you sure you want to reset the form? All inputs will be cleared.",
+            savePDFButton: "Save Proposal",
           },
           common: {
             company: "Company",
@@ -286,7 +288,8 @@ i18next
             accountValueLabel: "戶口價值: HKD $",
             compareButton: "馬上比較",
             resetButton: "重設表單",
-            resetConfirmation: "確定要重設表單嗎？所有輸入將被清除。"
+            resetConfirmation: "確定要重設表單嗎？所有輸入將被清除。",
+            savePDFButton: "儲存計劃書",
           },
           common: {
             company: "公司",
@@ -445,7 +448,8 @@ i18next
             accountValueLabel: "户口价值: HKD $",
             compareButton: "马上比较",
             resetButton: "重设表单",
-            resetConfirmation: "确定要重设表单吗？所有输入将被清除。"
+            resetConfirmation: "确定要重设表单吗？所有输入将被清除。",
+            savePDFButton: "储存计划书",
           },
           common: {
             company: "公司",

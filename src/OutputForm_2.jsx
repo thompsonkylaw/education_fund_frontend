@@ -6,7 +6,14 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
   const { t } = useTranslation();
 
   if (finalNotionalAmount === null) {
-    return <Typography>{t('outputForm2.placeholder')}</Typography>;
+    return <Typography sx={{
+          backgroundColor: 'rgb(231, 111, 81)',
+          color: 'white',
+          fontWeight: 'bold',
+          fontSize: '1.5rem',
+          padding: '10px',
+          textAlign: 'center',
+        }}>{t('outputForm2.placeholder')}</Typography>;
   }
 
   // const finalNotionalAmountNum = finalNotionalAmount ? parseFloat(finalNotionalAmount) : 0;
@@ -30,7 +37,7 @@ const OutputForm_2 = ({ age, numberOfYears, numberOfYearAccMP, finalNotionalAmou
 
   const rows = [];
   const firstRowEndAge = parseInt(age) + parseInt(numberOfYears) - 1;
-  console.log("firstRowEndAge111",firstRowEndAge)
+  // console.log("firstRowEndAge111",firstRowEndAge)
   const firstRowValue = t('outputForm2.firstRowValue', { premiumPaymentPeriod: numberOfYears, averageMonthly: formattedAverageMonthly });
   rows.push({
     ageRange: `${age} - ${firstRowEndAge} ${t('common.yearsOld')}`,

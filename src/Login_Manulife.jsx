@@ -59,7 +59,12 @@ function Login({
   clientInfo,
   setClientInfo,
   company,
-  IsProduction_Login
+  IsProduction_Login,
+  pdfBase64,
+  setpdfBase64,
+  filename,
+  setfilename,
+
 }) {
   const IsProduction = IsProduction_Login;
   const whitelist = ['thompsonkylaw@gmail.com', 'yuhodiy@gmail.com'];
@@ -150,15 +155,12 @@ function Login({
     for (let i = 0; i < len; i++) {
       bytes[i] = binaryString.charCodeAt(i);
     }
+    setpdfBase64(pdfBase64);
+    setfilename(filename);
     const blob = new Blob([bytes], { type: 'application/pdf' });
     const url = window.URL.createObjectURL(blob);
     window.open(url, '_blank');
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+   
     setTimeout(() => {
       window.URL.revokeObjectURL(url);
     }, 1000);

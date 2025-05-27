@@ -74,3 +74,7 @@ body > div:nth-child(1){
   margin-bottom:16px;
  }
  
+.MuiContainer-root .MuiGrid-container .MuiGrid-item > .MuiPaper-elevation{
+ padding-left:10px;
+ padding-right:10px;
+}

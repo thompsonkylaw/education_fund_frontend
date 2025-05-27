@@ -4,7 +4,6 @@ import { Button, TextField, Box, Typography } from '@mui/material';
 import { NumericFormat } from 'react-number-format';
 import ComparisonPopup from './ComparisonPopup';
 
-
 // Custom currency input component
 const NumberFormatCustom = React.forwardRef(function NumberFormatCustom(props, ref) {
   const { onChange, ...other } = props;
@@ -30,14 +29,23 @@ const NumberFormatCustom = React.forwardRef(function NumberFormatCustom(props, r
   );
 });
 
-const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNotionalAmount, age, currencyRate, setFinalNotionalAmount, numOfRowInOutputForm_1, cashValueInfo,plan1Inputs,plan2Inputs,clientInfo,appBarColor }) => {
-  // console.log("clientInfo.surname",clientInfo.surname)
-  // console.log("clientInfo.surname",clientInfo.givenName)
-  // console.log("clientInfo.chineseName",clientInfo.chineseName)
-  // console.log("clientInfo.basicPlan",clientInfo.basicPlan)
-  // console.log("clientInfo.premiumPaymentPeriod",clientInfo.premiumPaymentPeriod)
-  // console.log("finalNotionalAmount",finalNotionalAmount)
-  // console.log("clientInfo.basicPlanCurrency",clientInfo.basicPlanCurrency)
+const OutputForm_3 = ({
+  processedData,
+  numberOfYears,
+  numberOfYearAccMP,
+  finalNotionalAmount,
+  age,
+  currencyRate,
+  setFinalNotionalAmount,
+  numOfRowInOutputForm_1,
+  cashValueInfo,
+  plan1Inputs,
+  plan2Inputs,
+  clientInfo,
+  appBarColor,
+  pdfBase64,
+  filename
+}) => {
   const { t } = useTranslation();
 
   const [age1, setAge1] = useState(cashValueInfo.age_1);
@@ -66,6 +74,13 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
     }
   };
 
+  const handleSavePDF = () => {
+    const link = document.createElement('a');
+    link.href = `data:application/pdf;base64,${pdfBase64}`;
+    link.download = filename;
+    link.click();
+  };
+
   return (
     <Box>
       <Typography
@@ -81,7 +96,7 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
         {t('cash_value')}
       </Typography>
       <TextField
-        id="input_text_field_17"      
+        id="input_text_field_17"
         disabled={true}
         label={t('outputForm3.ageLabel')}
         type="number"
@@ -101,7 +116,7 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
         sx={{ m: 1, width: 180 }}
       />
       <TextField
-        id="input_text_field_18"      
+        id="input_text_field_18"
         disabled={true}
         label={t('outputForm3.ageLabel')}
         type="number"
@@ -120,8 +135,33 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
         }}
         sx={{ m: 1, width: 180 }}
       />
-      <Button variant="contained" onClick={handleOpenPopup} sx={{ m: 1 }}>
+      <Button
+  variant="contained"
+  onClick={handleOpenPopup}
+  sx={{
+    m: 1,
+    backgroundColor: '#4caf50', // Green
+    '&:hover': {
+      backgroundColor: '#388e3c', // Darker green
+    },
+  }}
+>
+        
         {t('outputForm3.compareButton')}
+      </Button>
+      <Button
+        variant="contained"
+        onClick={handleSavePDF}
+        sx={{
+          m: 1,
+          backgroundColor: 'blue.main',
+          '&:hover': {
+            backgroundColor: 'blue.dark',
+          },
+        }}
+      >
+        
+       {t('outputForm3.savePDFButton')}
       </Button>
       <Button
         variant="contained"
@@ -134,8 +174,19 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
           },
         }}
       >
+        
         {t('outputForm3.resetButton')}
       </Button>
+      
+
+      {/* <Button
+        variant="contained"
+        onClick={handleSavePDF}
+        sx={{ m: 1 }}
+        disabled={!pdfBase64 || !filename}
+      >
+        {t('outputForm3.savePDFButton')}
+      </Button> */}
       <ComparisonPopup
         open={openPopup}
         onClose={handleClosePopup}
@@ -150,12 +201,11 @@ const OutputForm_3 = ({ processedData, numberOfYears, numberOfYearAccMP, finalNo
         age={age}
         currencyRate={currencyRate}
         numOfRowInOutputForm_1={numOfRowInOutputForm_1}
-        plan1Inputs = {plan1Inputs}
-        plan2Inputs = {plan2Inputs}
-        clientInfo = {clientInfo}
+        plan1Inputs={plan1Inputs}
+        plan2Inputs={plan2Inputs}
+        clientInfo={clientInfo}
         cashValueInfo={cashValueInfo}
         appBarColor={appBarColor}
-
       />
     </Box>
   );

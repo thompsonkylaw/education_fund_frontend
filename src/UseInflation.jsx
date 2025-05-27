@@ -35,7 +35,11 @@ const UseInflation = ({
   clientInfo,
   setClientInfo,
   company,
-  IsProduction_Login
+  IsProduction_Login,
+  pdfBase64,
+  setpdfBase64,
+  filename,
+  setfilename,
 }) => {
   
   const { t } = useTranslation();
@@ -93,6 +97,10 @@ const UseInflation = ({
         setClientInfo={setClientInfo}
         company={company}
         IsProduction_Login = {IsProduction_Login}
+        pdfBase64={pdfBase64}
+        setpdfBase64={setpdfBase64}
+        filename={filename}
+        setfilename={setfilename}
       />
       
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, p: 2 }}>
