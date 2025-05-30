@@ -67,10 +67,11 @@ i18next
           'Expense Type': 'Expense Type',
           'From Age': 'From Age',
           'To Age': 'To Age',
-          'Yearly Withdrawal Amount': 'Yearly Withdrawal Amount',
+          'Yearly Withdrawal Amount': 'Yearly Withdrawal Amount(USD)',
           "expenseTypes": {
             "tuition": "Tuition",
             "marriage": "Marriage",
+            "business": "Business",
             "property": "Property Purchase",
             "retirement": "Retirement"
           },
@@ -244,10 +245,11 @@ i18next
           'Expense Type': '開支類型',
           'From Age': '起始年齡',
           'To Age': '結束年齡',
-          'Yearly Withdrawal Amount': '每年提取金額',
+          'Yearly Withdrawal Amount': '每年提取金額(美元)',
           "expenseTypes": {
             "tuition": "學費",
             "marriage": "結婚",
+            "business": "創業",
             "property": "置業",
             "retirement": "退休"
           },
@@ -306,8 +308,8 @@ i18next
           outputForm1: {
             header: "開支總覽",
             footer: "總成本: HKD $ {{total}}",
-            expenseType: "開支類型",
-            ageRange: "年齡範圍",
+            expenseType: "開支",
+            ageRange: "年齡",
             sumOfWithdrawal: "提取總額"
           },
           outputForm2: {
@@ -421,10 +423,11 @@ i18next
           'Expense Type': '开支类型',
           'From Age': '起始年龄',
           'To Age': '结束年龄',
-          'Yearly Withdrawal Amount': '每年提取金额',
+          'Yearly Withdrawal Amount': '每年提取金额(美元)',
           "expenseTypes": {
             "tuition": "学费",
             "marriage": "结婚",
+            "business": "创业",
             "property": "置业",
             "retirement": "退休"
           },
@@ -483,8 +486,8 @@ i18next
           outputForm1: {
             header: "传统医疗保费",
             footer: "总成本: HKD $ {{total}}",
-            expenseType: "开支类型",
-            ageRange: "年龄范围",
+            expenseType: "开支",
+            ageRange: "年龄",
             sumOfWithdrawal: "提取总额"
           },
           outputForm2: {

@@ -4,16 +4,33 @@ import { useTranslation } from 'react-i18next';
 
 const Input = ({ input, updateInput, disabled }) => {
   const { t } = useTranslation();
+
   const expenseTypeOptions = [
     { value: 'tuition', label: t('expenseTypes.tuition') },
     { value: 'marriage', label: t('expenseTypes.marriage') },
+    { value: 'business', label: t('expenseTypes.business') },
     { value: 'property', label: t('expenseTypes.property') },
     { value: 'retirement', label: t('expenseTypes.retirement') }
   ];
+
   const ageOptions = Array.from({ length: 100 }, (_, i) => i + 1);
+  const toAgeOptions = input.fromAge ? ageOptions.filter(age => age >= input.fromAge) : ageOptions;
+
   const handleChange = (field) => (event) => {
-    updateInput({ ...input, [field]: event.target.value });
+    const newValue = event.target.value;
+    if (field === 'fromAge') {
+      const newFromAge = newValue;
+      const currentToAge = input.toAge;
+      let newToAge = currentToAge;
+      if (newToAge === undefined || newToAge < newFromAge) {
+        newToAge = newFromAge;
+      }
+      updateInput({ ...input, fromAge: newFromAge, toAge: newToAge });
+    } else {
+      updateInput({ ...input, [field]: newValue });
+    }
   };
+
   const handleAmountChange = (e) => {
     const value = e.target.value;
     const rawValue = value.replace(/[^\d.]/g, '');
@@ -28,6 +45,7 @@ const Input = ({ input, updateInput, disabled }) => {
       updateInput({ ...input, yearlyWithdrawalAmount: formattedValue });
     }
   };
+
   return (
     <Box display="grid" gap={1} sx={{ gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, mt: 2 }}>
       <Box>
@@ -40,7 +58,7 @@ const Input = ({ input, updateInput, disabled }) => {
           value={input.expenseType || ''}
           onChange={handleChange('expenseType')}
           error={!input.expenseType}
-          disabled = {disabled}
+          disabled={disabled}
         >
           {expenseTypeOptions.map((option) => (
             <MenuItem key={option.value} value={option.value}>
@@ -59,7 +77,7 @@ const Input = ({ input, updateInput, disabled }) => {
           value={input.fromAge || ''}
           onChange={handleChange('fromAge')}
           error={!input.fromAge}
-          disabled = {disabled}
+          disabled={disabled}
         >
           {ageOptions.map((age) => (
             <MenuItem key={age} value={age}>
@@ -78,9 +96,9 @@ const Input = ({ input, updateInput, disabled }) => {
           value={input.toAge || ''}
           onChange={handleChange('toAge')}
           error={!input.toAge}
-          disabled = {disabled}
+          disabled={disabled}
         >
-          {ageOptions.map((age) => (
+          {toAgeOptions.map((age) => (
             <MenuItem key={age} value={age}>
               {age}
             </MenuItem>
@@ -97,7 +115,7 @@ const Input = ({ input, updateInput, disabled }) => {
           value={input.yearlyWithdrawalAmount || ''}
           onChange={handleAmountChange}
           error={!input.yearlyWithdrawalAmount}
-          disabled = {disabled}
+          disabled={disabled}
           InputProps={{
             startAdornment: <InputAdornment position="start">$</InputAdornment>,
           }}

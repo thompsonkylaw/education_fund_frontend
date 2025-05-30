@@ -35,6 +35,9 @@ const Proposal = ({ proposalIndex,
     const rows = [];
     let accExpenseInUSD = 0;
 
+    // Log target.age to verify its value
+    // console.log(`Proposal ${proposalIndex + 1} - target.age =`, target.age);
+
     for (let age = target.age; age <= 100; age++) {
       const year = age - target.age + 1;
       let baseExpenseInUSD = 0;
@@ -66,8 +69,21 @@ const Proposal = ({ proposalIndex,
       });
     }
 
+    // Log the computed rows to inspect the first row
+    // console.log(`Proposal ${proposalIndex + 1} - computed rows =`, rows);
+
+    // Validate that the first row's age matches target.age
+    if (rows.length > 0 && rows[0].age !== target.age) {
+      console.error(
+        `Proposal ${proposalIndex + 1} - Error: First row age (${rows[0].age}) does not match target.age (${target.age})`
+      );
+    }
+
     setProcessData(proposalIndex, rows);
   }, [target, inputs, inflationRate, currencyRate, useInflation, proposalIndex, setProcessData]);
+
+  // Fix typo in console.log from "prcessData" to "processData"
+  // console.log(`Proposal ${proposalIndex + 1} - processData =`, processData);
 
   return (
     <Card elevation={1} sx={{ position: 'relative', minHeight: 180, mt: proposalIndex > 0 ? 2 : 0 }}>
@@ -78,8 +94,8 @@ const Proposal = ({ proposalIndex,
         <Target 
           target={target} 
           updateTarget={updateTarget}
-          disabled={disabled}
-        />
+          disabled ={disabled}
+         />
         <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
           <IconButton onClick={addInput} disabled={inputs.length >= 4}>
             <AddIcon />
@@ -93,7 +109,7 @@ const Proposal = ({ proposalIndex,
             key={inputIndex}
             input={input}
             updateInput={(newInput) => updateInput(inputIndex, newInput)}
-            disabled={disabled}
+            disabled ={disabled}
           />
         ))}
         <OutputTable

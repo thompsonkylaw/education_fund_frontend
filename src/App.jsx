@@ -21,7 +21,7 @@ const App = () => {
   const [proposals, setProposals] = useState([
     {
       target: { age: 6, numberOfYears: 5, currencyRate: 7.85, inflationRate: 2 },
-      inputs: [{ expenseType: 'tuition', fromAge: '12', toAge: '15', yearlyWithdrawalAmount: '200000' }],
+      inputs: [{ expenseType: 'tuition', fromAge: '19', toAge: '22', yearlyWithdrawalAmount: '200000' }],
       processData: []
     }
   ]);
@@ -102,9 +102,11 @@ const App = () => {
       setProposals(prev => {
         const newProposals = [...prev];
         const proposal = newProposals[proposalIndex];
+        const lastInput = proposal.inputs[proposal.inputs.length - 1];
+        const newFromAge = lastInput ? Number(lastInput.toAge) + 1  : '';
         const newInputs = [
           ...proposal.inputs,
-          { expenseType: '', fromAge: '', toAge: '', yearlyWithdrawalAmount: '' }
+          { expenseType: '', fromAge: newFromAge, toAge: '', yearlyWithdrawalAmount: '' }
         ];
         newProposals[proposalIndex] = {
           ...proposal,
