@@ -20,14 +20,9 @@ const ComparisonPopup = ({
   age2,
   currency1,
   currency2,
-
   proposal,
-  
-  
   finalNotionalAmount,
-  
   numOfRowInOutputForm_1,
-  
   clientInfo,
   cashValueInfo,
   appBarColor
@@ -37,28 +32,23 @@ const ComparisonPopup = ({
   const [fontBoldData, setFontBoldData] = useState(null);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [isJsPDFEnabled, setIsJsPDFEnabled] = useState(false);
-  
+
   const currencyRate = proposal.target.currencyRate;
-  // console.log("currencyRate=====================================================",currencyRate)
 
   const inputs = proposal.inputs.map(item => ({
-        expenseType: item.expenseType,
-        fromAge: item.fromAge,
-        toAge: item.toAge,
-        yearlyWithdrawalAmount: item.yearlyWithdrawalAmount,
+    expenseType: item.expenseType,
+    fromAge: item.fromAge,
+    toAge: item.toAge,
+    yearlyWithdrawalAmount: item.yearlyWithdrawalAmount,
   }));
 
   const age = proposal.target.age;
   const numberOfYears = proposal.target.numberOfYears;
   const processData = proposal.processData;
   let numberOfYearAccMP;
-  console.log("processData======================================",processData);
   if (processData.length > 0) {
-  
-    numberOfYearAccMP = processData[numberOfYears -1 ].accExpenseInUSD;
-    console.log("numberOfYearAccMP======================================",numberOfYearAccMP);
+    numberOfYearAccMP = processData[numberOfYears - 1].accExpenseInUSD;
   }
-  
 
   useEffect(() => {
     const loadFonts = async () => {
@@ -95,7 +85,7 @@ const ComparisonPopup = ({
 
   const ageToAccMP = {};
   processData.forEach((row) => {
-    ageToAccMP[row.age] = row.accumulatedMP;
+    ageToAccMP[row.age] = row.accExpenseInHKD;
   });
   const traditionalTotalCost = ageToAccMP[100] || 0;
 
@@ -179,15 +169,20 @@ const ComparisonPopup = ({
     const pageWidth = 210;
     const margin = 14;
     const contentWidth = pageWidth - 2 * margin;
-    const fieldWidth = contentWidth / 3;
+    const fieldWidth = contentWidth / 4;
 
     const x1 = margin;
     const x2 = margin + fieldWidth;
     const x3 = margin + 2 * fieldWidth;
+    const x4 = margin + 3 * fieldWidth;
+    const currencyFormattedTraditionalTotalCost = numberFormatter.format(Math.round(traditionalTotalCost));
+    const currencyFormattedFinancingTotalCost = numberFormatter.format(Math.round(financingTotalCost));
 
-    doc.text(`${t('login.surname')}: ${clientInfo.surname || ''}`, x1, currentY);
-    doc.text(`${t('login.givenName')}: ${clientInfo.givenName || ''}`, x2, currentY);
-    doc.text(`${t('login.chineseName')}: ${clientInfo.chineseName || ''}`, x3, currentY);
+    doc.text(`${t('common.age')}: ${age || ''}`, x1, currentY);
+    doc.text(`${t('common.numberOfYears')}: ${numberOfYears || ''}`, x2, currentY);
+    const currencyFormattedFinancingTotalCostPerYear = currencyFormattedFinancingTotalCost / numberOfYears;
+    doc.text(`${t('formattedFinancingTotalCostPerYear')}: ${currencyFormattedFinancingTotalCostPerYear || ''}`, x3, currentY);
+    doc.text(`${t('formattedFinancingTotalCost')}: ${currencyFormattedFinancingTotalCost || ''}`, x4, currentY);
 
     currentY += 5;
 
@@ -208,7 +203,7 @@ const ComparisonPopup = ({
         [
           clientInfo.basicPlan || '',
           clientInfo.premiumPaymentPeriod || '',
-          clientInfo.basicPlanCurrency == "美元" ? 'USD$' + formattedFinalNotionalAmount : 'HKD$' + formattedFinalNotionalAmount,
+          clientInfo.basicPlanCurrency === "美元" ? 'USD$' + formattedFinalNotionalAmount : 'HKD$' + formattedFinalNotionalAmount,
         ],
       ],
       theme: 'grid',
@@ -220,52 +215,6 @@ const ComparisonPopup = ({
     currentY = doc.lastAutoTable.finalY + 5;
 
     const planTablesStartY = currentY;
-
-    const plan1Margin = plan2Inputs ? { left: 14, right: 110 } : { left: 14, right: 14 };
-    const plan2Margin = { left: 110, right: 14 };
-
-    autoTable(doc, {
-      startY: planTablesStartY,
-      head: [[t('comparisonPopup.plan1Details'), '']],
-      body: [
-        [t('common.company'), plan1Inputs.company],
-        [t('common.plan'), plan1Inputs.plan],
-        [t('common.planCategory'), plan1Inputs.planCategory],
-        [t('common.sexuality'), plan1Inputs.sexuality],
-        [t('common.ward'), plan1Inputs.ward],
-        [t('common.planOption'), plan1Inputs.planOption],
-        [t('common.age'), plan1Inputs.age.toString()],
-        [t('common.numberOfYears'), clientInfo.premiumPaymentPeriod.toString()],
-      ],
-      theme: 'grid',
-      styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
-      headStyles: { fontStyle: 'bold', fillColor: appBarColor },
-      margin: plan1Margin,
-    });
-
-    currentY = doc.lastAutoTable.finalY;
-
-    if (plan2Inputs) {
-      autoTable(doc, {
-        startY: planTablesStartY,
-        head: [[t('comparisonPopup.plan2Details'), '']],
-        body: [
-          [t('common.company'), plan2Inputs.company],
-          [t('common.plan'), plan2Inputs.plan],
-          [t('common.planCategory'), plan2Inputs.planCategory],
-          [t('common.sexuality'), plan2Inputs.sexuality],
-          [t('common.ward'), plan2Inputs.ward],
-          [t('common.planOption'), plan2Inputs.planOption],
-          [t('common.age'), plan2Inputs.age.toString()],
-          [t('common.numberOfYears'), clientInfo.premiumPaymentPeriod.toString()],
-        ],
-        theme: 'grid',
-        styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
-        headStyles: { fontStyle: 'bold', fillColor: appBarColor },
-        margin: plan2Margin,
-      });
-      currentY = Math.max(currentY, doc.lastAutoTable.finalY);
-    }
 
     currentY += 5;
 
@@ -335,58 +284,46 @@ const ComparisonPopup = ({
 
     const tablesStartY = howItWorksY + 13;
 
-    const startAge = age;
-    const decadeEndAges = [];
-    let currentAge = startAge + 9;
-    while (currentAge <= 100) {
-      if (currentAge in ageToAccMP) {
-        decadeEndAges.push(currentAge);
-      }
-      currentAge += 10;
-    }
-    if (decadeEndAges.length > 0 && decadeEndAges[decadeEndAges.length - 1] < 100 && 100 in ageToAccMP) {
-      decadeEndAges.push(100);
-    }
+    const tableRows = inputs.map(input => {
+      const fromAge = parseInt(input.fromAge, 10);
+      const toAge = parseInt(input.toAge, 10);
+      const yearlyWithdrawalAmount = parseFloat(input.yearlyWithdrawalAmount.replace(/,/g, ''));
+      const numberOfYears = toAge - fromAge + 1;
+      const sumInUSD = yearlyWithdrawalAmount * numberOfYears;
+      const sumInHKD = sumInUSD * currencyRate;
+      const formattedSum = numberFormatter.format(Math.round(sumInHKD));
+      const ageRange = `${fromAge} - ${toAge}`;
+      return [
+        t(`expenseTypes.${input.expenseType}`),
+        ageRange,
+        `HKD $ ${formattedSum}`
+      ];
+    });
 
-    const rows = [];
-    if (startAge + 9 in ageToAccMP) {
-      const firstEndAge = startAge + 9;
-      rows.push([`${startAge} - ${firstEndAge} ${t('common.yearsOld')}`, `HKD $ ${numberFormatter.format(Math.round(ageToAccMP[firstEndAge]))}`]);
-
-      let lastAccMP = ageToAccMP[firstEndAge];
-      let lastEndAge = firstEndAge;
-
-      for (let i = 0; i < decadeEndAges.length; i++) {
-        const endAge = decadeEndAges[i];
-        if (endAge > lastEndAge) {
-          const rangeStart = lastEndAge + 1;
-          const rangeEnd = endAge;
-          const value = ageToAccMP[endAge] - lastAccMP;
-          rangeStart === 100
-            ? rows.push([`${rangeStart}${t('common.yearsOld')}`, `HKD $ ${numberFormatter.format(Math.round(value))}`])
-            : rows.push([`${rangeStart} - ${rangeEnd} ${t('common.yearsOld')}`, `HKD $ ${numberFormatter.format(Math.round(value))}`]);
-          lastAccMP = ageToAccMP[endAge];
-          lastEndAge = endAge;
-        }
-      }
-
-      if (lastEndAge < 100 && 100 in ageToAccMP) {
-        const rangeStart = lastEndAge + 1;
-        const rangeEnd = 100;
-        const value = ageToAccMP[100] - lastAccMP;
-        rangeStart === 100
-          ? rows.push([`${rangeStart}${t('common.yearsOld')}`, `HKD $ ${numberFormatter.format(Math.round(value))}`])
-          : rows.push([`${rangeStart} - ${rangeEnd} ${t('common.yearsOld')}`, `HKD $ ${numberFormatter.format(Math.round(value))}`]);
-      }
-    }
+    const totalSumInHKD = inputs.reduce((acc, input) => {
+      const fromAge = parseInt(input.fromAge, 10);
+      const toAge = parseInt(input.toAge, 10);
+      const yearlyWithdrawalAmount = parseFloat(input.yearlyWithdrawalAmount.replace(/,/g, ''));
+      const numberOfYears = toAge - fromAge + 1;
+      const sumInUSD = yearlyWithdrawalAmount * numberOfYears;
+      const sumInHKD = sumInUSD * currencyRate;
+      return acc + sumInHKD;
+    }, 0);
+    const formattedTotal = numberFormatter.format(Math.round(totalSumInHKD));
 
     autoTable(doc, {
       startY: tablesStartY,
-      head: [[t('comparisonPopup.ageRange'), t('comparisonPopup.traditionalMedicalPremiumTable')]],
-      body: rows,
+      head: [
+        // [{ content: t('outputForm1.header'), colSpan: 3, styles: { halign: 'center', fillColor: [42, 157, 143] } }],
+        [t('outputForm1.expenseType'), t('outputForm1.ageRange'), t('outputForm1.sumOfWithdrawal')]
+      ],
+      body: tableRows,
+      // foot: [[{ content: t('outputForm1.footer', { total: formattedTotal }), colSpan: 3, styles: { halign: 'right' } }]],
       theme: 'grid',
       styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
-      headStyles: { fontStyle: 'bold', fillColor: [42, 157, 143] },
+      headStyles: { fontStyle: 'bold',fillColor: [42, 157, 143] },
+      // footStyles: { fillColor: [255, 255, 0], fontStyle: 'bold' },
+      columnStyles: { 2: { halign: 'right' } },
       margin: { left: leftX, right: 110 },
     });
 
@@ -394,7 +331,6 @@ const ComparisonPopup = ({
 
     const outputForm2Rows = [];
     const firstRowEndAge = age + parseInt(clientInfo.premiumPaymentPeriod) - 1;
-    console.log("firstRowEndAge222",firstRowEndAge)
     outputForm2Rows.push([`${age} - ${firstRowEndAge} ${t('common.yearsOld')}`, t('outputForm2.firstRowValue', { premiumPaymentPeriod: clientInfo.premiumPaymentPeriod, averageMonthly: numberFormatter.format(Math.round(financingTotalCost / clientInfo.premiumPaymentPeriod / 12)) })]);
 
     let lastRowLastAge = firstRowEndAge;
@@ -430,11 +366,8 @@ const ComparisonPopup = ({
     const yPosition = Math.max(table1FinalY + 10, table2FinalY + 10) - 5;
 
     doc.setFont('NotoSansCJKtc', 'bold');
-    const currencyFormattedTraditionalTotalCost = numberFormatter.format(Math.round(traditionalTotalCost));
-    const currencyFormattedFinancingTotalCost = numberFormatter.format(Math.round(financingTotalCost));
-
     doc.text(t('comparisonPopup.totalCost', { total: currencyFormattedTraditionalTotalCost }), leftX + 2, yPosition + 3);
-    doc.text(t('comparisonPopup.totalCost', { total: currencyFormattedFinancingTotalCost }), rightX + 2, yPosition + 3);
+    doc.text(t('formattedFinancingTotalCost', { total: currencyFormattedFinancingTotalCost }), rightX + 2, yPosition + 3);
 
     doc.setFont('NotoSansCJKtc', 'normal');
     doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: '沒有價值' }), leftX + 2, yPosition + 11);
@@ -561,13 +494,12 @@ const ComparisonPopup = ({
               <OutputForm_1 
                 proposal={proposal}
                 fontSizeMultiplier={1.5}
-                />
+              />
               <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age1, value: '-' })}</Typography>
               <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age2, value: '-' })}</Typography>
             </Grid>
             <Grid item xs={6}>
               <OutputForm_2
-                
                 proposal={proposal}
                 finalNotionalAmount={finalNotionalAmount}
                 cashValueInfo={cashValueInfo}

@@ -203,6 +203,8 @@ i18next
       },
       "zh-HK": {
         translation: {
+          formattedFinancingTotalCost: "總保費",
+          formattedFinancingTotalCostPerYear: "年繳保費",
           Proposal: '計劃書',
           'Expense in USD': '美元開支',
           'Acc Expense in USD': '累積美元開支',
@@ -306,7 +308,7 @@ i18next
             currencyRate: '匯率'
           },
           outputForm1: {
-            header: "開支總覽",
+            header: "自己儲蓄",
             footer: "總成本: HKD $ {{total}}",
             expenseType: "開支",
             ageRange: "年齡",
@@ -352,11 +354,11 @@ i18next
             plan2Details: "基本醫療計劃 2 詳情",
             title: "Manulife 宏利",
             ageRange: "年齡範圍",
-            traditionalMedicalPremiumTable: "傳統醫療保費",
-            financingMedicalPremiumTable: "醫療融資保費",
+            traditionalMedicalPremiumTable: "一般銀行儲蓄",
+            financingMedicalPremiumTable: "教育基金",
             page: "頁面 {{current}}/{{total}}",
-            traditionalMedicalPremium: "傳統醫療保費",
-            financingMedicalPremium: "醫療融資保費",
+            traditionalMedicalPremium: "一般銀行儲蓄",
+            financingMedicalPremium: "教育基金",
             howItWorks: "實際操作 How does it work?",
             totalCost: "總成本: HKD $ {{total}}",
             accountValueAtAge: "{{age}} 歲戶口價值: HKD $ {{value}}",
@@ -364,15 +366,15 @@ i18next
             downloadReport: "醫療融資計劃",
             loadingFonts: "字體正在加載中，請稍後再試",
             traditionalPoints: {
-              0: "供款終身，保障終身",
-              1: "終身醫療保費 : HKD${{traditionalTotalCost}}",
-              2: "儲蓄功能 : 沒有",
+              0: "銀行1:1 戶口 終身儲蓄",
+              1: "教育基金 : 總成本 : HKD${{traditionalTotalCost}}",
+              2: "資產傳承 : 沒有",
               3: ""
             },
             financingPoints: {
-              0: "供款{{premiumPaymentPeriod}}年，保障終身",
-              1: "節省{{savingsPercentage}}% (HKD ${{savings}}) 醫療保費",
-              2: "儲蓄功能 : {{age}}歲 戶口價值 : HKD ${{formattedAccountValue}}",
+              0: "儲蓄{{premiumPaymentPeriod}}年，一生受惠",
+              1: "節省{{savingsPercentage}}% (HKD ${{savings}}) 教育基金",
+              2: "資產傳承 : {{age}}歲 戶口價值 : HKD ${{formattedAccountValue}}",
               3: ""
             },
             disclaimer: "以上內容只供參考，並不作為任何投資買賣的意見或諮詢。"
@@ -530,11 +532,11 @@ i18next
             plan2Details: "基本医疗计划 2 详情",
             title: "Manulife 宏利",
             ageRange: "年龄范围",
-            traditionalMedicalPremiumTable: "传统医疗保费",
-            financingMedicalPremiumTable: "医疗融资保费",
+            traditionalMedicalPremiumTable: "一般银行储蓄",
+            financingMedicalPremiumTable: "教育基金",
             page: "页面 {{current}}/{{total}}",
-            traditionalMedicalPremium: "传统医疗保费",
-            financingMedicalPremium: "医疗融资保费",
+            traditionalMedicalPremium: "一般银行储蓄",
+            financingMedicalPremium: "教育基金",
             howItWorks: "实际操作 How does it work?",
             totalCost: "总成本: HKD $ {{total}}",
             accountValueAtAge: "{{age}} 岁户口价值: HKD $ {{value}}",
@@ -542,18 +544,18 @@ i18next
             downloadReport: "医疗融资计划",
             loadingFonts: "字体正在加载中，请稍后再试",
             traditionalPoints: {
-              0: "逐年购买，住院赔钱，无事洗钱",
-              1: "年年加价，年轻时保费便宜",
-              2: "年长时保费递增，退休后保费高昂",
-              3: "消费性产品"
+              0: "银行1:1 户口 终身储蓄",
+              1: "教育基金 : 总成本: HKD${{traditionalTotalCost}}",
+              2: "资产传承 : 没有",
+              3: ""
             },
             financingPoints: {
-              0: "只需{{premiumPaymentPeriod}}年完成终生医疗保卫",
-              1: "节省{{savingsPercentage}}% 终生医疗保费 HKD ${{savings}}",
-              2: "全面终生医疗保障至100岁",
-              3: "有事赔钱，无事储钱，户口长期增值"
+              0: "储蓄{{premiumPaymentPeriod}}年,一生受惠",
+              1: "节省{{savingsPercentage}}% (HKD ${{savings}}) 教育基金",
+              2: "资产传承 : {{age}}岁 户口价值 : HKD ${{formattedAccountValue}}",
+              3: ""
             },
-            disclaimer: "以上內容只供參考，並不作為任何投資買賣的意見或諮詢。"
+            disclaimer: "以上内容只供参考，并不作为任何投资买卖的意见或咨询。"
           }
         }
       }
