@@ -21,7 +21,7 @@ const App = () => {
   const [proposals, setProposals] = useState([
     {
       target: { age: 6, numberOfYears: 5, currencyRate: 7.85, inflationRate: 2 },
-      inputs: [{ expenseType: 'tuition', fromAge: '19', toAge: '22', yearlyWithdrawalAmount: '200000' }],
+      inputs: [{ expenseType: 'tuition', fromAge: '19', toAge: '22', yearlyWithdrawalAmount: '50,000' }],
       processData: []
     }
   ]);
