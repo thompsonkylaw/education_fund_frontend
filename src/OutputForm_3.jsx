@@ -30,6 +30,8 @@ const NumberFormatCustom = React.forwardRef(function NumberFormatCustom(props, r
 });
 
 const OutputForm_3 = ({
+  proposal,
+  
   processedData,
   numberOfYears,
   numberOfYearAccMP,
@@ -187,6 +189,8 @@ const OutputForm_3 = ({
       >
         {t('outputForm3.savePDFButton')}
       </Button> */}
+
+
       <ComparisonPopup
         open={openPopup}
         onClose={handleClosePopup}
@@ -194,18 +198,17 @@ const OutputForm_3 = ({
         age2={Number(age2)}
         currency1={Number(currency1)}
         currency2={Number(currency2)}
-        processedData={processedData}
-        numberOfYears={numberOfYears}
-        numberOfYearAccMP={numberOfYearAccMP}
-        finalNotionalAmount={finalNotionalAmount}
-        age={age}
-        currencyRate={currencyRate}
-        numOfRowInOutputForm_1={numOfRowInOutputForm_1}
-        plan1Inputs={plan1Inputs}
-        plan2Inputs={plan2Inputs}
-        clientInfo={clientInfo}
+
+        proposal={proposal}
         cashValueInfo={cashValueInfo}
+        finalNotionalAmount={finalNotionalAmount}
+        setFinalNotionalAmount={setFinalNotionalAmount}
+        clientInfo={clientInfo}
         appBarColor={appBarColor}
+        pdfBase64={pdfBase64}
+        filename={filename}
+
+
       />
     </Box>
   );

@@ -1,3 +1,4 @@
+//2
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
@@ -22,24 +23,28 @@ const UseInflation = ({
   inflationRate,
   currencyRate,
   useInflation,
-  setUseInflation,
+  setUseInflation,  
   onInflationRateChange,
   onCurrencyRateChange,
   processedData,
   inputs,
-  numberOfYearAccMP,
-  setFinalNotionalAmount,
-  disabled,
+  proposalIndex,
+  company,
   cashValueInfo,
   setCashValueInfo,
-  clientInfo,
-  setClientInfo,
-  company,
-  IsProduction_Login,
+  disabled,
   pdfBase64,
   setpdfBase64,
   filename,
   setfilename,
+  setFinalNotionalAmount,
+
+  numberOfYearAccMP,
+  
+  clientInfo,
+  setClientInfo,
+  IsProduction_Login,
+  
 }) => {
   
   const { t } = useTranslation();
@@ -87,14 +92,17 @@ const UseInflation = ({
         onClose={() => setOpenLoginModal(false)}
         processedData={processedData}
         inputs={inputs}
+        clientInfo={clientInfo}
+        setClientInfo={setClientInfo}
+
         numberOfYearAccMP={numberOfYearAccMP}
         useInflation={useInflation}
         setFinalNotionalAmount={setFinalNotionalAmount}
         disabled={disabled}
         cashValueInfo={cashValueInfo}
         setCashValueInfo={setCashValueInfo}
-        clientInfo={clientInfo}
-        setClientInfo={setClientInfo}
+        // clientInfo={processedData}
+        // setClientInfo={setClientInfo}
         company={company}
         IsProduction_Login = {IsProduction_Login}
         pdfBase64={pdfBase64}

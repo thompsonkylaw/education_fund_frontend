@@ -25,6 +25,10 @@ i18next
     resources: {
       en: {
         translation: {
+          Proposal: 'Proposal',
+          'Expense in USD': 'Expense in USD',
+          'Acc Expense in USD': 'Accumulated Expense in USD',
+          'Acc Expense in HKD': 'Accumulated Expense in HKD',
           cash_value: 'Surrender value after withdrawal',
           Failed_to_fetch_system_login_name: 'Failed to fetch system login name',
           Both_login_name_fields_are_required: 'Both login name fields are required',
@@ -39,7 +43,7 @@ i18next
           welcome: 'Welcome',
           greeting: 'Hello, {{name}}!',
           Yearth: 'Year {{year}}',
-          "Medical Financial Calculator": "Medical Financial Calculator",
+          "Medical Financial Calculator": "Education Fund Planner",
           medicalTotal: '{{years}}th Year Medical Ins Total (HKD): {{total}}',
           Company: "Insurance Company",
           Plan: 'Plan',
@@ -60,6 +64,16 @@ i18next
           'Acc MP USD': 'Acc MP(USD)',
           'Acc MP': 'Acc MP(HKD)',
           Settings: 'Setting',
+          'Expense Type': 'Expense Type',
+          'From Age': 'From Age',
+          'To Age': 'To Age',
+          'Yearly Withdrawal Amount': 'Yearly Withdrawal Amount',
+          "expenseTypes": {
+            "tuition": "Tuition",
+            "marriage": "Marriage",
+            "property": "Property Purchase",
+            "retirement": "Retirement"
+          },
           login: {
             premiumPeriodError: 'Does not match the premium payment period of the medical plan',
             age1: 'First Surrender Value Age',
@@ -114,14 +128,16 @@ i18next
           },
           outputForm1: {
             header: "Traditional Medical Premium",
-            footer: "Total Cost: HKD $ {{total}}"
+            footer: "Total Cost: HKD $ {{total}}",
+            expenseType: "Expense Type",
+            ageRange: "Age Range",
+            sumOfWithdrawal: "Sum of Withdrawal"
           },
           outputForm2: {
             header: "Medical Financing Premium",
             footer: "Total Cost: HKD $ {{total}}",
             firstRowValue: "First {{premiumPaymentPeriod}} years average monthly HKD $ {{averageMonthly}}",
-            placeholder: "Please complete login to get notional amount",
-            
+            placeholder: "Please complete login to get notional amount"
           },
           outputForm3: {
             ageLabel: "Age",
@@ -129,7 +145,7 @@ i18next
             compareButton: "Compare Now",
             resetButton: "Reset Form",
             resetConfirmation: "Are you sure you want to reset the form? All inputs will be cleared.",
-            savePDFButton: "Save Proposal",
+            savePDFButton: "Save Proposal"
           },
           common: {
             company: "Company",
@@ -180,12 +196,16 @@ i18next
               2: "Savings feature: Account value at age {{age}}: HKD ${{formattedAccountValue}}",
               3: ""
             },
-            disclaimer:"This document is for reference only and is not intended as any investment advice or consultation."
+            disclaimer: "This document is for reference only and is not intended as any investment advice or consultation."
           }
         }
       },
       "zh-HK": {
         translation: {
+          Proposal: '計劃書',
+          'Expense in USD': '美元開支',
+          'Acc Expense in USD': '累積美元開支',
+          'Acc Expense in HKD': '累積港元開支',
           cash_value: '款項提取後的退保價值',
           Failed_to_fetch_system_login_name: '無法取得系統登入名稱',
           Both_login_name_fields_are_required: '兩個登入名稱欄位均為必填',
@@ -200,7 +220,7 @@ i18next
           welcome: '歡迎',
           greeting: '你好, {{name}}!',
           Yearth: '第{{year}}年',
-          "Medical Financial Calculator": "醫療融資計算機",
+          "Medical Financial Calculator": "教育基金計算器",
           medicalTotal: '第{{years}}年醫療保險總額（港元）：{{total}}',
           Company: "保險公司",
           Plan: '計劃',
@@ -221,6 +241,16 @@ i18next
           'Acc MP USD': '累積醫療保費(美元)',
           'Acc MP': '累積醫療保費(港元)',
           Settings: 'Setting',
+          'Expense Type': '開支類型',
+          'From Age': '起始年齡',
+          'To Age': '結束年齡',
+          'Yearly Withdrawal Amount': '每年提取金額',
+          "expenseTypes": {
+            "tuition": "學費",
+            "marriage": "結婚",
+            "property": "置業",
+            "retirement": "退休"
+          },
           login: {
             premiumPeriodError: '與醫療計劃保費繳付期不符',
             age1: '第一退保報價值歲數',
@@ -274,11 +304,14 @@ i18next
             currencyRate: '匯率'
           },
           outputForm1: {
-            header: "傳統醫療保費",
-            footer: "總成本: HKD $ {{total}}"
+            header: "開支總覽",
+            footer: "總成本: HKD $ {{total}}",
+            expenseType: "開支類型",
+            ageRange: "年齡範圍",
+            sumOfWithdrawal: "提取總額"
           },
           outputForm2: {
-            header: "醫療融資保費",
+            header: "教育基金",
             footer: "總成本: HKD $ {{total}}",
             firstRowValue: "首{{premiumPaymentPeriod}}年平均每月 HKD $ {{averageMonthly}}",
             placeholder: "請先完成登錄以獲取名義金額"
@@ -289,7 +322,7 @@ i18next
             compareButton: "馬上比較",
             resetButton: "重設表單",
             resetConfirmation: "確定要重設表單嗎？所有輸入將被清除。",
-            savePDFButton: "儲存計劃書",
+            savePDFButton: "儲存計劃書"
           },
           common: {
             company: "公司",
@@ -340,12 +373,16 @@ i18next
               2: "儲蓄功能 : {{age}}歲 戶口價值 : HKD ${{formattedAccountValue}}",
               3: ""
             },
-            disclaimer:"以上內容只供參考，並不作為任何投資買賣的意見或諮詢。"
+            disclaimer: "以上內容只供參考，並不作為任何投資買賣的意見或諮詢。"
           }
         }
       },
       "zh-CN": {
         translation: {
+          Proposal: '计划书',
+          'Expense in USD': '美元开支',
+          'Acc Expense in USD': '累积美元开支',
+          'Acc Expense in HKD': '累积港元开支',
           cash_value: '款项提取后的退保价值',
           Failed_to_fetch_system_login_name: '无法获取系统登录名称',
           Both_login_name_fields_are_required: '两个登录名称字段均为必填',
@@ -360,7 +397,7 @@ i18next
           welcome: '欢迎',
           greeting: '你好, {{name}}!',
           Yearth: '第{{year}}年',
-          "Medical Financial Calculator": "医疗融资计算器",
+          "Medical Financial Calculator": "教育基金计算器",
           medicalTotal: '第{{years}}年医疗保险总额（港元）：{{total}}',
           Company: "保险公司",
           Plan: '计划',
@@ -381,6 +418,16 @@ i18next
           'Acc MP USD': '累积医疗保费(美元)',
           'Acc MP': '累积医疗保费(港元)',
           Settings: 'Setting',
+          'Expense Type': '开支类型',
+          'From Age': '起始年龄',
+          'To Age': '结束年龄',
+          'Yearly Withdrawal Amount': '每年提取金额',
+          "expenseTypes": {
+            "tuition": "学费",
+            "marriage": "结婚",
+            "property": "置业",
+            "retirement": "退休"
+          },
           login: {
             premiumPeriodError: '与医疗计划保费缴付期不符',
             age1: '第一退保报价值岁数',
@@ -435,7 +482,10 @@ i18next
           },
           outputForm1: {
             header: "传统医疗保费",
-            footer: "总成本: HKD $ {{total}}"
+            footer: "总成本: HKD $ {{total}}",
+            expenseType: "开支类型",
+            ageRange: "年龄范围",
+            sumOfWithdrawal: "提取总额"
           },
           outputForm2: {
             header: "医疗融资保费",
@@ -449,7 +499,7 @@ i18next
             compareButton: "马上比较",
             resetButton: "重设表单",
             resetConfirmation: "确定要重设表单吗？所有输入将被清除。",
-            savePDFButton: "储存计划书",
+            savePDFButton: "储存计划书"
           },
           common: {
             company: "公司",
@@ -500,7 +550,7 @@ i18next
               2: "全面终生医疗保障至100岁",
               3: "有事赔钱，无事储钱，户口长期增值"
             },
-            disclaimer:"以上內容只供參考，並不作為任何投資買賣的意見或諮詢。"
+            disclaimer: "以上內容只供參考，並不作為任何投資買賣的意見或諮詢。"
           }
         }
       }

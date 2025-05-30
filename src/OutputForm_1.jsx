@@ -16,37 +16,36 @@ const numberFormatter = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0,
 });
 
-const OutputForm_1 = ({ processedData, age, currencyRate, numOfRowInOutputForm_1, fontSizeMultiplier = 1 }) => {
+const OutputForm_1 = ({ proposal, fontSizeMultiplier = 1 }) => {
   const { t } = useTranslation();
-  const startAge = age;
-  const ageToAccMP = {};
-  processedData.forEach(row => {
-    ageToAccMP[row.age] = row.accumulatedMP;
+  const currencyRate = proposal.target.currencyRate;
+
+  const inputs = proposal.inputs.map(item => ({
+    expenseType: item.expenseType,
+    fromAge: item.fromAge,
+    toAge: item.toAge,
+    yearlyWithdrawalAmount: item.yearlyWithdrawalAmount,
+  }));
+
+  const rows = inputs.map(input => {
+    const fromAge = parseInt(input.fromAge, 10);
+    const toAge = parseInt(input.toAge, 10);
+    const yearlyWithdrawalAmount = parseFloat(input.yearlyWithdrawalAmount.replace(/,/g, ''));
+    const numberOfYears = toAge - fromAge + 1;
+    const sumInUSD = yearlyWithdrawalAmount * numberOfYears;
+    const sumInHKD = sumInUSD * currencyRate;
+    const formattedSum = numberFormatter.format(Math.round(sumInHKD));
+    const ageRange = `${fromAge} - ${toAge}`;
+    return {
+      expenseType: input.expenseType,
+      ageRange,
+      formattedSum: `HKD $ ${formattedSum}`,
+      sumInHKD,
+    };
   });
 
-  const rows = [];
-  let lastEndAge = startAge - 1;
-  let lastAccMP = 0;
-
-  while (lastEndAge < 100) {
-    const rowStart = lastEndAge + 1;
-    if (rowStart > 100) break;
-    const rowEnd = Math.min(rowStart + 9, 100);
-    if (!(rowEnd in ageToAccMP)) break;
-    const ageRange = rowStart === rowEnd 
-      ? `${rowStart} ${t('common.yearsOld')}` 
-      : `${rowStart} - ${rowEnd} ${t('common.yearsOld')}`;
-    const value = ageToAccMP[rowEnd] - lastAccMP;
-    rows.push({
-      ageRange,
-      value,
-    });
-    lastAccMP = ageToAccMP[rowEnd];
-    lastEndAge = rowEnd;
-  }
-
-  const total = ageToAccMP[100];
-  const formattedTotal = numberFormatter.format(Math.round(total));
+  const totalSumInHKD = rows.reduce((acc, row) => acc + row.sumInHKD, 0);
+  const formattedTotal = numberFormatter.format(Math.round(totalSumInHKD));
 
   const baseFontSize = 1;
   const headerFontSize = 1.5;
@@ -59,7 +58,7 @@ const OutputForm_1 = ({ processedData, age, currencyRate, numOfRowInOutputForm_1
         <TableHead>
           <TableRow>
             <TableCell 
-              colSpan={2} 
+              colSpan={3} 
               align="center" 
               sx={{ 
                 backgroundColor: 'rgb(42, 157, 143)', 
@@ -71,16 +70,35 @@ const OutputForm_1 = ({ processedData, age, currencyRate, numOfRowInOutputForm_1
               {t('outputForm1.header')}
             </TableCell>
           </TableRow>
+          <TableRow>
+            <TableCell sx={{ fontWeight: 'bold', fontSize: cellFontSize }}>
+              {t('outputForm1.expenseType')}
+            </TableCell>
+            <TableCell sx={{ fontWeight: 'bold', fontSize: cellFontSize }}>
+              {t('outputForm1.ageRange')}
+            </TableCell>
+            <TableCell 
+              align="right" 
+              sx={{ fontWeight: 'bold', fontSize: cellFontSize }}
+            >
+              {t('outputForm1.sumOfWithdrawal')}
+            </TableCell>
+          </TableRow>
         </TableHead>
         <TableBody>
           {rows.map((row, index) => (
             <TableRow key={index}>
-              <TableCell sx={{ fontSize: cellFontSize }}>{row.ageRange}</TableCell>
+              <TableCell sx={{ fontSize: cellFontSize }}>
+                {t(`expenseTypes.${row.expenseType}`)}
+              </TableCell>
+              <TableCell sx={{ fontSize: cellFontSize }}>
+                {row.ageRange}
+              </TableCell>
               <TableCell 
                 align="right" 
                 sx={{ fontSize: cellFontSize }}
               >
-                {`HKD $ ${numberFormatter.format(Math.round(row.value))}`}
+                {row.formattedSum}
               </TableCell>
             </TableRow>
           ))}
@@ -88,7 +106,7 @@ const OutputForm_1 = ({ processedData, age, currencyRate, numOfRowInOutputForm_1
         <TableFooter>
           <TableRow>
             <TableCell 
-              colSpan={2} 
+              colSpan={3} 
               align="right" 
               sx={{ 
                 backgroundColor: 'yellow', 

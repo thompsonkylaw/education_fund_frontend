@@ -20,15 +20,14 @@ const ComparisonPopup = ({
   age2,
   currency1,
   currency2,
-  processedData,
-  numberOfYears,
-  numberOfYearAccMP,
+
+  proposal,
+  
+  
   finalNotionalAmount,
-  age,
-  currencyRate,
+  
   numOfRowInOutputForm_1,
-  plan1Inputs,
-  plan2Inputs,
+  
   clientInfo,
   cashValueInfo,
   appBarColor
@@ -38,7 +37,28 @@ const ComparisonPopup = ({
   const [fontBoldData, setFontBoldData] = useState(null);
   const [fontsLoaded, setFontsLoaded] = useState(false);
   const [isJsPDFEnabled, setIsJsPDFEnabled] = useState(false);
+  
+  const currencyRate = proposal.target.currencyRate;
+  // console.log("currencyRate=====================================================",currencyRate)
 
+  const inputs = proposal.inputs.map(item => ({
+        expenseType: item.expenseType,
+        fromAge: item.fromAge,
+        toAge: item.toAge,
+        yearlyWithdrawalAmount: item.yearlyWithdrawalAmount,
+  }));
+
+  const age = proposal.target.age;
+  const numberOfYears = proposal.target.numberOfYears;
+  const processData = proposal.processData;
+  let numberOfYearAccMP;
+  console.log("processData======================================",processData);
+  if (processData.length > 0) {
+  
+    numberOfYearAccMP = processData[numberOfYears -1 ].accExpenseInUSD;
+    console.log("numberOfYearAccMP======================================",numberOfYearAccMP);
+  }
+  
 
   useEffect(() => {
     const loadFonts = async () => {
@@ -74,7 +94,7 @@ const ComparisonPopup = ({
   };
 
   const ageToAccMP = {};
-  processedData.forEach((row) => {
+  processData.forEach((row) => {
     ageToAccMP[row.age] = row.accumulatedMP;
   });
   const traditionalTotalCost = ageToAccMP[100] || 0;
@@ -538,19 +558,18 @@ const ComparisonPopup = ({
               </Box>
             </Grid>
             <Grid item xs={6}>
-              <OutputForm_1 processedData={processedData} age={age} currencyRate={currencyRate} fontSizeMultiplier={1.5} />
+              <OutputForm_1 
+                proposal={proposal}
+                fontSizeMultiplier={1.5}
+                />
               <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age1, value: '-' })}</Typography>
               <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age2, value: '-' })}</Typography>
             </Grid>
             <Grid item xs={6}>
               <OutputForm_2
-                age={age}
-                numberOfYears={clientInfo.premiumPaymentPeriod}
-                numberOfYearAccMP={numberOfYearAccMP}
+                
+                proposal={proposal}
                 finalNotionalAmount={finalNotionalAmount}
-                currencyRate={currencyRate}
-                fontSizeMultiplier={1.5}
-                numOfRowInOutputForm_1={numOfRowInOutputForm_1}
                 cashValueInfo={cashValueInfo}
               />
               <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age1, value: formattedAccountValue1 })}</Typography>

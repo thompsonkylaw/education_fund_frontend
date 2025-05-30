@@ -1,3 +1,4 @@
+//test
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -48,7 +49,7 @@ const modalStyle = {
 function Login({ 
   open,
   onClose,
-  processedData, 
+  // processedData, 
   inputs, 
   numberOfYearAccMP,
   useInflation,
@@ -91,7 +92,7 @@ function Login({
   const [notionalAmount, setNotionalAmount] = useState('20000');
   const [premiumPaymentMethod, setPremiumPaymentMethod] = useState('每年');
   const [getPromotionalDiscount, setGetPromotionalDiscount] = useState(true);
-  const [fromYear, setFromYear] = useState(inputs.numberOfYears + 1);
+  const [fromYear, setFromYear] = useState(inputs[0].target.numberOfYears + 1);
   const [withdrawalPeriod, setWithdrawalPeriod] = useState('');
   const [annualWithdrawalAmount, setAnnualWithdrawalAmount] = useState(1000);
   const [proposalLanguage, setProposalLanguage] = useState("zh-HK");
@@ -118,11 +119,38 @@ function Login({
   const reconnectIntervalRef = useRef(null);
 
   const ageOptions = [...Array.from({ length: 30 }, (_, i) => i + 1), 65, 70, 75, 80, 85, 90, 95, 100];
-  const [selectedAge1, setSelectedAge1] = useState(cashValueInfo?.age_1 || 1);
-  const [selectedAge2, setSelectedAge2] = useState(cashValueInfo?.age_2 || 1);
+  const [selectedAge1, setSelectedAge1] = useState(cashValueInfo?.age_1 || 65);
+  const [selectedAge2, setSelectedAge2] = useState(cashValueInfo?.age_2 || 85);
 
   const sessionIdRef = useRef(sessionId);
+  const useAge = false;
+  const isEduFund = true;
   const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:7002';
+
+  
+  // State for calculation_data
+  const [processedData, setProcessedData] = useState([]);
+  const [calculationInputs, setCalculationInputs] = useState({});
+
+  // Process inputs and set calculation data
+  useEffect(() => {
+    if (inputs && inputs[0] && inputs[0].processData) {
+      const newProcessedData = inputs[0].processData.map(item => ({
+        yearNumber: item.year,
+        age: item.age,
+        medicalPremium: item.expenseInUSD,
+        accumulatedMP: item.accExpenseInUSD,
+      }));
+      setProcessedData(newProcessedData);
+      setCalculationInputs({
+        age: inputs[0].target.age,
+        numberOfYears: inputs[0].target.numberOfYears,
+        currencyRate: inputs[0].target.currencyRate || 0,
+        inflationRate: inputs[0].target.inflationRate || 0,
+      });
+    }
+  }, [inputs]);
+     
 
   useEffect(() => {
     sessionIdRef.current = sessionId;
@@ -165,13 +193,14 @@ function Login({
       window.URL.revokeObjectURL(url);
     }, 1000);
   };
-
+  
+  
   useEffect(() => {
-    if (inputs.age && inputs.numberOfYears) {
-      const calculatedWithdrawalPeriod = 100 - inputs.age - inputs.numberOfYears + 2;
+    if (inputs[0].target.age && inputs[0].target.numberOfYears) {
+      const calculatedWithdrawalPeriod = 100 - inputs[0].target.age - inputs[0].target.numberOfYears + 2;
       setWithdrawalPeriod(calculatedWithdrawalPeriod);
     }
-  }, [inputs.age, inputs.numberOfYears]);
+  }, [inputs[0].target.age, inputs[0].target.numberOfYears]);
 
   useEffect(() => {
     if (open) {
@@ -429,9 +458,10 @@ function Login({
         session_id: sessionId,
         otp,
         calculation_data: {
-          processedData,
-          inputs,
-          totalAccumulatedMP: numberOfYearAccMP,
+          processedData : processedData,
+          inputs : calculationInputs,
+          totalAccumulatedMP: 0,
+
         },
         cashValueInfo: {
           age_1: selectedAge1,
@@ -458,6 +488,8 @@ function Login({
           proposalLanguage,
           selectedAge1,
           selectedAge2,
+          useAge,
+          isEduFund
         },
       });
       if (response.data.status === 'otp_failed') {
@@ -578,7 +610,7 @@ function Login({
     'en': t('login.languageEn'),
   };
 
-  const premiumPeriodError = clientInfo.premiumPaymentPeriod && parseInt(clientInfo.premiumPaymentPeriod, 10) !== inputs.numberOfYears;
+  const premiumPeriodError = clientInfo.premiumPaymentPeriod && parseInt(clientInfo.premiumPaymentPeriod, 10) !== inputs[0].target.numberOfYears;
 
   const isLoginDisabled = step === 'login' && (
     !clientInfo.surname ||
@@ -597,6 +629,10 @@ function Login({
   );
 
   const isOtpDisabled = step === 'otp' && (otp.length !== 6);
+
+  
+  
+  
 
   return (
     <Modal
