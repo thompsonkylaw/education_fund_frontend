@@ -137,7 +137,7 @@ const UseInflation = ({
             type="number"
             value={inflationRate}
             onChange={(e) => onInflationRateChange(Number(e.target.value))}
-            inputProps={{ min: 0, step: 0.1 }}
+            inputProps={{ min: 0, step: 1 }}
             variant="outlined"
             margin="normal"
             disabled={disabled}

@@ -128,7 +128,7 @@ i18next
             currencyRate: 'Currency Rate'
           },
           outputForm1: {
-            header: "Traditional Medical Premium",
+            header: "Bank Saving",
             footer: "Total Cost: HKD $ {{total}}",
             expenseType: "Expense Type",
             ageRange: "Age Range",
@@ -308,7 +308,7 @@ i18next
             currencyRate: '匯率'
           },
           outputForm1: {
-            header: "自己儲蓄",
+            header: "銀行儲蓄",
             footer: "總成本: HKD $ {{total}}",
             expenseType: "開支",
             ageRange: "年齡",
@@ -486,14 +486,14 @@ i18next
             currencyRate: '汇率'
           },
           outputForm1: {
-            header: "传统医疗保费",
+            header: "银行储蓄",
             footer: "总成本: HKD $ {{total}}",
             expenseType: "开支",
             ageRange: "年龄",
             sumOfWithdrawal: "提取总额"
           },
           outputForm2: {
-            header: "医疗融资保费",
+            header: "教育基金",
             footer: "总成本: HKD $ {{total}}",
             firstRowValue: "首{{premiumPaymentPeriod}}年平均每月 HKD $ {{averageMonthly}}",
             placeholder: "请先完成登录以获取名义金额"

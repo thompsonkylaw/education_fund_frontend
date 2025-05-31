@@ -19,20 +19,20 @@ const numberFormatter = new Intl.NumberFormat('en-US', {
 const OutputForm_1 = ({ proposal, fontSizeMultiplier = 1 }) => {
   const { t } = useTranslation();
   const currencyRate = proposal.target.currencyRate;
+  const processData = proposal.processData || [];
 
   const inputs = proposal.inputs.map(item => ({
     expenseType: item.expenseType,
     fromAge: item.fromAge,
     toAge: item.toAge,
-    yearlyWithdrawalAmount: item.yearlyWithdrawalAmount,
   }));
 
   const rows = inputs.map(input => {
     const fromAge = parseInt(input.fromAge, 10);
     const toAge = parseInt(input.toAge, 10);
-    const yearlyWithdrawalAmount = parseFloat(input.yearlyWithdrawalAmount.replace(/,/g, ''));
-    const numberOfYears = toAge - fromAge + 1;
-    const sumInUSD = yearlyWithdrawalAmount * numberOfYears;
+    const sumInUSD = processData
+      .filter(row => row.age >= fromAge && row.age <= toAge)
+      .reduce((acc, row) => acc + row.expenseInUSD, 0);
     const sumInHKD = sumInUSD * currencyRate;
     const formattedSum = numberFormatter.format(Math.round(sumInHKD));
     const ageRange = `${fromAge} - ${toAge}`;
