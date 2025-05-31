@@ -97,7 +97,7 @@ const Proposal = ({ proposalIndex,
           disabled ={disabled}
          />
         <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
-          <IconButton onClick={addInput} disabled={inputs.length >= 4}>
+          <IconButton onClick={addInput} disabled={inputs.length >= 5}>
             <AddIcon />
           </IconButton>
           <IconButton onClick={removeInput} disabled={inputs.length <= 1}>

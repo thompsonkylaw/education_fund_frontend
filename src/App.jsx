@@ -18,15 +18,51 @@ const theme = createTheme({
 const App = () => {
   const IsProduction_Login = true;
   const { t } = useTranslation();
-  const [proposals, setProposals] = useState([
-    {
-      target: { age: 6, numberOfYears: 5, currencyRate: 7.85, inflationRate: 2 },
-      inputs: [{ expenseType: 'tuition', fromAge: '19', toAge: '22', yearlyWithdrawalAmount: '50,000' }],
-      processData: []
+
+  const [proposals, setProposals] = useState(() => {
+    const saved = localStorage.getItem('proposals');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Error parsing saved proposals:', e);
+      }
     }
-  ]);
-  const [inflationRate, setInflationRate] = useState(6);
-  const [currencyRate, setCurrencyRate] = useState(7.85);
+    return [
+      {
+        target: { age: 6, numberOfYears: 5, currencyRate: 7.85, inflationRate: 2 },
+        inputs: [{ expenseType: 'tuition', fromAge: '19', toAge: '22', yearlyWithdrawalAmount: '50,000' }],
+        processData: []
+      }
+    ];
+  });
+
+  const [inflationRate, setInflationRate] = useState(() => {
+    const savedProposals = localStorage.getItem('proposals');
+    if (savedProposals) {
+      try {
+        const parsed = JSON.parse(savedProposals);
+        return parsed[0]?.target.inflationRate ?? 1.5;
+      } catch (e) {
+        console.error('Error parsing saved proposals for inflationRate:', e);
+      }
+    }
+    return 1.5;
+  });
+
+  const [currencyRate, setCurrencyRate] = useState(() => {
+    const savedProposals = localStorage.getItem('proposals');
+    if (savedProposals) {
+      try {
+        const parsed = JSON.parse(savedProposals);
+        return parsed[0]?.target.currencyRate ?? 7.85;
+      } catch (e) {
+        console.error('Error parsing saved proposals for currencyRate:', e);
+      }
+    }
+    return 7.85;
+  });
+
   const [useInflation, setUseInflation] = useState(false);
   const [appBarColor, setAppBarColor] = useState('green');
   const [company, setCompany] = useState('Manulife');
@@ -48,6 +84,10 @@ const App = () => {
   });
   const [pdfBase64, setpdfBase64] = useState();
   const [filename, setfilename] = useState();
+
+  useEffect(() => {
+    localStorage.setItem('proposals', JSON.stringify(proposals));
+  }, [proposals]);
 
   useEffect(() => {
     setProposals(prevProposals =>
@@ -98,12 +138,12 @@ const App = () => {
   };
 
   const addInputToProposal = (proposalIndex) => {
-    if (proposals[proposalIndex].inputs.length < 4) {
+    if (proposals[proposalIndex].inputs.length < 5) {
       setProposals(prev => {
         const newProposals = [...prev];
         const proposal = newProposals[proposalIndex];
         const lastInput = proposal.inputs[proposal.inputs.length - 1];
-        const newFromAge = lastInput ? Number(lastInput.toAge) + 1  : '';
+        const newFromAge = lastInput ? Number(lastInput.toAge) + 1 : '';
         const newInputs = [
           ...proposal.inputs,
           { expenseType: '', fromAge: newFromAge, toAge: '', yearlyWithdrawalAmount: '' }

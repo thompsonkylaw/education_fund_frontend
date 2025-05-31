@@ -175,12 +175,15 @@ const ComparisonPopup = ({
     const x2 = margin + fieldWidth;
     const x3 = margin + 2 * fieldWidth;
     const x4 = margin + 3 * fieldWidth;
+
     const currencyFormattedTraditionalTotalCost = numberFormatter.format(Math.round(traditionalTotalCost));
     const currencyFormattedFinancingTotalCost = numberFormatter.format(Math.round(financingTotalCost));
+    const currencyFormattedFinancingTotalCostPerYear = numberFormatter.format(Math.round(financingTotalCost / numberOfYears));
+
 
     doc.text(`${t('common.age')}: ${age || ''}`, x1, currentY);
     doc.text(`${t('common.numberOfYears')}: ${numberOfYears || ''}`, x2, currentY);
-    const currencyFormattedFinancingTotalCostPerYear = currencyFormattedFinancingTotalCost / numberOfYears;
+    
     doc.text(`${t('formattedFinancingTotalCostPerYear')}: ${currencyFormattedFinancingTotalCostPerYear || ''}`, x3, currentY);
     doc.text(`${t('formattedFinancingTotalCost')}: ${currencyFormattedFinancingTotalCost || ''}`, x4, currentY);
 
@@ -367,7 +370,7 @@ const ComparisonPopup = ({
 
     doc.setFont('NotoSansCJKtc', 'bold');
     doc.text(t('comparisonPopup.totalCost', { total: currencyFormattedTraditionalTotalCost }), leftX + 2, yPosition + 3);
-    doc.text(t('formattedFinancingTotalCost', { total: currencyFormattedFinancingTotalCost }), rightX + 2, yPosition + 3);
+    doc.text(t('comparisonPopup.totalCost', { total: currencyFormattedFinancingTotalCost }), rightX + 2, yPosition + 3);
 
     doc.setFont('NotoSansCJKtc', 'normal');
     doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: '沒有價值' }), leftX + 2, yPosition + 11);
