@@ -67,7 +67,7 @@ function Login({
   setfilename,
 
 }) {
-  const IsProduction = IsProduction_Login;
+  const IsProduction = true;
   const whitelist = ['thompsonkylaw@gmail.com', 'yuhodiy@gmail.com'];
   
   const { t } = useTranslation();
