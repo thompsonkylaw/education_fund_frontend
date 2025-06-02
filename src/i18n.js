@@ -28,7 +28,6 @@ i18next
           Proposal: 'Proposal',
           'Expense in USD': 'Expense in USD',
           'Acc Expense in USD': 'Accumulated Expense in USD',
-          'Acc Expense in HKD': 'Accumulated Expense in HKD',
           cash_value: 'Surrender value after withdrawal',
           Failed_to_fetch_system_login_name: 'Failed to fetch system login name',
           Both_login_name_fields_are_required: 'Both login name fields are required',
@@ -44,7 +43,7 @@ i18next
           greeting: 'Hello, {{name}}!',
           Yearth: 'Year {{year}}',
           "Medical Financial Calculator": "Education Fund Planner",
-          medicalTotal: '{{years}}th Year Medical Ins Total (HKD): {{total}}',
+          medicalTotal: '{{years}}th Year Medical Ins Total ({{currency}}): {{total}}',
           Company: "Insurance Company",
           Plan: 'Plan',
           'Plan Category': 'Plan Category',
@@ -62,7 +61,7 @@ i18next
           Year: 'Year',
           'Medical Premium USD': 'Medical Premium(USD)',
           'Acc MP USD': 'Acc MP(USD)',
-          'Acc MP': 'Acc MP(HKD)',
+          'Acc MP': 'Acc MP({{currency}})',
           Settings: 'Setting',
           'Expense Type': 'Expense Type',
           'From Age': 'From Age',
@@ -129,20 +128,20 @@ i18next
           },
           outputForm1: {
             header: "Bank Saving",
-            footer: "Total Cost: HKD $ {{total}}",
+            footer: "Total Cost: {{currency}} {{total}}",
             expenseType: "Expense Type",
             ageRange: "Age Range",
             sumOfWithdrawal: "Sum of Withdrawal"
           },
           outputForm2: {
             header: "Medical Financing Premium",
-            footer: "Total Cost: HKD $ {{total}}",
-            firstRowValue: "First {{premiumPaymentPeriod}} years average monthly HKD $ {{averageMonthly}}",
+            footer: "Total Cost: {{currency}} {{total}}",
+            firstRowValue: "First {{premiumPaymentPeriod}} years average monthly {{currency}} {{averageMonthly}}",
             placeholder: "Please complete login to get notional amount"
           },
           outputForm3: {
             ageLabel: "Age",
-            accountValueLabel: "Account Value: HKD $",
+            accountValueLabel: "Account Value",
             compareButton: "Compare Now",
             resetButton: "Reset Form",
             resetConfirmation: "Are you sure you want to reset the form? All inputs will be cleared.",
@@ -162,7 +161,7 @@ i18next
             inflationRate: "Inflation Rate",
             currencyRate: "Currency Rate",
             yearsOld: "years old",
-            hkdZero: "HKD $ 0",
+            hkdZero: "{{currency}} 0",
             noValue: "No Value"
           },
           comparisonPopup: {
@@ -180,24 +179,33 @@ i18next
             traditionalMedicalPremium: "Traditional Medical Premium",
             financingMedicalPremium: "Medical Financing Premium",
             howItWorks: "How does it work?",
-            totalCost: "Total Cost: HKD $ {{total}}",
-            accountValueAtAge: "Account Value at age {{age}}: HKD $ {{value}}",
+            totalCost: "Total Cost: {{currency}} {{total}}",
+            accountValueAtAge: "Account Value at age {{age}}: {{currency}} {{value}}",
             useHtml: "Use Simple Reports",
             downloadReport: "Medical_Financing_Plan",
             loadingFonts: "Fonts are loading, please wait",
             traditionalPoints: {
               0: "Lifetime premium payment, lifetime coverage",
-              1: "Lifetime medical premium: {{traditionalTotalCost}} total cost",
+              1: "Lifetime medical premium: {{traditionalTotalCost}} total feed",
               2: "Savings feature: None",
               3: ""
             },
             financingPoints: {
               0: "Premium payment for {{premiumPaymentPeriod}} years, lifetime coverage",
-              1: "Save {{savingsPercentage}}% (HKD ${{savings}}) on medical premiums",
-              2: "Savings feature: Account value at age {{age}}: HKD ${{formattedAccountValue}}",
+              1: "Save {{savingsPercentage}}% ({{currency}} {{savings}}) on medical premiums",
+              2: "Savings feature: Account value at age {{age}}: {{currency}} {{formattedAccountValue}}",
               3: ""
             },
             disclaimer: "This document is for reference only and is not intended as any investment advice or consultation."
+          },
+          currency: {
+            USD: "USD",
+            HKD: "HKD",
+            RMB: "RMB"
+          },
+          accExpense: {
+            HKD: "Accumulated Expense in HKD",
+            RMB: "Accumulated Expense in RMB"
           }
         }
       },
@@ -208,7 +216,6 @@ i18next
           Proposal: '計劃書',
           'Expense in USD': '美元(USD)開支',
           'Acc Expense in USD': '累積美元(USD)開支',
-          'Acc Expense in HKD': '累積港元(HKD)開支',
           cash_value: '款項提取後的退保價值',
           Failed_to_fetch_system_login_name: '無法取得系統登入名稱',
           Both_login_name_fields_are_required: '兩個登入名稱欄位均為必填',
@@ -224,7 +231,7 @@ i18next
           greeting: '你好, {{name}}!',
           Yearth: '第{{year}}年',
           "Medical Financial Calculator": "教育基金計算器",
-          medicalTotal: '第{{years}}年醫療保險總額（港元）：{{total}}',
+          medicalTotal: '第{{years}}年醫療保險總額（{{currency}}）：{{total}}',
           Company: "保險公司",
           Plan: '計劃',
           'Plan Category': '計劃類別',
@@ -242,7 +249,7 @@ i18next
           Year: '年',
           'Medical Premium USD': '醫療保費(美元)',
           'Acc MP USD': '累積醫療保費(美元)',
-          'Acc MP': '累積醫療保費(港元)',
+          'Acc MP': '累積醫療保費({{currency}})',
           Settings: 'Setting',
           'Expense Type': '開支類型',
           'From Age': '起始年齡',
@@ -309,20 +316,20 @@ i18next
           },
           outputForm1: {
             header: "銀行儲蓄",
-            footer: "總成本: HKD $ {{total}}",
+            footer: "總成本: {{currency}} {{total}}",
             expenseType: "開支",
             ageRange: "年齡",
             sumOfWithdrawal: "提取總額"
           },
           outputForm2: {
             header: "教育基金",
-            footer: "總成本: HKD $ {{total}}",
-            firstRowValue: "首{{premiumPaymentPeriod}}年平均每月 HKD $ {{averageMonthly}}",
+            footer: "總成本: {{currency}} {{total}}",
+            firstRowValue: "首{{premiumPaymentPeriod}}年平均每月 {{currency}} {{averageMonthly}}",
             placeholder: "請先完成登錄以獲取名義金額"
           },
           outputForm3: {
             ageLabel: "歲",
-            accountValueLabel: "戶口價值: HKD $",
+            accountValueLabel: "戶口價值",
             compareButton: "馬上比較",
             resetButton: "重設表單",
             resetConfirmation: "確定要重設表單嗎？所有輸入將被清除。",
@@ -342,7 +349,7 @@ i18next
             inflationRate: "通脹率",
             currencyRate: "匯率",
             yearsOld: "歲",
-            hkdZero: "HKD $ 0",
+            hkdZero: "{{currency}} 0",
             noValue: "沒有價值"
           },
           comparisonPopup: {
@@ -360,26 +367,35 @@ i18next
             traditionalMedicalPremium: "一般銀行儲蓄",
             financingMedicalPremium: "教育基金",
             howItWorks: "實際操作 How does it work?",
-            totalCost: "總成本: HKD $ {{total}}",
-            accountValueAtAge: "{{age}} 歲戶口價值: HKD $ {{value}}",
+            totalCost: "總成本: {{currency}} {{total}}",
+            accountValueAtAge: "{{age}} 歲戶口價值: {{currency}} {{value}}",
             useHtml: "使用簡單報表",
             downloadReport: "醫療融資計劃",
             loadingFonts: "字體正在加載中，請稍後再試",
             traditionalPoints: {
               0: "銀行1:1 戶口 終身儲蓄",
-              1: "教育基金 : 總成本 : HKD${{traditionalTotalCost}}",
+              1: "教育基金 : 總成本 : {{traditionalTotalCost}}",
               2: "資產傳承 : 沒有",
               3: ""
             },
             financingPoints: {
               0: "儲蓄{{premiumPaymentPeriod}}年，一生受惠",
-              1: "節省{{savingsPercentage}}% (HKD ${{savings}}) 教育基金",
-              2: "資產傳承 : {{age}}歲 戶口價值 : HKD ${{formattedAccountValue}}",
+              1: "節省{{savingsPercentage}}% ({{currency}} {{savings}}) 教育基金",
+              2: "資產傳承 : {{age}}歲 戶口價值 : {{currency}} {{formattedAccountValue}}",
               3: ""
             },
             disclaimer: "以上內容只供參考，並不作為任何投資買賣的意見或諮詢。",
             age: "歲",
             period: "",
+          },
+          currency: {
+            USD: "美元",
+            HKD: "港元",
+            RMB: "人民幣"
+          },
+          accExpense: {
+            HKD: "累積港元開支",
+            RMB: "累積人民幣開支"
           }
         }
       },
@@ -388,7 +404,6 @@ i18next
           Proposal: '计划书',
           'Expense in USD': '美元开支',
           'Acc Expense in USD': '累积美元开支',
-          'Acc Expense in HKD': '累积港元开支',
           cash_value: '款项提取后的退保价值',
           Failed_to_fetch_system_login_name: '无法获取系统登录名称',
           Both_login_name_fields_are_required: '两个登录名称字段均为必填',
@@ -404,7 +419,7 @@ i18next
           greeting: '你好, {{name}}!',
           Yearth: '第{{year}}年',
           "Medical Financial Calculator": "教育基金计算器",
-          medicalTotal: '第{{years}}年医疗保险总额（港元）：{{total}}',
+          medicalTotal: '第{{years}}年医疗保险总额（{{currency}}）：{{total}}',
           Company: "保险公司",
           Plan: '计划',
           'Plan Category': '计划类别',
@@ -422,7 +437,7 @@ i18next
           Year: '年',
           'Medical Premium USD': '医疗保费(美元)',
           'Acc MP USD': '累积医疗保费(美元)',
-          'Acc MP': '累积医疗保费(港元)',
+          'Acc MP': '累积医疗保费({{currency}})',
           Settings: 'Setting',
           'Expense Type': '开支类型',
           'From Age': '起始年龄',
@@ -489,20 +504,20 @@ i18next
           },
           outputForm1: {
             header: "银行储蓄",
-            footer: "总成本: HKD $ {{total}}",
+            footer: "总成本: {{currency}} {{total}}",
             expenseType: "开支",
             ageRange: "年龄",
             sumOfWithdrawal: "提取总额"
           },
           outputForm2: {
             header: "教育基金",
-            footer: "总成本: HKD $ {{total}}",
-            firstRowValue: "首{{premiumPaymentPeriod}}年平均每月 HKD $ {{averageMonthly}}",
+            footer: "总成本: {{currency}} {{total}}",
+            firstRowValue: "首{{premiumPaymentPeriod}}年平均每月 {{currency}} {{averageMonthly}}",
             placeholder: "请先完成登录以获取名义金额"
           },
           outputForm3: {
             ageLabel: "岁",
-            accountValueLabel: "户口价值: HKD $",
+            accountValueLabel: "户口价值",
             compareButton: "马上比较",
             resetButton: "重设表单",
             resetConfirmation: "确定要重设表单吗？所有输入将被清除。",
@@ -522,7 +537,7 @@ i18next
             inflationRate: "通胀率",
             currencyRate: "汇率",
             yearsOld: "岁",
-            hkdZero: "HKD $ 0",
+            hkdZero: "{{currency}} 0",
             noValue: "没有价值"
           },
           comparisonPopup: {
@@ -538,26 +553,35 @@ i18next
             financingMedicalPremiumTable: "教育基金",
             page: "页面 {{current}}/{{total}}",
             traditionalMedicalPremium: "一般银行储蓄",
-            financingMedicalPremium: "教育基金",
+            financingMedicalPremiumToken: "教育基金",
             howItWorks: "实际操作 How does it work?",
-            totalCost: "总成本: HKD $ {{total}}",
-            accountValueAtAge: "{{age}} 岁户口价值: HKD $ {{value}}",
+            totalCost: "总成本: {{currency}} {{total}}",
+            accountValueAtAge: "{{age}} 岁户口价值: {{currency}} {{value}}",
             useHtml: "使用简单报表",
             downloadReport: "医疗融资计划",
             loadingFonts: "字体正在加载中，请稍后再试",
             traditionalPoints: {
               0: "银行1:1 户口 终身储蓄",
-              1: "教育基金 : 总成本: HKD${{traditionalTotalCost}}",
+              1: "教育基金 : 总成本: {{traditionalTotalCost}}",
               2: "资产传承 : 没有",
               3: ""
             },
             financingPoints: {
               0: "储蓄{{premiumPaymentPeriod}}年,一生受惠",
-              1: "节省{{savingsPercentage}}% (HKD ${{savings}}) 教育基金",
-              2: "资产传承 : {{age}}岁 户口价值 : HKD ${{formattedAccountValue}}",
+              1: "节省{{savingsPercentage}}% ({{currency}} {{savings}}) 教育基金",
+              2: "资产传承 : {{age}}岁 户口价值 : {{currency}} {{formattedAccountValue}}",
               3: ""
             },
             disclaimer: "以上内容只供参考，并不作为任何投资买卖的意见或咨询。"
+          },
+          currency: {
+            USD: "美元",
+            HKD: "港元",
+            RMB: "人民币"
+          },
+          accExpense: {
+            HKD: "累积港元开支",
+            RMB: "累积人民币开支"
           }
         }
       }

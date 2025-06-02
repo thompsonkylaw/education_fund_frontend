@@ -1,11 +1,10 @@
-//test
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import manulifeSavingPlans from './dropdown/manulife/manulife_saving_plan.json';
 import premiumPaymentPeriodOptions from './dropdown/manulife/premium_payment_period_options.json';
 
-import { 
+import {
   Modal,
   Box,
   Typography,
@@ -46,11 +45,10 @@ const modalStyle = {
   overflowY: 'auto'
 };
 
-function Login({ 
+function Login_Manulifte({
   open,
   onClose,
-  // processedData, 
-  inputs, 
+  inputs,
   numberOfYearAccMP,
   useInflation,
   setFinalNotionalAmount,
@@ -65,11 +63,11 @@ function Login({
   setpdfBase64,
   filename,
   setfilename,
-
+  selectedCurrency // Added for completeness, though not used in login process
 }) {
   const IsProduction = IsProduction_Login;
   const whitelist = ['thompsonkylaw@gmail.com', 'yuhodiy@gmail.com'];
-  
+
   const { t } = useTranslation();
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
   const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('CHANTSZLUNG');
@@ -127,12 +125,9 @@ function Login({
   const isEduFund = true;
   const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:7002';
 
-  
-  // State for calculation_data
   const [processedData, setProcessedData] = useState([]);
   const [calculationInputs, setCalculationInputs] = useState({});
 
-  // Process inputs and set calculation data
   useEffect(() => {
     if (inputs && inputs[0] && inputs[0].processData) {
       const newProcessedData = inputs[0].processData.map(item => ({
@@ -150,7 +145,6 @@ function Login({
       });
     }
   }, [inputs]);
-     
 
   useEffect(() => {
     sessionIdRef.current = sessionId;
@@ -188,13 +182,12 @@ function Login({
     const blob = new Blob([bytes], { type: 'application/pdf' });
     const url = window.URL.createObjectURL(blob);
     window.open(url, '_blank');
-   
+
     setTimeout(() => {
       window.URL.revokeObjectURL(url);
     }, 1000);
   };
-  
-  
+
   useEffect(() => {
     if (inputs[0].target.age && inputs[0].target.numberOfYears) {
       const calculatedWithdrawalPeriod = 100 - inputs[0].target.age - inputs[0].target.numberOfYears + 2;
@@ -231,7 +224,7 @@ function Login({
 
   const fetchSystemLoginName = () => {
     const apiUrl = window.wpApiSettings.root + 'myplugin/v1/system-login-name';
-    fetch(apiUrl, { 
+    fetch(apiUrl, {
       credentials: 'include',
       headers: {
         'X-WP-Nonce': window.wpApiSettings.nonce
@@ -345,7 +338,7 @@ function Login({
         setRemainingTime(prev => prev - 1);
       }, 1000);
     } else if (remainingTime === 0) {
-      alert('輸入OTP超時');
+      alert('输入OTP超时');
       handleClose();
     }
     return () => clearInterval(timer);
@@ -358,7 +351,7 @@ function Login({
         setRemainingTimeNewNotional(prev => prev - 1);
       }, 1000);
     } else if (remainingTimeNewNotional === 0) {
-      alert('輸入新的名義金額超時');
+      alert('输入新的名义金额超时');
       handleClose();
     }
     return () => clearInterval(timer);
@@ -378,7 +371,7 @@ function Login({
     const apiUrl = window.wpApiSettings.root + 'myplugin/v1/system-login-name';
     fetch(apiUrl, {
       method: 'POST',
-      headers: { 
+      headers: {
         'Content-Type': 'application/json',
         'X-WP-Nonce': window.wpApiSettings.nonce
       },
@@ -458,10 +451,9 @@ function Login({
         session_id: sessionId,
         otp,
         calculation_data: {
-          processedData : processedData,
-          inputs : calculationInputs,
+          processedData: processedData,
+          inputs: calculationInputs,
           totalAccumulatedMP: 0,
-
         },
         cashValueInfo: {
           age_1: selectedAge1,
@@ -480,7 +472,7 @@ function Login({
           gender,
           isSmoker,
           basicPlan: clientInfo.basicPlan,
-          currency: clientInfo.basicPlanCurrency, 
+          currency: clientInfo.basicPlanCurrency,
           notionalAmount,
           premiumPaymentPeriod: clientInfo.premiumPaymentPeriod,
           premiumPaymentMethod,
@@ -630,10 +622,6 @@ function Login({
 
   const isOtpDisabled = step === 'otp' && (otp.length !== 6);
 
-  
-  
-  
-
   return (
     <Modal
       open={open}
@@ -661,7 +649,7 @@ function Login({
         <Typography variant="h5" gutterBottom sx={{ fontWeight: 600 }}>
           {t('login.title')}
         </Typography>
-        
+
         {step === 'login' || step === 'otp' ? (
           <div onSubmit={handleSubmit}>
             <div className="margin-top-20 info-section">
@@ -994,8 +982,8 @@ function Login({
                           </InputAdornment>
                         ),
                       }}
-                      sx={{ 
-                        mb: 2, 
+                      sx={{
+                        mb: 2,
                         '& .MuiInputLabel-asterisk': { color: 'red' },
                         '& .Mui-error': { color: 'red' }
                       }}
@@ -1089,7 +1077,6 @@ function Login({
               </div>
 
               <div className="login-fields margin-top-20" style={{ marginTop: '30px' }}>
-                {/* Row with age1 and age2 fields */}
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2, mb: 2 }}>
                   <div>
                     <FormControl fullWidth>
@@ -1134,7 +1121,6 @@ function Login({
                     </FormControl>
                   </div>
                 </Box>
-                {/* Row with username and password fields */}
                 <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                   <div>
                     <TextField
@@ -1204,7 +1190,7 @@ function Login({
                       maxLength: 6,
                       inputMode: 'numeric',
                     }}
-                    placeholder={isTimerRunning ? `剩餘時間: ${remainingTime} 秒` : '請輸入 OTP'}
+                    placeholder={isTimerRunning ? `Remaining time: ${remainingTime} seconds` : 'Enter OTP'}
                     inputRef={otpInputRef}
                   />
                 )}
@@ -1214,10 +1200,10 @@ function Login({
                   variant="contained"
                   fullWidth
                   disabled={loading || isLoginDisabled || isOtpDisabled || disabled}
-                  sx={{ 
-                    padding: '12px 24px', 
-                    backgroundColor: (loading || isLoginDisabled || isOtpDisabled || disabled) ? '#ccc' : '#10740AFF', 
-                    '&:hover': { backgroundColor: '#0d5f08' } 
+                  sx={{
+                    padding: '12px 24px',
+                    backgroundColor: (loading || isLoginDisabled || isOtpDisabled || disabled) ? '#ccc' : '#10740AFF',
+                    '&:hover': { backgroundColor: '#0d5f08' }
                   }}
                 >
                   {loading ? (
@@ -1230,8 +1216,8 @@ function Login({
                 </Button>
 
                 <Box sx={{ mt: 2 }}>
-                  <Button 
-                    onClick={() => setLogDialogOpen(true)} 
+                  <Button
+                    onClick={() => setLogDialogOpen(true)}
                     variant="outlined"
                     fullWidth
                     sx={{ padding: '12px 24px' }}
@@ -1284,7 +1270,7 @@ function Login({
               }}
               sx={{ mb: 2 }}
               InputLabelProps={{ style: { fontWeight: '500' } }}
-              placeholder={isTimerRunningNewNotional ? `剩餘時間: ${remainingTimeNewNotional} 秒` : 'Enter new amount'}
+              placeholder={isTimerRunningNewNotional ? `Remaining time: ${remainingTimeNewNotional} seconds` : 'Enter new amount'}
               inputRef={newNotionalInputRef}
               error={!newNotionalAmount}
               helperText={!newNotionalAmount ? t('login.fieldRequired') : ''}
@@ -1294,9 +1280,9 @@ function Login({
               variant="contained"
               fullWidth
               disabled={loading || !newNotionalAmount}
-              sx={{ 
-                backgroundColor: (loading || !newNotionalAmount) ? '#ccc' : '#10740AFF', 
-                '&:hover': { backgroundColor: '#0d5f08' } 
+              sx={{
+                backgroundColor: (loading || !newNotionalAmount) ? '#ccc' : '#10740AFF',
+                '&:hover': { backgroundColor: '#0d5f08' }
               }}
             >
               {loading ? <CircularProgress size={24} /> : t('login.submitButton')}
@@ -1315,9 +1301,9 @@ function Login({
             <Button
               onClick={handleClose}
               variant="contained"
-              sx={{ 
-                backgroundColor: '#10740AFF', 
-                '&:hover': { backgroundColor: '#0d5f08' } 
+              sx={{
+                backgroundColor: '#10740AFF',
+                '&:hover': { backgroundColor: '#0d5f08' }
               }}
             >
               {t('login.completeButton')}
@@ -1391,4 +1377,4 @@ function Login({
   );
 }
 
-export default Login;
+export default Login_Manulifte;

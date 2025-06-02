@@ -4,9 +4,8 @@ import { Button, TextField, Box, Typography } from '@mui/material';
 import { NumericFormat } from 'react-number-format';
 import ComparisonPopup from './ComparisonPopup';
 
-// Custom currency input component
 const NumberFormatCustom = React.forwardRef(function NumberFormatCustom(props, ref) {
-  const { onChange, ...other } = props;
+  const { onChange, prefix, ...other } = props;
   const { t } = useTranslation();
   return (
     <NumericFormat
@@ -21,7 +20,7 @@ const NumberFormatCustom = React.forwardRef(function NumberFormatCustom(props, r
         });
       }}
       thousandSeparator
-      prefix="$"
+      prefix={prefix}
       decimalScale={0}
       fixedDecimalScale
       allowNegative={false}
@@ -31,22 +30,14 @@ const NumberFormatCustom = React.forwardRef(function NumberFormatCustom(props, r
 
 const OutputForm_3 = ({
   proposal,
-  
-  processedData,
-  numberOfYears,
-  numberOfYearAccMP,
-  finalNotionalAmount,
-  age,
-  currencyRate,
-  setFinalNotionalAmount,
-  numOfRowInOutputForm_1,
   cashValueInfo,
-  plan1Inputs,
-  plan2Inputs,
+  finalNotionalAmount,
+  setFinalNotionalAmount,
   clientInfo,
   appBarColor,
   pdfBase64,
-  filename
+  filename,
+  selectedCurrency
 }) => {
   const { t } = useTranslation();
 
@@ -62,6 +53,19 @@ const OutputForm_3 = ({
     setCurrency1(cashValueInfo.age_1_cash_value);
     setCurrency2(cashValueInfo.age_2_cash_value);
   }, [cashValueInfo]);
+
+  const getCurrencySymbol = (currency) => {
+    switch (currency) {
+      case 'USD':
+        return '$';
+      case 'HKD':
+        return 'HK$';
+      case 'RMB':
+        return '¥';
+      default:
+        return '';
+    }
+  };
 
   const handleOpenPopup = () => setOpenPopup(true);
   const handleClosePopup = () => setOpenPopup(false);
@@ -114,6 +118,7 @@ const OutputForm_3 = ({
         onChange={(e) => setCurrency1(e.target.value)}
         InputProps={{
           inputComponent: NumberFormatCustom,
+          inputProps: { prefix: getCurrencySymbol(selectedCurrency) },
         }}
         sx={{ m: 1, width: 180 }}
       />
@@ -134,21 +139,19 @@ const OutputForm_3 = ({
         onChange={(e) => setCurrency2(e.target.value)}
         InputProps={{
           inputComponent: NumberFormatCustom,
+          inputProps: { prefix: getCurrencySymbol(selectedCurrency) },
         }}
         sx={{ m: 1, width: 180 }}
       />
       <Button
-  variant="contained"
-  onClick={handleOpenPopup}
-  sx={{
-    m: 1,
-    backgroundColor: '#4caf50', // Green
-    '&:hover': {
-      backgroundColor: '#388e3c', // Darker green
-    },
-  }}
->
-        
+        variant="contained"
+        onClick={handleOpenPopup}
+        sx={{
+          m: 1,
+          backgroundColor: '#4caf50',
+          '&:hover': { backgroundColor: '#388e3c' },
+        }}
+      >
         {t('outputForm3.compareButton')}
       </Button>
       <Button
@@ -156,41 +159,23 @@ const OutputForm_3 = ({
         onClick={handleSavePDF}
         sx={{
           m: 1,
-          backgroundColor: 'blue.main',
-          '&:hover': {
-            backgroundColor: 'blue.dark',
-          },
+          backgroundColor: 'blue',
+          '&:hover': { backgroundColor: 'darkblue' },
         }}
       >
-        
-       {t('outputForm3.savePDFButton')}
+        {t('outputForm3.savePDFButton')}
       </Button>
       <Button
         variant="contained"
         onClick={reset}
         sx={{
           m: 1,
-          backgroundColor: 'error.main',
-          '&:hover': {
-            backgroundColor: 'error.dark',
-          },
+          backgroundColor: 'red',
+          '&:hover': { backgroundColor: 'darkred' },
         }}
       >
-        
         {t('outputForm3.resetButton')}
       </Button>
-      
-
-      {/* <Button
-        variant="contained"
-        onClick={handleSavePDF}
-        sx={{ m: 1 }}
-        disabled={!pdfBase64 || !filename}
-      >
-        {t('outputForm3.savePDFButton')}
-      </Button> */}
-
-
       <ComparisonPopup
         open={openPopup}
         onClose={handleClosePopup}
@@ -198,7 +183,6 @@ const OutputForm_3 = ({
         age2={Number(age2)}
         currency1={Number(currency1)}
         currency2={Number(currency2)}
-
         proposal={proposal}
         cashValueInfo={cashValueInfo}
         finalNotionalAmount={finalNotionalAmount}
@@ -207,8 +191,7 @@ const OutputForm_3 = ({
         appBarColor={appBarColor}
         pdfBase64={pdfBase64}
         filename={filename}
-
-
+        selectedCurrency={selectedCurrency}
       />
     </Box>
   );

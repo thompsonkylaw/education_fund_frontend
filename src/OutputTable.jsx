@@ -1,22 +1,12 @@
 import React, { useState } from 'react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper,
-  IconButton
-} from '@mui/material';
-import { ExpandLess, ExpandMore } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, IconButton } from '@mui/material';
+import { ExpandLess, ExpandMore } from '@mui/icons-material';
 
-const OutputTable = ({ processData, numberOfYears }) => {
+const OutputTable = ({ processData, numberOfYears, selectedCurrency }) => {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(true);
 
-  // Number formatter for formatting numbers with commas and no decimals
   const numberFormatter = new Intl.NumberFormat('en-US', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
@@ -31,7 +21,7 @@ const OutputTable = ({ processData, numberOfYears }) => {
             <TableCell>{t('Age')}</TableCell>
             <TableCell>{t('Expense in USD')}</TableCell>
             <TableCell>{t('Acc Expense in USD')}</TableCell>
-            <TableCell>{t('Acc Expense in HKD')}</TableCell>
+            <TableCell>{t(`accExpense.${selectedCurrency}`)}</TableCell>
             <TableCell align="right">
               <IconButton
                 size="small"
@@ -72,7 +62,7 @@ const OutputTable = ({ processData, numberOfYears }) => {
                     fontWeight: isDecade ? 600 : 'normal',
                     color: isDecade ? '#ffffff' : '#111111'
                   }}>
-                    {numberFormatter.format(row.accExpenseInHKD)}
+                    {numberFormatter.format(row.accExpenseInCurrency)}
                   </TableCell>
                   <TableCell />
                 </TableRow>

@@ -22,10 +22,10 @@ const ComparisonPopup = ({
   currency2,
   proposal,
   finalNotionalAmount,
-  numOfRowInOutputForm_1,
-  clientInfo,
   cashValueInfo,
-  appBarColor
+  clientInfo,
+  appBarColor,
+  selectedCurrency
 }) => {
   const { t, i18n } = useTranslation();
   const [fontRegularData, setFontRegularData] = useState(null);
@@ -85,7 +85,7 @@ const ComparisonPopup = ({
 
   const ageToAccMP = {};
   processData.forEach((row) => {
-    ageToAccMP[row.age] = row.accExpenseInHKD;
+    ageToAccMP[row.age] = row.accExpenseInCurrency;
   });
   const traditionalTotalCost = ageToAccMP[100] || 0;
 
@@ -99,12 +99,7 @@ const ComparisonPopup = ({
     const unit = i18n.language === 'zh-CN' ? ['万', '亿'] : ['萬', '億'];
     if (amount >= 100000000) {
       const yi = amount / 100000000;
-      let yiStr;
-      if (yi % 1 === 0) {
-        yiStr = yi.toString();
-      } else {
-        yiStr = yi.toFixed(1);
-      }
+      let yiStr = yi % 1 === 0 ? yi.toString() : yi.toFixed(1);
       const parts = yiStr.split('.');
       parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       yiStr = parts.join('.');
@@ -118,24 +113,14 @@ const ComparisonPopup = ({
   const formatEnglishCurrency = (amount) => {
     if (amount >= 1000000000) {
       const b = amount / 1000000000;
-      let bStr;
-      if (b % 1 === 0) {
-        bStr = b.toString();
-      } else {
-        bStr = b.toFixed(2);
-      }
+      let bStr = b % 1 === 0 ? b.toString() : b.toFixed(2);
       const parts = bStr.split('.');
       parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       bStr = parts.join('.');
       return bStr + 'B';
     } else if (amount >= 1000000) {
       const m = amount / 1000000;
-      let mStr;
-      if (m % 1 === 0) {
-        mStr = m.toString();
-      } else {
-        mStr = m.toFixed(1);
-      }
+      let mStr = m % 1 === 0 ? m.toString() : m.toFixed(1);
       const parts = mStr.split('.');
       parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
       mStr = parts.join('.');
@@ -223,9 +208,8 @@ const ComparisonPopup = ({
 
     doc.text(`${t('common.age')}: ${age || ''} ${t('comparisonPopup.age')}`, x1, currentY);
     doc.text(`${t('common.numberOfYears')}: ${numberOfYears || ''}${t('Year')}`, x2-10, currentY);
-    
-    doc.text(`${t('formattedFinancingTotalCostPerYear')}: HKD $${currencyFormattedFinancingTotalCostPerYear || ''}`, x3-20, currentY);
-    doc.text(`${t('formattedFinancingTotalCost')}: HKD $${currencyFormattedFinancingTotalCost || ''}`, x4-5, currentY);
+    doc.text(`${t('formattedFinancingTotalCostPerYear')}: ${t(`currency.${selectedCurrency}`)} ${currencyFormattedFinancingTotalCostPerYear || ''}`, x3-20, currentY);
+    doc.text(`${t('formattedFinancingTotalCost')}: ${t(`currency.${selectedCurrency}`)} ${currencyFormattedFinancingTotalCost || ''}`, x4-5, currentY);
 
     currentY += 5;
 
@@ -246,7 +230,7 @@ const ComparisonPopup = ({
         [
           clientInfo.basicPlan || '',
           clientInfo.premiumPaymentPeriod || '',
-          clientInfo.basicPlanCurrency === "美元" ? 'USD$' + formattedFinalNotionalAmount : 'HKD$' + formattedFinalNotionalAmount,
+          clientInfo.basicPlanCurrency === "美元" ? 'USD ' + formattedFinalNotionalAmount : `${t(`currency.${selectedCurrency}`)} ${formattedFinalNotionalAmount}`,
         ],
       ],
       theme: 'grid',
@@ -306,10 +290,8 @@ const ComparisonPopup = ({
     doc.setFont('NotoSansCJKtc', 'normal');
     const financingPoints = [
       t('comparisonPopup.financingPoints.0', { premiumPaymentPeriod: clientInfo.premiumPaymentPeriod }),
-      t('comparisonPopup.financingPoints.1', { savingsPercentage: formattedSavingsPercentage, savings: formattedSavings }),
-      i18n.language === 'zh-CN'
-        ? t('comparisonPopup.financingPoints.2')
-        : t('comparisonPopup.financingPoints.2', { age: age1, formattedAccountValue: formattedAccountValue1 }),
+      t('comparisonPopup.financingPoints.1', { savingsPercentage: formattedSavingsPercentage, savings: formattedSavings, currency: t(`currency.${selectedCurrency}`) }),
+      t('comparisonPopup.financingPoints.2', { age: age1, formattedAccountValue: formattedAccountValue1, currency: t(`currency.${selectedCurrency}`) }),
       t('comparisonPopup.financingPoints.3'),
     ];
     financingPoints.forEach((point, index) => {
@@ -333,26 +315,26 @@ const ComparisonPopup = ({
       const yearlyWithdrawalAmount = parseFloat(input.yearlyWithdrawalAmount.replace(/,/g, ''));
       const numberOfYears = toAge - fromAge + 1;
       const sumInUSD = yearlyWithdrawalAmount * numberOfYears;
-      const sumInHKD = sumInUSD * currencyRate;
-      const formattedSum = numberFormatter.format(Math.round(sumInHKD));
+      const sumInCurrency = sumInUSD * currencyRate;
+      const formattedSum = numberFormatter.format(Math.round(sumInCurrency));
       const ageRange = `${fromAge} - ${toAge}`;
       return [
         t(`expenseTypes.${input.expenseType}`),
         ageRange,
-        `HKD $ ${formattedSum}`
+        `${t(`currency.${selectedCurrency}`)} ${formattedSum}`
       ];
     });
 
-    const totalSumInHKD = inputs.reduce((acc, input) => {
+    const totalSumInCurrency = inputs.reduce((acc, input) => {
       const fromAge = parseInt(input.fromAge, 10);
       const toAge = parseInt(input.toAge, 10);
       const yearlyWithdrawalAmount = parseFloat(input.yearlyWithdrawalAmount.replace(/,/g, ''));
       const numberOfYears = toAge - fromAge + 1;
       const sumInUSD = yearlyWithdrawalAmount * numberOfYears;
-      const sumInHKD = sumInUSD * currencyRate;
-      return acc + sumInHKD;
+      const sumInCurrency = sumInUSD * currencyRate;
+      return acc + sumInCurrency;
     }, 0);
-    const formattedTotal = numberFormatter.format(Math.round(totalSumInHKD));
+    const formattedTotal = numberFormatter.format(Math.round(totalSumInCurrency));
 
     autoTable(doc, {
       startY: tablesStartY,
@@ -371,24 +353,20 @@ const ComparisonPopup = ({
 
     const outputForm2Rows = [];
     const firstRowEndAge = age + parseInt(clientInfo.premiumPaymentPeriod) - 1;
-    outputForm2Rows.push([`${age} - ${firstRowEndAge} ${t('common.yearsOld')}`, t('outputForm2.firstRowValue', { premiumPaymentPeriod: clientInfo.premiumPaymentPeriod, averageMonthly: numberFormatter.format(Math.round(financingTotalCost / clientInfo.premiumPaymentPeriod / 12)) })]);
+    outputForm2Rows.push([`${age} - ${firstRowEndAge} ${t('common.yearsOld')}`, t('outputForm2.firstRowValue', { premiumPaymentPeriod: clientInfo.premiumPaymentPeriod, averageMonthly: numberFormatter.format(Math.round(financingTotalCost / clientInfo.premiumPaymentPeriod / 12)), currency: t(`currency.${selectedCurrency}`) })]);
 
     let lastRowLastAge = firstRowEndAge;
     while (lastRowLastAge < 100) {
       if (lastRowLastAge + 1 < 90) {
         const startAge = lastRowLastAge + 1;
         const endAge = lastRowLastAge + 10;
-        outputForm2Rows.push([`${startAge} - ${endAge} ${t('common.yearsOld')}`, t('common.hkdZero')]);
+        outputForm2Rows.push([`${startAge} - ${endAge} ${t('common.yearsOld')}`, `${t(`currency.${selectedCurrency}`)} 0`]);
         lastRowLastAge = endAge;
       } else {
         const startAge = lastRowLastAge + 1;
-        outputForm2Rows.push([`${startAge} - 100 ${t('common.yearsOld')}`, t('common.hkdZero')]);
+        outputForm2Rows.push([`${startAge} - 100 ${t('common.yearsOld')}`, `${t(`currency.${selectedCurrency}`)} 0`]);
         lastRowLastAge = 100;
       }
-    }
-
-    if (outputForm2Rows.length < numOfRowInOutputForm_1) {
-      outputForm2Rows.push(['-', '-']);
     }
 
     autoTable(doc, {
@@ -406,14 +384,14 @@ const ComparisonPopup = ({
     const yPosition = Math.max(table1FinalY + 10, table2FinalY + 10) - 5;
 
     doc.setFont('NotoSansCJKtc', 'bold');
-    doc.text(t('comparisonPopup.totalCost', { total: currencyFormattedTraditionalTotalCost }), leftX + 2, yPosition + 3);
-    doc.text(t('comparisonPopup.totalCost', { total: currencyFormattedFinancingTotalCost }), rightX + 2, yPosition + 3);
+    doc.text(t('comparisonPopup.totalCost', { total: currencyFormattedTraditionalTotalCost, currency: t(`currency.${selectedCurrency}`) }), leftX + 2, yPosition + 3);
+    doc.text(t('comparisonPopup.totalCost', { total: currencyFormattedFinancingTotalCost, currency: t(`currency.${selectedCurrency}`) }), rightX + 2, yPosition + 3);
 
     doc.setFont('NotoSansCJKtc', 'normal');
-    doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: '沒有價值' }), leftX + 2, yPosition + 11);
-    doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: '沒有價值' }), leftX + 2, yPosition + 18);
-    doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: formattedAccountValue1 }), rightX + 2, yPosition + 11);
-    doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: formattedAccountValue2 }), rightX + 2, yPosition + 18);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: t('common.noValue'), currency: t(`currency.${selectedCurrency}`) }), leftX + 2, yPosition + 11);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: t('common.noValue'), currency: t(`currency.${selectedCurrency}`) }), leftX + 2, yPosition + 18);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age1, value: formattedAccountValue1, currency: t(`currency.${selectedCurrency}`) }), rightX + 2, yPosition + 11);
+    doc.text(t('comparisonPopup.accountValueAtAge', { age: age2, value: formattedAccountValue2, currency: t(`currency.${selectedCurrency}`) }), rightX + 2, yPosition + 18);
 
     const pageHeight = 297;
     const bottomMargin = 10;
@@ -516,12 +494,8 @@ const ComparisonPopup = ({
                 <img src="/tick.png" alt="Tick" style={{ position: 'absolute', top: 20, right: 8, width: 50, height: 50 }} />
                 <Typography variant="h3">{t('comparisonPopup.financingMedicalPremium')}</Typography>
                 <Typography variant="h5">{t('comparisonPopup.financingPoints.0', { premiumPaymentPeriod: clientInfo.premiumPaymentPeriod })}</Typography>
-                <Typography variant="h5">{t('comparisonPopup.financingPoints.1', { savingsPercentage: formattedSavingsPercentage, savings: formattedSavings })}</Typography>
-                {i18n.language === 'zh-CN' ? (
-                  <Typography variant="h5">{t('comparisonPopup.financingPoints.2')}</Typography>
-                ) : (
-                  <Typography variant="h5">{t('comparisonPopup.financingPoints.2', { age: age1, formattedAccountValue: formattedAccountValue1 })}</Typography>
-                )}
+                <Typography variant="h5">{t('comparisonPopup.financingPoints.1', { savingsPercentage: formattedSavingsPercentage, savings: formattedSavings, currency: t(`currency.${selectedCurrency}`) })}</Typography>
+                <Typography variant="h5">{t('comparisonPopup.financingPoints.2', { age: age1, formattedAccountValue: formattedAccountValue1, currency: t(`currency.${selectedCurrency}`) })}</Typography>
                 <Typography variant="h5">{t('comparisonPopup.financingPoints.3')}</Typography>
               </Box>
             </Grid>
@@ -531,21 +505,23 @@ const ComparisonPopup = ({
               </Box>
             </Grid>
             <Grid item xs={6}>
-              <OutputForm_1 
+              <OutputForm_1
                 proposal={proposal}
                 fontSizeMultiplier={1.5}
+                selectedCurrency={selectedCurrency}
               />
-              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age1, value: '-' })}</Typography>
-              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age2, value: '-' })}</Typography>
+              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age1, value: t('common.noValue'), currency: t(`currency.${selectedCurrency}`) })}</Typography>
+              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age2, value: t('common.noValue'), currency: t(`currency.${selectedCurrency}`) })}</Typography>
             </Grid>
             <Grid item xs={6}>
               <OutputForm_2
                 proposal={proposal}
                 finalNotionalAmount={finalNotionalAmount}
                 cashValueInfo={cashValueInfo}
+                selectedCurrency={selectedCurrency}
               />
-              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age1, value: formattedAccountValue1 })}</Typography>
-              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age2, value: formattedAccountValue2 })}</Typography>
+              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age1, value: formattedAccountValue1, currency: t(`currency.${selectedCurrency}`) })}</Typography>
+              <Typography variant="h4">{t('comparisonPopup.accountValueAtAge', { age: age2, value: formattedAccountValue2, currency: t(`currency.${selectedCurrency}`) })}</Typography>
             </Grid>
           </Grid>
           <Box sx={{ p: 2, textAlign: 'center' }}>

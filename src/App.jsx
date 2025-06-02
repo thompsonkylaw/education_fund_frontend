@@ -50,18 +50,22 @@ const App = () => {
     return 1.5;
   });
 
-  const [currencyRate, setCurrencyRate] = useState(() => {
-    const savedProposals = localStorage.getItem('proposals');
-    if (savedProposals) {
-      try {
-        const parsed = JSON.parse(savedProposals);
-        return parsed[0]?.target.currencyRate ?? 7.85;
-      } catch (e) {
-        console.error('Error parsing saved proposals for currencyRate:', e);
-      }
-    }
-    return 7.85;
+  const [selectedCurrency, setSelectedCurrency] = useState(() => {
+    const saved = localStorage.getItem('selectedCurrency');
+    return saved ? saved : 'HKD';
   });
+
+  const [hkdRate, setHkdRate] = useState(() => {
+    const saved = localStorage.getItem('hkdRate');
+    return saved ? parseFloat(saved) : 7.85;
+  });
+
+  const [rmbRate, setRmbRate] = useState(() => {
+    const saved = localStorage.getItem('rmbRate');
+    return saved ? parseFloat(saved) : 7.0;
+  });
+
+  const currencyRate = selectedCurrency === 'HKD' ? hkdRate : rmbRate;
 
   const [useInflation, setUseInflation] = useState(false);
 
@@ -123,6 +127,18 @@ const App = () => {
   useEffect(() => {
     localStorage.setItem('company', company);
   }, [company]);
+
+  useEffect(() => {
+    localStorage.setItem('selectedCurrency', selectedCurrency);
+  }, [selectedCurrency]);
+
+  useEffect(() => {
+    localStorage.setItem('hkdRate', hkdRate);
+  }, [hkdRate]);
+
+  useEffect(() => {
+    localStorage.setItem('rmbRate', rmbRate);
+  }, [rmbRate]);
 
   const addProposal = () => {
     if (proposals.length < 6) {
@@ -214,7 +230,11 @@ const App = () => {
   };
 
   const handleCurrencyRateChange = (value) => {
-    setCurrencyRate(value);
+    if (selectedCurrency === 'HKD') {
+      setHkdRate(value);
+    } else {
+      setRmbRate(value);
+    }
   };
 
   proposals.forEach((proposal, index) => {
@@ -228,7 +248,6 @@ const App = () => {
       console.log(`    Expense Type: ${input.expenseType}`);
       console.log(`    From Age: ${input.fromAge}`);
       console.log(`    To Age: ${input.toAge}`);
-      // console.log(`    Yearly Withdrawal Amount: ${input.yearlyWithdrawalAmount}`);
     });
   });
 
@@ -272,6 +291,7 @@ const App = () => {
                 useInflation={useInflation}
                 setProcessData={setProcessData}
                 disabled={finalNotionalAmount !== null}
+                selectedCurrency={selectedCurrency}
               />
             ))}
           </Grid>
@@ -298,6 +318,7 @@ const App = () => {
                 filename={filename}
                 setfilename={setfilename}
                 IsProduction_Login={IsProduction_Login}
+                selectedCurrency={selectedCurrency}
               />
             </Card>
             <Card elevation={3} sx={{ mt: 2, p: 2 }}>
@@ -305,16 +326,18 @@ const App = () => {
                 <OutputForm_1
                   key={proposalIndex}
                   proposal={proposal}
+                  selectedCurrency={selectedCurrency}
                 />
               ))}
             </Card>
-            < Card elevation={3} sx={{ mt: 2, p: 2 }}>
+            <Card elevation={3} sx={{ mt: 2, p: 2 }}>
               {proposals.map((proposal, proposalIndex) => (
                 <OutputForm_2
                   key={proposalIndex}
                   proposal={proposal}
                   finalNotionalAmount={finalNotionalAmount}
                   cashValueInfo={cashValueInfo}
+                  selectedCurrency={selectedCurrency}
                 />
               ))}
             </Card>
@@ -331,6 +354,7 @@ const App = () => {
                     appBarColor={appBarColor}
                     pdfBase64={pdfBase64}
                     filename={filename}
+                    selectedCurrency={selectedCurrency}
                   />
                 ))}
               </Card>
@@ -340,6 +364,8 @@ const App = () => {
                 setAppBarColor={setAppBarColor}
                 appBarColor={appBarColor}
                 setCompany={setCompany}
+                selectedCurrency={selectedCurrency}
+                setSelectedCurrency={setSelectedCurrency}
               />
             </Box>
           </Grid>
