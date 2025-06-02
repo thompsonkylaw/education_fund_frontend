@@ -95,29 +95,70 @@ const ComparisonPopup = ({
   const savingsAmount = traditionalTotalCost - financingTotalCost;
   const savingsPercentage = traditionalTotalCost > 0 ? (savingsAmount / traditionalTotalCost) * 100 : 0;
 
+  const formatChineseCurrency = (amount) => {
+    const unit = i18n.language === 'zh-CN' ? ['万', '亿'] : ['萬', '億'];
+    if (amount >= 100000000) {
+      const yi = amount / 100000000;
+      let yiStr;
+      if (yi % 1 === 0) {
+        yiStr = yi.toString();
+      } else {
+        yiStr = yi.toFixed(1);
+      }
+      const parts = yiStr.split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      yiStr = parts.join('.');
+      return yiStr + unit[1];
+    } else {
+      const wan = Math.round(amount / 10000);
+      return numberFormatter.format(wan) + unit[0];
+    }
+  };
+
+  const formatEnglishCurrency = (amount) => {
+    if (amount >= 1000000000) {
+      const b = amount / 1000000000;
+      let bStr;
+      if (b % 1 === 0) {
+        bStr = b.toString();
+      } else {
+        bStr = b.toFixed(2);
+      }
+      const parts = bStr.split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      bStr = parts.join('.');
+      return bStr + 'B';
+    } else if (amount >= 1000000) {
+      const m = amount / 1000000;
+      let mStr;
+      if (m % 1 === 0) {
+        mStr = m.toString();
+      } else {
+        mStr = m.toFixed(1);
+      }
+      const parts = mStr.split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+      mStr = parts.join('.');
+      return mStr + 'M';
+    } else {
+      const k = Math.round(amount / 1000);
+      return numberFormatter.format(k) + 'K';
+    }
+  };
+
   let formattedSavings, formattedAccountValue1, formattedAccountValue2, formattedFinancingTotalCost, formattedTraditionalTotalCost;
   if (i18n.language === 'en') {
-    const savingsInK = Math.round(savingsAmount / 1000);
-    formattedSavings = numberFormatter.format(savingsInK) + 'K';
-    const accountValue1InK = Math.round(currency1 / 1000);
-    formattedAccountValue1 = numberFormatter.format(accountValue1InK) + 'K';
-    const accountValue2InK = Math.round(currency2 / 1000);
-    formattedAccountValue2 = numberFormatter.format(accountValue2InK) + 'K';
-    const financingTotalCostInK = Math.round(financingTotalCost / 1000);
-    formattedFinancingTotalCost = numberFormatter.format(financingTotalCostInK) + 'K';
-    const traditionalTotalCostInK = Math.round(traditionalTotalCost / 1000);
-    formattedTraditionalTotalCost = numberFormatter.format(traditionalTotalCostInK) + 'K';
+    formattedSavings = formatEnglishCurrency(savingsAmount);
+    formattedAccountValue1 = formatEnglishCurrency(currency1);
+    formattedAccountValue2 = formatEnglishCurrency(currency2);
+    formattedFinancingTotalCost = formatEnglishCurrency(financingTotalCost);
+    formattedTraditionalTotalCost = formatEnglishCurrency(traditionalTotalCost);
   } else {
-    const savingsInMillions = Math.round(savingsAmount / 10000);
-    formattedSavings = numberFormatter.format(savingsInMillions) + (i18n.language === 'zh-CN' ? '万' : '萬');
-    const accountValue1InMillions = Math.round(currency1 / 10000);
-    formattedAccountValue1 = numberFormatter.format(accountValue1InMillions) + (i18n.language === 'zh-CN' ? '万' : '萬');
-    const accountValue2InMillions = Math.round(currency2 / 10000);
-    formattedAccountValue2 = numberFormatter.format(accountValue2InMillions) + (i18n.language === 'zh-CN' ? '万' : '萬');
-    const financingTotalCostInMillions = Math.round(financingTotalCost / 10000);
-    formattedFinancingTotalCost = numberFormatter.format(financingTotalCostInMillions) + (i18n.language === 'zh-CN' ? '万' : '萬');
-    const traditionalTotalCostInMillions = Math.round(traditionalTotalCost / 10000);
-    formattedTraditionalTotalCost = numberFormatter.format(traditionalTotalCostInMillions) + (i18n.language === 'zh-CN' ? '万' : '萬');
+    formattedSavings = formatChineseCurrency(savingsAmount);
+    formattedAccountValue1 = formatChineseCurrency(currency1);
+    formattedAccountValue2 = formatChineseCurrency(currency2);
+    formattedFinancingTotalCost = formatChineseCurrency(financingTotalCost);
+    formattedTraditionalTotalCost = formatChineseCurrency(traditionalTotalCost);
   }
 
   const formattedSavingsPercentage = numberFormatter.format(Math.round(savingsPercentage));
@@ -180,12 +221,11 @@ const ComparisonPopup = ({
     const currencyFormattedFinancingTotalCost = numberFormatter.format(Math.round(financingTotalCost));
     const currencyFormattedFinancingTotalCostPerYear = numberFormatter.format(Math.round(financingTotalCost / numberOfYears));
 
-
-    doc.text(`${t('common.age')}: ${age || ''}`, x1, currentY);
-    doc.text(`${t('common.numberOfYears')}: ${numberOfYears || ''}`, x2, currentY);
+    doc.text(`${t('common.age')}: ${age || ''} ${t('comparisonPopup.age')}`, x1, currentY);
+    doc.text(`${t('common.numberOfYears')}: ${numberOfYears || ''}${t('Year')}`, x2-10, currentY);
     
-    doc.text(`${t('formattedFinancingTotalCostPerYear')}: ${currencyFormattedFinancingTotalCostPerYear || ''}`, x3, currentY);
-    doc.text(`${t('formattedFinancingTotalCost')}: ${currencyFormattedFinancingTotalCost || ''}`, x4, currentY);
+    doc.text(`${t('formattedFinancingTotalCostPerYear')}: HKD $${currencyFormattedFinancingTotalCostPerYear || ''}`, x3-20, currentY);
+    doc.text(`${t('formattedFinancingTotalCost')}: HKD $${currencyFormattedFinancingTotalCost || ''}`, x4-5, currentY);
 
     currentY += 5;
 
@@ -317,15 +357,12 @@ const ComparisonPopup = ({
     autoTable(doc, {
       startY: tablesStartY,
       head: [
-        // [{ content: t('outputForm1.header'), colSpan: 3, styles: { halign: 'center', fillColor: [42, 157, 143] } }],
         [t('outputForm1.expenseType'), t('outputForm1.ageRange'), t('outputForm1.sumOfWithdrawal')]
       ],
       body: tableRows,
-      // foot: [[{ content: t('outputForm1.footer', { total: formattedTotal }), colSpan: 3, styles: { halign: 'right' } }]],
       theme: 'grid',
       styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
-      headStyles: { fontStyle: 'bold',fillColor: [42, 157, 143] },
-      // footStyles: { fillColor: [255, 255, 0], fontStyle: 'bold' },
+      headStyles: { fontStyle: 'bold', fillColor: [42, 157, 143] },
       columnStyles: { 2: { halign: 'right' } },
       margin: { left: leftX, right: 110 },
     });
@@ -517,10 +554,6 @@ const ComparisonPopup = ({
         </div>
       </DialogContent>
       <DialogActions>
-        {/* <FormControlLabel
-          control={<Switch checked={isJsPDFEnabled} onChange={(e) => setIsJsPDFEnabled(e.target.checked)} />}
-          label={t('comparisonPopup.useHtml')}
-        /> */}
         <div className="pdf-button-container">
           <button
             className="pdf-button"

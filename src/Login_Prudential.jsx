@@ -49,7 +49,7 @@ const modalStyle = {
 function Login({ 
   open,
   onClose,
-  processedData, 
+  // processedData, 
   inputs, 
   numberOfYearAccMP,
   useInflation,
@@ -121,6 +121,30 @@ function Login({
 
   const serverURL = IsProduction ? 'https://prudentialbackend-production.up.railway.app' : 'http://localhost:5004';
   const sessionIdRef = useRef(sessionId);
+  const useAge = false;
+  const isEduFund = true;
+// State for calculation_data
+  const [processedData, setProcessedData] = useState([]);
+  const [calculationInputs, setCalculationInputs] = useState({});
+
+  // Process inputs and set calculation data
+  useEffect(() => {
+    if (inputs && inputs[0] && inputs[0].processData) {
+      const newProcessedData = inputs[0].processData.map(item => ({
+        yearNumber: item.year,
+        age: item.age,
+        medicalPremium: item.expenseInUSD,
+        accumulatedMP: item.accExpenseInUSD,
+      }));
+      setProcessedData(newProcessedData);
+      setCalculationInputs({
+        age: inputs[0].target.age,
+        numberOfYears: inputs[0].target.numberOfYears,
+        currencyRate: inputs[0].target.currencyRate || 0,
+        inflationRate: inputs[0].target.inflationRate || 0,
+      });
+    }
+  }, [inputs]);
 
   useEffect(() => {
     sessionIdRef.current = sessionId;
@@ -176,11 +200,11 @@ function Login({
   };
 
   useEffect(() => {
-    if (inputs.age && inputs.numberOfYears) {
-      const calculatedWithdrawalPeriod = 100 - inputs.age - inputs.numberOfYears + 2;
-      setWithdrawalPeriod(calculatedWithdrawalPeriod);
-    }
-  }, [inputs.age, inputs.numberOfYears]);
+      if (inputs[0].target.age && inputs[0].target.numberOfYears) {
+        const calculatedWithdrawalPeriod = 100 - inputs[0].target.age - inputs[0].target.numberOfYears + 2;
+        setWithdrawalPeriod(calculatedWithdrawalPeriod);
+      }
+    }, [inputs[0].target.age, inputs[0].target.numberOfYears]);
 
   useEffect(() => {
     if (open) {
@@ -400,6 +424,7 @@ function Login({
     }
     setLogs([]);
     localStorage.setItem('loginLogs', JSON.stringify([]));
+    // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
     try {
       const payload = {
         session_id: sessionId,
@@ -407,9 +432,9 @@ function Login({
         username,
         password,
         calculation_data: {
-          processedData,
-          inputs,
-          totalAccumulatedMP: numberOfYearAccMP,
+          processedData : processedData,
+          inputs : calculationInputs,
+          totalAccumulatedMP: 0,
         },
         cashValueInfo: {
           age_1: selectedAge1,
@@ -436,9 +461,13 @@ function Login({
           proposalLanguage,
           selectedAge1,
           selectedAge2,
+          useAge,
+          isEduFund
         },
       };
+      // console.log("hrererereetereeererererererere")
       const response = await axios.post(serverURL + '/login', payload);
+      // console.log("thrhrhrhhhhhhhhhhrhrhrhrhrhrhr")
       if (response.data.status === 'retry') {
         setSystemMessage(response.data.system_message);
         setSessionId(response.data.session_id);
@@ -575,7 +604,8 @@ function Login({
     'en': t('login.languageEn'),
   };
 
-  const premiumPeriodError = clientInfo.premiumPaymentPeriod && parseInt(clientInfo.premiumPaymentPeriod, 10) !== inputs.numberOfYears;
+  // const premiumPeriodError = clientInfo.premiumPaymentPeriod && parseInt(clientInfo.premiumPaymentPeriod, 10) !== inputs.numberOfYears;
+  const premiumPeriodError = clientInfo.premiumPaymentPeriod && parseInt(clientInfo.premiumPaymentPeriod, 10) !== inputs[0].target.numberOfYears;
   const notionalNumeric = notionalAmount ? parseInt(notionalAmount, 10) : 0;
   const notionalError = !notionalAmount || notionalNumeric < 1500;
   const notionalHelperText = !notionalAmount

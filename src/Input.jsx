@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Typography, Select, MenuItem, TextField, InputAdornment } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-const Input = ({ input, updateInput, disabled }) => {
+const Input = ({ input, updateInput, disabled, isFirst }) => {
   const { t } = useTranslation();
 
   const expenseTypeOptions = [
@@ -49,9 +49,11 @@ const Input = ({ input, updateInput, disabled }) => {
   return (
     <Box display="grid" gap={1} sx={{ gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, mt: 2 }}>
       <Box>
-        <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
-          {t('Expense Type')}
-        </Typography>
+        {isFirst && (
+          <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
+            {t('Expense Type')}
+          </Typography>
+        )}
         <Select
           fullWidth
           variant="standard"
@@ -68,9 +70,11 @@ const Input = ({ input, updateInput, disabled }) => {
         </Select>
       </Box>
       <Box>
-        <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
-          {t('From Age')}
-        </Typography>
+        {isFirst && (
+          <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
+            {t('From Age')}
+          </Typography>
+        )}
         <Select
           fullWidth
           variant="standard"
@@ -87,9 +91,11 @@ const Input = ({ input, updateInput, disabled }) => {
         </Select>
       </Box>
       <Box>
-        <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
-          {t('To Age')}
-        </Typography>
+        {isFirst && (
+          <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
+            {t('To Age')}
+          </Typography>
+        )}
         <Select
           fullWidth
           variant="standard"
@@ -106,9 +112,11 @@ const Input = ({ input, updateInput, disabled }) => {
         </Select>
       </Box>
       <Box>
-        <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
-          {t('Yearly Withdrawal Amount')}
-        </Typography>
+        {isFirst && (
+          <Typography variant="body1" component="label" sx={{ display: 'block', mb: 1, fontWeight: 500 }}>
+            {t('Yearly Withdrawal Amount')}
+          </Typography>
+        )}
         <TextField
           fullWidth
           variant="standard"

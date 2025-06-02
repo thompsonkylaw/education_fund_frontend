@@ -34,17 +34,22 @@ const OutputForm_1 = ({ proposal, fontSizeMultiplier = 1 }) => {
       .filter(row => row.age >= fromAge && row.age <= toAge)
       .reduce((acc, row) => acc + row.expenseInUSD, 0);
     const sumInHKD = sumInUSD * currencyRate;
-    const formattedSum = numberFormatter.format(Math.round(sumInHKD));
-    const ageRange = `${fromAge} - ${toAge}`;
+
+    // Display values with checks for invalid/missing data
+    const displayExpenseType = input.expenseType ? t(`expenseTypes.${input.expenseType}`) : ' ';
+    const displayAgeRange = (Number.isFinite(fromAge) && Number.isFinite(toAge)) ? `${fromAge} - ${toAge}` : ' ';
+    const displaySum = Number.isFinite(sumInHKD) ? `HKD $ ${numberFormatter.format(Math.round(sumInHKD))}` : ' ';
+
     return {
-      expenseType: input.expenseType,
-      ageRange,
-      formattedSum: `HKD $ ${formattedSum}`,
+      displayExpenseType,
+      displayAgeRange,
+      displaySum,
       sumInHKD,
     };
   });
 
-  const totalSumInHKD = rows.reduce((acc, row) => acc + row.sumInHKD, 0);
+  // Calculate total, treating NaN as 0 to avoid total being NaN
+  const totalSumInHKD = rows.reduce((acc, row) => acc + (Number.isFinite(row.sumInHKD) ? row.sumInHKD : 0), 0);
   const formattedTotal = numberFormatter.format(Math.round(totalSumInHKD));
 
   const baseFontSize = 1;
@@ -89,16 +94,16 @@ const OutputForm_1 = ({ proposal, fontSizeMultiplier = 1 }) => {
           {rows.map((row, index) => (
             <TableRow key={index}>
               <TableCell sx={{ fontSize: cellFontSize }}>
-                {t(`expenseTypes.${row.expenseType}`)}
+                {row.displayExpenseType}
               </TableCell>
               <TableCell sx={{ fontSize: cellFontSize }}>
-                {row.ageRange}
+                {row.displayAgeRange}
               </TableCell>
               <TableCell 
                 align="right" 
                 sx={{ fontSize: cellFontSize }}
               >
-                {row.formattedSum}
+                {row.displaySum}
               </TableCell>
             </TableRow>
           ))}

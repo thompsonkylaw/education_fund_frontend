@@ -206,9 +206,9 @@ i18next
           formattedFinancingTotalCost: "總保費",
           formattedFinancingTotalCostPerYear: "年繳保費",
           Proposal: '計劃書',
-          'Expense in USD': '美元開支',
-          'Acc Expense in USD': '累積美元開支',
-          'Acc Expense in HKD': '累積港元開支',
+          'Expense in USD': '美元(USD)開支',
+          'Acc Expense in USD': '累積美元(USD)開支',
+          'Acc Expense in HKD': '累積港元(HKD)開支',
           cash_value: '款項提取後的退保價值',
           Failed_to_fetch_system_login_name: '無法取得系統登入名稱',
           Both_login_name_fields_are_required: '兩個登入名稱欄位均為必填',
@@ -234,7 +234,7 @@ i18next
           Ward: '病房',
           'Plan Option': '計劃選項',
           Age: '年齡',
-          'Number of Year': '年數',
+          'Number of Year': '供款年期',
           Add: '添加',
           Remove: '移除',
           'Add Second Plan': '添加第二個計劃',
@@ -338,7 +338,7 @@ i18next
             ward: "病房",
             planOption: "計劃選項",
             age: "年齡",
-            numberOfYears: "年數",
+            numberOfYears: "供款年期",
             inflationRate: "通脹率",
             currencyRate: "匯率",
             yearsOld: "歲",
@@ -377,7 +377,9 @@ i18next
               2: "資產傳承 : {{age}}歲 戶口價值 : HKD ${{formattedAccountValue}}",
               3: ""
             },
-            disclaimer: "以上內容只供參考，並不作為任何投資買賣的意見或諮詢。"
+            disclaimer: "以上內容只供參考，並不作為任何投資買賣的意見或諮詢。",
+            age: "歲",
+            period: "",
           }
         }
       },

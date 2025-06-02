@@ -20,11 +20,11 @@ const OutputForm_2 = ({ proposal, finalNotionalAmount, numOfRowInOutputForm_1, f
   const numberOfYears = proposal.target.numberOfYears;
   const processData = proposal.processData;
   let numberOfYearAccMP;
-  console.log("processData======================================",processData);
+  // console.log("processData======================================",processData);
   if (processData.length > 0) {
   
     numberOfYearAccMP = processData[numberOfYears -1 ].accExpenseInUSD;
-    console.log("numberOfYearAccMP======================================",numberOfYearAccMP);
+    // console.log("numberOfYearAccMP======================================",numberOfYearAccMP);
   }
   // console.log("numberOfYearAccMP======================================",numberOfYearAccMP);
 

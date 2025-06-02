@@ -1,4 +1,3 @@
-//bj
 import React, { useState, useCallback, useEffect } from 'react';
 import { ThemeProvider, createTheme, AppBar, Toolbar, IconButton, Typography, Container, Grid, Box, Card } from '@mui/material';
 import { ArrowBack as ArrowBackIcon, Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
@@ -17,7 +16,6 @@ const theme = createTheme({
 });
 
 const App = () => {
-
   const IsProduction_Login = false;
   const { t } = useTranslation();
 
@@ -32,7 +30,7 @@ const App = () => {
     }
     return [
       {
-        target: { age: 6, numberOfYears: 5, currencyRate: 7.85, inflationRate: 2 },
+        target: { age: 6, numberOfYears: 5, currencyRate: 7.85, inflationRate: 1 },
         inputs: [{ expenseType: 'tuition', fromAge: '19', toAge: '22', yearlyWithdrawalAmount: '50,000' }],
         processData: []
       }
@@ -66,8 +64,17 @@ const App = () => {
   });
 
   const [useInflation, setUseInflation] = useState(false);
-  const [appBarColor, setAppBarColor] = useState('green');
-  const [company, setCompany] = useState('Manulife');
+
+  const [appBarColor, setAppBarColor] = useState(() => {
+    const savedColor = localStorage.getItem('appBarColor');
+    return savedColor ? savedColor : 'green';
+  });
+
+  const [company, setCompany] = useState(() => {
+    const savedCompany = localStorage.getItem('company');
+    return savedCompany ? savedCompany : 'Manulife';
+  });
+
   const [finalNotionalAmount, setFinalNotionalAmount] = useState(null);
   const [cashValueInfo, setCashValueInfo] = useState({
     age_1: 65,
@@ -108,6 +115,14 @@ const App = () => {
       }))
     );
   }, [inflationRate]);
+
+  useEffect(() => {
+    localStorage.setItem('appBarColor', appBarColor);
+  }, [appBarColor]);
+
+  useEffect(() => {
+    localStorage.setItem('company', company);
+  }, [company]);
 
   const addProposal = () => {
     if (proposals.length < 6) {
@@ -213,7 +228,7 @@ const App = () => {
       console.log(`    Expense Type: ${input.expenseType}`);
       console.log(`    From Age: ${input.fromAge}`);
       console.log(`    To Age: ${input.toAge}`);
-      console.log(`    Yearly Withdrawal Amount: ${input.yearlyWithdrawalAmount}`);
+      // console.log(`    Yearly Withdrawal Amount: ${input.yearlyWithdrawalAmount}`);
     });
   });
 
@@ -231,11 +246,11 @@ const App = () => {
         </Toolbar>
       </AppBar>
       <Container sx={{ mt: 10, mb: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-          <IconButton onClick={addProposal} disabled={proposals.length >= 6}>
+        <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
+          <IconButton onClick={addProposal} sx={proposals.length >= 1 ? { display: 'none' } : {}}>
             <AddIcon />
           </IconButton>
-          <IconButton onClick={removeProposal} disabled={proposals.length <= 1}>
+          <IconButton onClick={removeProposal} sx={proposals.length <= 1 ? { display: 'none' } : {}}>
             <RemoveIcon />
           </IconButton>
         </Box>
@@ -293,7 +308,7 @@ const App = () => {
                 />
               ))}
             </Card>
-            <Card elevation={3} sx={{ mt: 2, p: 2 }}>
+            < Card elevation={3} sx={{ mt: 2, p: 2 }}>
               {proposals.map((proposal, proposalIndex) => (
                 <OutputForm_2
                   key={proposalIndex}

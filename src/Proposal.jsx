@@ -110,6 +110,7 @@ const Proposal = ({ proposalIndex,
             input={input}
             updateInput={(newInput) => updateInput(inputIndex, newInput)}
             disabled ={disabled}
+            isFirst={inputIndex === 0}
           />
         ))}
         <OutputTable
