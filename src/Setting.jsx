@@ -4,47 +4,38 @@ import { useTranslation } from 'react-i18next';
 
 const Setting = ({ setAppBarColor, onClose, setCompany, selectedCurrency, setSelectedCurrency }) => {
   const { t } = useTranslation();
-  const colors = ['#009739', '#E4002B', '#FFCD00', '#00008F', '#004A9F', '#ed1b2e', '#e67e22'];
-  let companyName;
 
-  const handleColorSelect = (color) => {
-    setAppBarColor(color);
-    if (color === '#009739') {
-      setCompany('Manulife');
-      companyName = 'Manulife';
-    } else if (color === '#E4002B') {
-      setCompany('AIA');
-    } else if (color === '#FFCD00') {
-      setCompany('Sunlife');
-    } else if (color === '#00008F') {
-      setCompany('AXA');
-    } else if (color === '#004A9F') {
-      setCompany('Chubb');
-    } else if (color === '#ed1b2e') {
-      setCompany('Prudential');
-    } else if (color === '#e67e22') {
-      setCompany('FWD');
-    }
-    onClose();
-  };
+  const colorCompanyMap = [
+    { color: '#009739', company: 'Manulife' },
+    { color: '#E4002B', company: 'AIA' },
+    { color: '#FFCD00', company: 'Sunlife' },
+    { color: '#00008F', company: 'AXA' },
+    { color: '#004A9F', company: 'Chubb' },
+    { color: '#ed1b2e', company: 'Prudential' },
+    { color: '#e67e22', company: 'FWD' },
+  ];
 
   return (
     <>
       <DialogTitle>Settings v1.0.8</DialogTitle>
       <DialogContent>
-        <Box>
-          {colors.map((color) => (
+        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+          {colorCompanyMap.map(({ color, company }) => (
             <Button
               key={color}
-              onClick={() => handleColorSelect(color)}
-              style={{
+              onClick={() => {
+                setAppBarColor(color);
+                setCompany(company);
+                onClose();
+              }}
+              sx={{
                 backgroundColor: color,
-                color: color === '#FFCD00' ? 'black' : 'white',
-                margin: '5px',
-                minWidth: '80px',
+                color: color === '#FFCD00' ? 'black' : 'white', // Black text for yellow, white for others
+                width: '120px', // Fixed width for uniformity
+                margin: '5px', // Maintain original spacing
               }}
             >
-              {color}
+              {company}
             </Button>
           ))}
         </Box>

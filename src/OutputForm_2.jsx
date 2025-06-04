@@ -59,24 +59,31 @@ const OutputForm_2 = ({ proposal, finalNotionalAmount, cashValueInfo, fontSizeMu
 
   let lastRowLastAge = firstRowEndAge;
 
-  while (lastRowLastAge < 100) {
-    if (lastRowLastAge + 1 <= 90) {
-      const startAge = lastRowLastAge + 1;
-      const endAge = Math.min(startAge + 9, 100);
+  const startAge = lastRowLastAge + 1;
+      const endAge = 100;
       rows.push({
         ageRange: `${startAge} - ${endAge} ${t('common.yearsOld')}`,
         value: `${t(`currency.${selectedCurrency}`)} 0`,
-      });
-      lastRowLastAge = endAge;
-    } else {
-      const startAge = lastRowLastAge + 1;
-      rows.push({
-        ageRange: `${startAge} - 100 ${t('common.yearsOld')}`,
-        value: `${t(`currency.${selectedCurrency}`)} 0`,
-      });
-      lastRowLastAge = 100;
-    }
-  }
+  });
+
+  // while (lastRowLastAge < 100) {
+  //   if (lastRowLastAge + 1 <= 90) {
+  //     const startAge = lastRowLastAge + 1;
+  //     const endAge = Math.min(startAge + 9, 100);
+  //     rows.push({
+  //       ageRange: `${startAge} - ${endAge} ${t('common.yearsOld')}`,
+  //       value: `${t(`currency.${selectedCurrency}`)} 0`,
+  //     });
+  //     lastRowLastAge = endAge;
+  //   } else {
+  //     const startAge = lastRowLastAge + 1;
+  //     rows.push({
+  //       ageRange: `${startAge} - 100 ${t('common.yearsOld')}`,
+  //       value: `${t(`currency.${selectedCurrency}`)} 0`,
+  //     });
+  //     lastRowLastAge = 100;
+  //   }
+  // }
 
   const baseFontSize = 1;
   const headerFontSize = 1.5;

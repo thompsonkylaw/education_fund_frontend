@@ -39,6 +39,7 @@ const OutputForm_3 = ({
   filename,
   selectedCurrency
 }) => {
+  console.log("firstTable_data==cccccccccccccccccccccccc=",cashValueInfo.firstTable_data)
   const { t } = useTranslation();
 
   const [age1, setAge1] = useState(cashValueInfo.age_1);

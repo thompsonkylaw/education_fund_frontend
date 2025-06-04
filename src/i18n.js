@@ -25,6 +25,7 @@ i18next
     resources: {
       en: {
         translation: {
+          currencySelection: "Report Currency Selection",
           Proposal: 'Proposal',
           'Expense in USD': 'Expense in USD',
           'Acc Expense in USD': 'Accumulated Expense in USD',
@@ -127,6 +128,7 @@ i18next
             currencyRate: 'Currency Rate'
           },
           outputForm1: {
+            yearlyWithdrawalAmount: "Yearly Withdrawal Amount",
             header: "Bank Saving",
             footer: "Total Cost: {{currency}} {{total}}",
             expenseType: "Expense Type",
@@ -136,7 +138,7 @@ i18next
           outputForm2: {
             header: "Medical Financing Premium",
             footer: "Total Cost: {{currency}} {{total}}",
-            firstRowValue: "First {{premiumPaymentPeriod}} years average monthly {{currency}} {{averageMonthly}}",
+            firstRowValue: "First {{premiumPaymentPeriod}} years for every year {{currency}} {{averageMonthly}}",
             placeholder: "Please complete login to get notional amount"
           },
           outputForm3: {
@@ -211,6 +213,7 @@ i18next
       },
       "zh-HK": {
         translation: {
+          currencySelection: "選擇報表貨幣",
           formattedFinancingTotalCost: "總保費",
           formattedFinancingTotalCostPerYear: "年繳保費",
           Proposal: '計劃書',
@@ -315,6 +318,7 @@ i18next
             currencyRate: '匯率'
           },
           outputForm1: {
+            yearlyWithdrawalAmount: "每年提取金額",
             header: "銀行儲蓄",
             footer: "總成本: {{currency}} {{total}}",
             expenseType: "開支",
@@ -324,7 +328,7 @@ i18next
           outputForm2: {
             header: "教育基金",
             footer: "總成本: {{currency}} {{total}}",
-            firstRowValue: "首{{premiumPaymentPeriod}}年平均每月 {{currency}} {{averageMonthly}}",
+            firstRowValue: "首{{premiumPaymentPeriod}}年平均每年 {{currency}} {{averageMonthly}}",
             placeholder: "請先完成登錄以獲取名義金額"
           },
           outputForm3: {
@@ -370,7 +374,7 @@ i18next
             totalCost: "總成本: {{currency}} {{total}}",
             accountValueAtAge: "{{age}} 歲戶口價值: {{currency}} {{value}}",
             useHtml: "使用簡單報表",
-            downloadReport: "醫療融資計劃",
+            downloadReport: "教學基金儲存計劃",
             loadingFonts: "字體正在加載中，請稍後再試",
             traditionalPoints: {
               0: "銀行1:1 戶口 終身儲蓄",
@@ -401,6 +405,7 @@ i18next
       },
       "zh-CN": {
         translation: {
+          currencySelection: "选择报表货币",
           Proposal: '计划书',
           'Expense in USD': '美元开支',
           'Acc Expense in USD': '累积美元开支',
@@ -503,6 +508,7 @@ i18next
             currencyRate: '汇率'
           },
           outputForm1: {
+            yearlyWithdrawalAmount: "每年提取金额",
             header: "银行储蓄",
             footer: "总成本: {{currency}} {{total}}",
             expenseType: "开支",
@@ -512,7 +518,7 @@ i18next
           outputForm2: {
             header: "教育基金",
             footer: "总成本: {{currency}} {{total}}",
-            firstRowValue: "首{{premiumPaymentPeriod}}年平均每月 {{currency}} {{averageMonthly}}",
+            firstRowValue: "首{{premiumPaymentPeriod}}年平均每年 {{currency}} {{averageMonthly}}",
             placeholder: "请先完成登录以获取名义金额"
           },
           outputForm3: {
@@ -558,7 +564,7 @@ i18next
             totalCost: "总成本: {{currency}} {{total}}",
             accountValueAtAge: "{{age}} 岁户口价值: {{currency}} {{value}}",
             useHtml: "使用简单报表",
-            downloadReport: "医疗融资计划",
+            downloadReport: "教学基金储存计划",
             loadingFonts: "字体正在加载中，请稍后再试",
             traditionalPoints: {
               0: "银行1:1 户口 终身储蓄",

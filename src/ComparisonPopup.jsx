@@ -1,3 +1,4 @@
+//b4 new new table
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogTitle, DialogContent, DialogActions, Box, Grid, Typography, IconButton, Switch, FormControlLabel } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -208,15 +209,16 @@ const ComparisonPopup = ({
 
     doc.text(`${t('common.age')}: ${age || ''} ${t('comparisonPopup.age')}`, x1, currentY);
     doc.text(`${t('common.numberOfYears')}: ${numberOfYears || ''}${t('Year')}`, x2-10, currentY);
-    doc.text(`${t('formattedFinancingTotalCostPerYear')}: ${t(`currency.${selectedCurrency}`)} ${currencyFormattedFinancingTotalCostPerYear || ''}`, x3-20, currentY);
-    doc.text(`${t('formattedFinancingTotalCost')}: ${t(`currency.${selectedCurrency}`)} ${currencyFormattedFinancingTotalCost || ''}`, x4-5, currentY);
+    doc.text(`${t('formattedFinancingTotalCostPerYear')}: ${currencyFormattedFinancingTotalCostPerYear || ''} 美元`, x3-15, currentY);
+    doc.text(`${t('formattedFinancingTotalCost')}: ${currencyFormattedFinancingTotalCost || ''} 美元`, x4-5, currentY);
 
     currentY += 5;
 
     const formattedFinalNotionalAmount = finalNotionalAmount
       ? numberFormatter.format(parseFloat(finalNotionalAmount.replace(/,/g, '')))
       : '0';
-
+    
+    // Basic plan table
     autoTable(doc, {
       startY: currentY,
       head: [
@@ -236,6 +238,35 @@ const ComparisonPopup = ({
       theme: 'grid',
       styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
       headStyles: { fontStyle: 'bold', fillColor: appBarColor },
+      margin: { left: 14, right: 14 },
+    });
+
+    currentY = doc.lastAutoTable.finalY + 5;
+
+    // New table with yearly withdrawal amounts
+    const newTableRows = inputs.map(input => {
+      const expenseType = t(`expenseTypes.${input.expenseType}`);
+      const ageRange = `${input.fromAge} - ${input.toAge}`;
+      const yearlyAmountInUSD = parseFloat(input.yearlyWithdrawalAmount.replace(/,/g, ''));
+      const yearlyAmountInCurrency = yearlyAmountInUSD * currencyRate;
+      const formattedYearlyAmount = numberFormatter.format(Math.round(yearlyAmountInCurrency));
+      return [
+        expenseType,
+        ageRange,
+        `${t(`currency.${selectedCurrency}`)} ${formattedYearlyAmount}`
+      ];
+    });
+
+    autoTable(doc, {
+      startY: currentY,
+      head: [
+        [t('outputForm1.expenseType'), t('outputForm1.ageRange'), t('outputForm1.yearlyWithdrawalAmount')]
+      ],
+      body: newTableRows,
+      theme: 'grid',
+      styles: { font: 'NotoSansCJKtc', fontStyle: 'normal', fontSize: 10 },
+      headStyles: { fontStyle: 'bold', fillColor: [42, 157, 143] },
+      columnStyles: { 2: { halign: 'right' } },
       margin: { left: 14, right: 14 },
     });
 
@@ -325,20 +356,11 @@ const ComparisonPopup = ({
       ];
     });
 
-    const totalSumInCurrency = inputs.reduce((acc, input) => {
-      const fromAge = parseInt(input.fromAge, 10);
-      const toAge = parseInt(input.toAge, 10);
-      const yearlyWithdrawalAmount = parseFloat(input.yearlyWithdrawalAmount.replace(/,/g, ''));
-      const numberOfYears = toAge - fromAge + 1;
-      const sumInUSD = yearlyWithdrawalAmount * numberOfYears;
-      const sumInCurrency = sumInUSD * currencyRate;
-      return acc + sumInCurrency;
-    }, 0);
-    const formattedTotal = numberFormatter.format(Math.round(totalSumInCurrency));
-
+    // Self Saving Table
     autoTable(doc, {
       startY: tablesStartY,
       head: [
+        // ["","自我儲蓄",""],
         [t('outputForm1.expenseType'), t('outputForm1.ageRange'), t('outputForm1.sumOfWithdrawal')]
       ],
       body: tableRows,
@@ -353,22 +375,30 @@ const ComparisonPopup = ({
 
     const outputForm2Rows = [];
     const firstRowEndAge = age + parseInt(clientInfo.premiumPaymentPeriod) - 1;
-    outputForm2Rows.push([`${age} - ${firstRowEndAge} ${t('common.yearsOld')}`, t('outputForm2.firstRowValue', { premiumPaymentPeriod: clientInfo.premiumPaymentPeriod, averageMonthly: numberFormatter.format(Math.round(financingTotalCost / clientInfo.premiumPaymentPeriod / 12)), currency: t(`currency.${selectedCurrency}`) })]);
+    outputForm2Rows.push([`${age} - ${firstRowEndAge} ${t('common.yearsOld')}`, t('outputForm2.firstRowValue', { premiumPaymentPeriod: clientInfo.premiumPaymentPeriod, averageMonthly: numberFormatter.format(Math.round(financingTotalCost / clientInfo.premiumPaymentPeriod)), currency: t(`currency.${selectedCurrency}`) })]);
 
     let lastRowLastAge = firstRowEndAge;
-    while (lastRowLastAge < 100) {
-      if (lastRowLastAge + 1 < 90) {
-        const startAge = lastRowLastAge + 1;
-        const endAge = lastRowLastAge + 10;
-        outputForm2Rows.push([`${startAge} - ${endAge} ${t('common.yearsOld')}`, `${t(`currency.${selectedCurrency}`)} 0`]);
-        lastRowLastAge = endAge;
-      } else {
-        const startAge = lastRowLastAge + 1;
-        outputForm2Rows.push([`${startAge} - 100 ${t('common.yearsOld')}`, `${t(`currency.${selectedCurrency}`)} 0`]);
-        lastRowLastAge = 100;
-      }
-    }
+    
+    const startAge = lastRowLastAge + 1;
+    const endAge = 100;
+    outputForm2Rows.push([`${startAge} - ${endAge} ${t('common.yearsOld')}`, `${t(`currency.${selectedCurrency}`)} 0`]);
 
+
+    // while (lastRowLastAge < 100) {
+    //   if (lastRowLastAge + 1 < 90) {
+    //     const startAge = lastRowLastAge + 1;
+    //     const endAge = lastRowLastAge + 10;
+    //     outputForm2Rows.push([`${startAge} - ${endAge} ${t('common.yearsOld')}`, `${t(`currency.${selectedCurrency}`)} 0`]);
+    //     lastRowLastAge = endAge;
+    //   } else {
+    //     const startAge = lastRowLastAge + 1;
+    //     outputForm2Rows.push([`${startAge} - 100 ${t('common.yearsOld')}`, `${t(`currency.${selectedCurrency}`)} 0`]);
+    //     lastRowLastAge = 100;
+    //   }
+    // }
+
+    
+    // Saving Plan Table
     autoTable(doc, {
       startY: tablesStartY,
       head: [[t('comparisonPopup.ageRange'), t('comparisonPopup.financingMedicalPremiumTable')]],
@@ -499,6 +529,7 @@ const ComparisonPopup = ({
                 <Typography variant="h5">{t('comparisonPopup.financingPoints.3')}</Typography>
               </Box>
             </Grid>
+            
             <Grid item xs={12}>
               <Box sx={{ backgroundColor: 'rgb(38, 70, 83)', color: 'white', p: 2, textAlign: 'center' }}>
                 <Typography variant="h3" sx={{ color: 'white !important' }}>{t('comparisonPopup.howItWorks')}</Typography>

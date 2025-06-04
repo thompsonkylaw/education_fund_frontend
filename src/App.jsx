@@ -85,7 +85,8 @@ const App = () => {
     age_2: 85,
     age_1_cash_value: 0,
     age_2_cash_value: 0,
-    annual_premium: 0
+    annual_premium: 0,
+    firstTable_data: "",
   });
   const [clientInfo, setClientInfo] = useState({
     surname: "VIP",
@@ -238,17 +239,17 @@ const App = () => {
   };
 
   proposals.forEach((proposal, index) => {
-    console.log(`Proposal ${index + 1}:`);
-    console.log(`  Target age: ${proposal.target.age}`);
-    console.log(`  Target numberOfYears: ${proposal.target.numberOfYears}`);
-    console.log(`  Target currencyRate: ${proposal.target.currencyRate}`);
-    console.log(`  Target inflationRate: ${proposal.target.inflationRate}`);
-    proposal.inputs.forEach((input, idx) => {
-      console.log(`  Input ${idx + 1}:`);
-      console.log(`    Expense Type: ${input.expenseType}`);
-      console.log(`    From Age: ${input.fromAge}`);
-      console.log(`    To Age: ${input.toAge}`);
-    });
+    // console.log(`Proposal ${index + 1}:`);
+    // console.log(`  Target age: ${proposal.target.age}`);
+    // console.log(`  Target numberOfYears: ${proposal.target.numberOfYears}`);
+    // console.log(`  Target currencyRate: ${proposal.target.currencyRate}`);
+    // console.log(`  Target inflationRate: ${proposal.target.inflationRate}`);
+    // proposal.inputs.forEach((input, idx) => {
+    //   console.log(`  Input ${idx + 1}:`);
+    //   console.log(`    Expense Type: ${input.expenseType}`);
+    //   console.log(`    From Age: ${input.fromAge}`);
+    //   console.log(`    To Age: ${input.toAge}`);
+    // });
   });
 
   return (
