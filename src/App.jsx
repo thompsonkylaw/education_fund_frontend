@@ -16,7 +16,7 @@ const theme = createTheme({
 });
 
 const App = () => {
-  const IsProduction_Login = true;
+  const IsProduction_Login = false;
   const { t } = useTranslation();
 
   const [proposals, setProposals] = useState(() => {
@@ -87,6 +87,8 @@ const App = () => {
     age_2_cash_value: 0,
     annual_premium: 0,
     firstTable_data: "",
+    lastYearWithdrawal_cash_value_index:0,
+    lastYearWithdrawal_cash_value:0,
   });
   const [clientInfo, setClientInfo] = useState({
     surname: "VIP",

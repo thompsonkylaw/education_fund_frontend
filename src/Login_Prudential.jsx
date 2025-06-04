@@ -490,6 +490,7 @@ function Login({
           age_2_cash_value: response.data.age_2_cash_value,
           annual_premium: response.data.annual_premium,
           firstTable_data: response.data.firstTable_data,
+          lastYearWithdrawal_cash_value :response.data.lastYearWithdrawal_cash_value,
         });
         setStep('success');
         setFinalNotionalAmount(notionalAmount);
@@ -531,6 +532,7 @@ function Login({
           age_2_cash_value: response.data.age_2_cash_value,
           annual_premium: response.data.annual_premium,
           firstTable_data: response.data.firstTable_data,
+          lastYearWithdrawal_cash_value :response.data.lastYearWithdrawal_cash_value,
         }));
         setStep('success');
         setFinalNotionalAmount(newNotionalAmount);

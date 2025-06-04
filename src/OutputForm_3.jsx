@@ -40,6 +40,7 @@ const OutputForm_3 = ({
   selectedCurrency
 }) => {
   console.log("firstTable_data==cccccccccccccccccccccccc=",cashValueInfo.firstTable_data)
+  console.log("lastYearWithdrawal_cash_value==cccccccccccccccccccccccc=",cashValueInfo.lastYearWithdrawal_cash_value)
   const { t } = useTranslation();
 
   const [age1, setAge1] = useState(cashValueInfo.age_1);
