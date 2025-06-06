@@ -20,7 +20,8 @@ const Proposal = ({
   useInflation,
   setProcessData,
   disabled,
-  selectedCurrency
+  selectedCurrency,
+  company,
 }) => {
   const { t } = useTranslation();
   const numberOfYears = target.numberOfYears;
@@ -78,12 +79,13 @@ const Proposal = ({
           target={target}
           updateTarget={updateTarget}
           disabled={disabled}
+          company={company}
         />
         <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
-          <IconButton onClick={addInput} disabled={inputs.length >= 5}>
+          <IconButton onClick={addInput} disabled={inputs.length >= 5 || disabled }>
             <AddIcon />
           </IconButton>
-          <IconButton onClick={removeInput} disabled={inputs.length <= 1}>
+          <IconButton onClick={removeInput} disabled={inputs.length <= 1 || disabled}>
             <RemoveIcon />
           </IconButton>
         </Box>
@@ -94,6 +96,7 @@ const Proposal = ({
             updateInput={(newInput) => updateInput(inputIndex, newInput)}
             disabled={disabled}
             isFirst={inputIndex === 0}
+            company={company}
           />
         ))}
         <OutputTable

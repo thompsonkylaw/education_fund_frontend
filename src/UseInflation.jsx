@@ -136,7 +136,12 @@ const UseInflation = ({
             label={t('useInflation.inflationRate')}
             type="number"
             value={inflationRate}
-            onChange={(e) => onInflationRateChange(Number(e.target.value))}
+            onChange={(e) => {
+              const value = e.target.value;
+              if (/^\d*$/.test(value)) {
+                onInflationRateChange(value === '' ? 0 : Number(value));
+              }
+            }}
             inputProps={{ min: 0, step: 1 }}
             variant="outlined"
             margin="normal"

@@ -2,9 +2,9 @@ import React from 'react';
 import { Box, Typography, Select, MenuItem, TextField, InputAdornment } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-const Input = ({ input, updateInput, disabled, isFirst }) => {
+const Input = ({ input, updateInput, disabled, isFirst,company }) => {
   const { t } = useTranslation();
-
+  console.log("company={company}=",company)
   const expenseTypeOptions = [
     { value: 'tuition', label: t('expenseTypes.tuition') },
     { value: 'marriage', label: t('expenseTypes.marriage') },

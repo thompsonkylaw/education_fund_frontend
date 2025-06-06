@@ -16,17 +16,17 @@ const OutputTable = ({ processData, numberOfYears, selectedCurrency }) => {
     <TableContainer component={Paper} sx={{ mt: 3 }}>
       <Table>
         <TableHead>
-          <TableRow>
-            <TableCell>{t('Year')}</TableCell>
-            <TableCell>{t('Age')}</TableCell>
-            <TableCell>{t('Expense in USD')}</TableCell>
-            <TableCell>{t('Acc Expense in USD')}</TableCell>
-            <TableCell>{t(`accExpense.${selectedCurrency}`)}</TableCell>
+          <TableRow sx={{ backgroundColor: '#956251' }}>
+            <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '1rem' }}>{t('Year')}</TableCell>
+            <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '1rem' }}>{t('Age')}</TableCell>
+            <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '1rem' }}>{t('Expense in USD')}</TableCell>
+            <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '1rem' }}>{t('Acc Expense in USD')}</TableCell>
+            <TableCell sx={{ color: 'white', fontWeight: 'bold', fontSize: '1rem' }}>{t(`accExpense.${selectedCurrency}`)}</TableCell>
             <TableCell align="right">
               <IconButton
                 size="small"
                 onClick={() => setExpanded(!expanded)}
-                sx={{ p: 0 }}
+                sx={{ p: 0, color: 'white'}}
               >
                 {expanded ? <ExpandLess /> : <ExpandMore />}
               </IconButton>

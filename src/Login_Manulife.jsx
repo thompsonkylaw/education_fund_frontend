@@ -497,7 +497,9 @@ function Login_Manulifte({
           age_2: selectedAge2,
           age_1_cash_value: response.data.age_1_cash_value,
           age_2_cash_value: response.data.age_2_cash_value,
-          annual_premium: response.data.annual_premium
+          annual_premium: response.data.annual_premium,
+          firstTable_data: response.data.firstTable_data,
+          cashValueTable:response.data.cashValueTable,
         });
         setStep('success');
         setFinalNotionalAmount(notionalAmount);
@@ -528,7 +530,9 @@ function Login_Manulifte({
           ...prev,
           age_1_cash_value: response.data.age_1_cash_value,
           age_2_cash_value: response.data.age_2_cash_value,
-          annual_premium: response.data.annual_premium
+          annual_premium: response.data.annual_premium,
+          firstTable_data: response.data.firstTable_data,
+          cashValueTable:response.data.cashValueTable,
         }));
         setStep('success');
         setFinalNotionalAmount(newNotionalAmount);

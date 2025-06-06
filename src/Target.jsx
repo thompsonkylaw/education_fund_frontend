@@ -2,10 +2,13 @@ import React from 'react';
 import { Box, Typography, Select, MenuItem } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 
-const Target = ({ target, updateTarget,disabled }) => {
+const Target = ({ target, updateTarget,disabled,company }) => {
   const { t } = useTranslation();
   const numberOfYearsOptions = Array.from({ length: 20 }, (_, i) => i + 1);
-  const ageOptions = Array.from({ length: 121 }, (_, i) => i);
+  const ageOptions = company === "Prudential"
+    ? Array.from({ length: 120 }, (_, i) => i + 1) // 1 to 120 for Prudential
+    : Array.from({ length: 121 }, (_, i) => i);
+    
   const handleChange = (field) => (event) => {
     updateTarget({ ...target, [field]: event.target.value });
   };

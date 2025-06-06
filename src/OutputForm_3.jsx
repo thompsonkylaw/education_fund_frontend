@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Button, TextField, Box, Typography } from '@mui/material';
 import { NumericFormat } from 'react-number-format';
 import ComparisonPopup from './ComparisonPopup';
+import ProposalInfo from './ProposalInfo';
 
 const NumberFormatCustom = React.forwardRef(function NumberFormatCustom(props, ref) {
   const { onChange, prefix, ...other } = props;
@@ -39,8 +40,8 @@ const OutputForm_3 = ({
   filename,
   selectedCurrency
 }) => {
-  console.log("firstTable_data==cccccccccccccccccccccccc=",cashValueInfo.firstTable_data)
-  console.log("lastYearWithdrawal_cash_value==cccccccccccccccccccccccc=",cashValueInfo.lastYearWithdrawal_cash_value)
+  // console.log("firstTable_data==cccccccccccccccccccccccc=", cashValueInfo.firstTable_data);
+  // console.log("lastYearWithdrawal_cash_value==cccccccccccccccccccccccc=", cashValueInfo.lastYearWithdrawal_cash_value);
   const { t } = useTranslation();
 
   const [age1, setAge1] = useState(cashValueInfo.age_1);
@@ -48,6 +49,7 @@ const OutputForm_3 = ({
   const [currency1, setCurrency1] = useState(cashValueInfo.age_1_cash_value);
   const [currency2, setCurrency2] = useState(cashValueInfo.age_2_cash_value);
   const [openPopup, setOpenPopup] = useState(false);
+  const [openProposalInfoPopup, setOpenProposalInfoPopup] = useState(false);
 
   useEffect(() => {
     setAge1(cashValueInfo.age_1);
@@ -103,81 +105,98 @@ const OutputForm_3 = ({
       >
         {t('cash_value')}
       </Typography>
-      <TextField
-        id="input_text_field_17"
-        disabled={true}
-        label={t('outputForm3.ageLabel')}
-        type="number"
-        value={age1}
-        onChange={(e) => setAge1(e.target.value)}
-        sx={{ m: 1, width: 80 }}
-      />
-      <TextField
-        disabled={true}
-        id="input_text_field_10"
-        label={t('outputForm3.accountValueLabel')}
-        value={currency1}
-        onChange={(e) => setCurrency1(e.target.value)}
-        InputProps={{
-          inputComponent: NumberFormatCustom,
-          inputProps: { prefix: getCurrencySymbol(selectedCurrency) },
-        }}
-        sx={{ m: 1, width: 180 }}
-      />
-      <TextField
-        id="input_text_field_18"
-        disabled={true}
-        label={t('outputForm3.ageLabel')}
-        type="number"
-        value={age2}
-        onChange={(e) => setAge2(e.target.value)}
-        sx={{ m: 1, width: 80 }}
-      />
-      <TextField
-        disabled={true}
-        id="input_text_field_11"
-        label={t('outputForm3.accountValueLabel')}
-        value={currency2}
-        onChange={(e) => setCurrency2(e.target.value)}
-        InputProps={{
-          inputComponent: NumberFormatCustom,
-          inputProps: { prefix: getCurrencySymbol(selectedCurrency) },
-        }}
-        sx={{ m: 1, width: 180 }}
-      />
-      <Button
-        variant="contained"
-        onClick={handleOpenPopup}
-        sx={{
-          m: 1,
-          backgroundColor: '#4caf50',
-          '&:hover': { backgroundColor: '#388e3c' },
-        }}
-      >
-        {t('outputForm3.compareButton')}
-      </Button>
-      <Button
-        variant="contained"
-        onClick={handleSavePDF}
-        sx={{
-          m: 1,
-          backgroundColor: 'blue',
-          '&:hover': { backgroundColor: 'darkblue' },
-        }}
-      >
-        {t('outputForm3.savePDFButton')}
-      </Button>
-      <Button
-        variant="contained"
-        onClick={reset}
-        sx={{
-          m: 1,
-          backgroundColor: 'red',
-          '&:hover': { backgroundColor: 'darkred' },
-        }}
-      >
-        {t('outputForm3.resetButton')}
-      </Button>
+      <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <TextField
+          id="input_text_field_17"
+          disabled={true}
+          label={t('outputForm3.ageLabel')}
+          type="number"
+          value={age1}
+          onChange={(e) => setAge1(e.target.value)}
+          sx={{ m: 1, width: 80 }}
+        />
+        <TextField
+          disabled={true}
+          id="input_text_field_10"
+          label={t('outputForm3.accountValueLabel')}
+          value={currency1}
+          onChange={(e) => setCurrency1(e.target.value)}
+          InputProps={{
+            inputComponent: NumberFormatCustom,
+            inputProps: { prefix: getCurrencySymbol(selectedCurrency) },
+          }}
+          sx={{ m: 1, width: 180 }}
+        />
+        <TextField
+          id="input_text_field_18"
+          disabled={true}
+          label={t('outputForm3.ageLabel')}
+          type="number"
+          value={age2}
+          onChange={(e) => setAge2(e.target.value)}
+          sx={{ m: 1, width: 80 }}
+        />
+        <TextField
+          disabled={true}
+          id="input_text_field_11"
+          label={t('outputForm3.accountValueLabel')}
+          value={currency2}
+          onChange={(e) => setCurrency2(e.target.value)}
+          InputProps={{
+            inputComponent: NumberFormatCustom,
+            inputProps: { prefix: getCurrencySymbol(selectedCurrency) },
+          }}
+          sx={{ m: 1, width: 180 }}
+        />
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap' }}>
+        <Button
+          variant="contained"
+          onClick={handleOpenPopup}
+          sx={{
+            m: 1,
+            backgroundColor: '#4caf50',
+            '&:hover': { backgroundColor: '#388e3c' },
+          }}
+        >
+          {t('outputForm3.compareButton')}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleSavePDF}
+          sx={{
+            m: 1,
+            backgroundColor: 'blue',
+            '&:hover': { backgroundColor: 'darkblue' },
+          }}
+        >
+          {t('outputForm3.savePDFButton')}
+        </Button>
+        <Button
+          variant="contained"
+          onClick={reset}
+          sx={{
+            m: 1,
+            backgroundColor: 'red',
+            '&:hover': { backgroundColor: 'darkred' },
+          }}
+        >
+          {t('outputForm3.resetButton')}
+        </Button>
+      </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+        <Button
+          variant="contained"
+          onClick={() => setOpenProposalInfoPopup(true)}
+          sx={{
+            m: 1,
+            backgroundColor: 'purple',
+            '&:hover': { backgroundColor: 'darkpurple' },
+          }}
+        >
+          {t('outputForm3.proposalInfoButton')}
+        </Button>
+      </Box>
       <ComparisonPopup
         open={openPopup}
         onClose={handleClosePopup}
@@ -194,6 +213,13 @@ const OutputForm_3 = ({
         pdfBase64={pdfBase64}
         filename={filename}
         selectedCurrency={selectedCurrency}
+      />
+      <ProposalInfo
+        open={openProposalInfoPopup}
+        onClose={() => setOpenProposalInfoPopup(false)}
+        cashValueInfo={cashValueInfo}
+        selectedCurrency={selectedCurrency}
+        proposal={proposal}
       />
     </Box>
   );

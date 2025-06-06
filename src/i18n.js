@@ -164,7 +164,22 @@ i18next
             currencyRate: "Currency Rate",
             yearsOld: "years old",
             hkdZero: "{{currency}} 0",
-            noValue: "No Value"
+            noValue: "No Value",
+            close: "Close"
+          },
+          proposalInfo: {
+            title: "Proposal Information",
+            age: "Age",
+            numberOfPayments: "Number of Payments",
+            annualPremium: "Annual Premium",
+            totalPremiumsPaidUpToYear: "Total Premiums",
+            cashValue: "Cash Value",
+            profitFactor: "Profit Factor",
+            irr: "IRR",
+            expenseType: "Expense Type",
+            ageRange: "Age Range",
+            sumOfWithdrawal: "Sum of Withdrawal",
+            lastYearWithdrawalCashValue: "Last Year Withdrawal Cash Value"
           },
           comparisonPopup: {
             clientInformation: "Client Information",
@@ -337,7 +352,8 @@ i18next
             compareButton: "馬上比較",
             resetButton: "重設表單",
             resetConfirmation: "確定要重設表單嗎？所有輸入將被清除。",
-            savePDFButton: "儲存計劃書"
+            savePDFButton: "儲存計劃書",
+            proposalInfoButton:"計劃書概覽",
           },
           common: {
             company: "公司",
@@ -354,7 +370,23 @@ i18next
             currencyRate: "匯率",
             yearsOld: "歲",
             hkdZero: "{{currency}} 0",
-            noValue: "沒有價值"
+            noValue: "沒有價值",
+            close: "關閉"
+          },
+          proposalInfo: {
+            title: "計劃書概覽",
+            age: "保單年度",
+            numberOfPayments: "供款年期",
+            annualPremium: "年繳保費",
+            totalPremiumsPaidUpToYear: "總保費",
+            cashValue: "總現金價值",
+            profitFactor: "收益倍數",
+            irr: "IRR",
+            expenseType: "開支類型",
+            ageRange: "年齡範圍",
+            yearlyWithdrawalAmount: "每年提取",
+            sumOfWithdrawal: "累積提取",
+            lastYearWithdrawalCashValue: "戶口價值"
           },
           comparisonPopup: {
             clientInformation: "客戶信息",
@@ -513,7 +545,7 @@ i18next
             footer: "总成本: {{currency}} {{total}}",
             expenseType: "开支",
             ageRange: "年龄",
-            sumOfWithdrawal: "提取总额"
+            sumOfWithdrawal: "累积提取"
           },
           outputForm2: {
             header: "教育基金",
@@ -527,7 +559,8 @@ i18next
             compareButton: "马上比较",
             resetButton: "重设表单",
             resetConfirmation: "确定要重设表单吗？所有输入将被清除。",
-            savePDFButton: "储存计划书"
+            savePDFButton: "储存计划书",
+            proposalInfoButton:"计划书概览",
           },
           common: {
             company: "公司",
@@ -544,7 +577,23 @@ i18next
             currencyRate: "汇率",
             yearsOld: "岁",
             hkdZero: "{{currency}} 0",
-            noValue: "没有价值"
+            noValue: "没有价值",
+            close: "关闭"
+          },
+          proposalInfo: {
+            title: "计划书概览",
+            age: "保单年度",
+            numberOfPayments: "供款年期",
+            annualPremium: "年缴保费",
+            totalPremiumsPaidUpToYear: "总保费",
+            cashValue: "总现金价值",
+            profitFactor: "收益倍数",
+            irr: "IRR",
+            expenseType: "开支类型",
+            ageRange: "年龄范围",
+            yearlyWithdrawalAmount: "每年提取",
+            sumOfWithdrawal: "提款总额",
+            lastYearWithdrawalCashValue: "户口价值"
           },
           comparisonPopup: {
             clientInformation: "客户信息",
