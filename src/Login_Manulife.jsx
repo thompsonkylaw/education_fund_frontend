@@ -63,7 +63,8 @@ function Login_Manulifte({
   setpdfBase64,
   filename,
   setfilename,
-  selectedCurrency // Added for completeness, though not used in login process
+  selectedCurrency, // Added for completeness, though not used in login process
+  proposals,
 }) {
   const IsProduction = IsProduction_Login;
   const whitelist = ['thompsonkylaw@gmail.com', 'yuhodiy@gmail.com'];
@@ -467,6 +468,7 @@ function Login_Manulifte({
           processedData: processedData,
           inputs: calculationInputs,
           totalAccumulatedMP: 0,
+          proposals:proposals,
         },
         cashValueInfo: {
           age_1: selectedAge1,

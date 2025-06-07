@@ -14,10 +14,10 @@ const Setting = ({ setAppBarColor, onClose, setCompany, selectedCurrency, setSel
     { color: '#ed1b2e', company: 'Prudential' },
     { color: '#e67e22', company: 'FWD' },
   ];
-
+  //for proposal
   return (
     <>
-      <DialogTitle>Settings v1.1.0</DialogTitle>
+      <DialogTitle>Settings v2.0.0</DialogTitle>
       
       <DialogContent>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
