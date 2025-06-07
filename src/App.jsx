@@ -16,7 +16,7 @@ const theme = createTheme({
 });
 
 const App = () => {
-  const IsProduction_Login = true;
+  const IsProduction_Login = false;
   const { t } = useTranslation();
 
   const [proposals, setProposals] = useState(() => {
@@ -42,12 +42,12 @@ const App = () => {
     if (savedProposals) {
       try {
         const parsed = JSON.parse(savedProposals);
-        return parsed[0]?.target.inflationRate ?? 1.5;
+        return parsed[0]?.target.inflationRate ?? 1;
       } catch (e) {
         console.error('Error parsing saved proposals for inflationRate:', e);
       }
     }
-    return 1.5;
+    return 1;
   });
 
   const [selectedCurrency, setSelectedCurrency] = useState(() => {
@@ -297,6 +297,7 @@ const App = () => {
                 disabled={finalNotionalAmount !== null}
                 selectedCurrency={selectedCurrency}
                 company={company}
+                
               />
             ))}
           </Grid>
@@ -324,6 +325,7 @@ const App = () => {
                 setfilename={setfilename}
                 IsProduction_Login={IsProduction_Login}
                 selectedCurrency={selectedCurrency}
+                proposals={proposals}
               />
             </Card>
             <Card elevation={3} sx={{ mt: 2, p: 2 }}>

@@ -9,7 +9,7 @@ const numberFormatter = new Intl.NumberFormat('en-US', {
 
 const ProposalInfo = ({ open, onClose, cashValueInfo, selectedCurrency, proposal }) => {
   const { t } = useTranslation();
-  console.log("cashValueTablexxxxxxxxxxxxxxxxxxxxxxxxxxxxxx=", cashValueInfo.cashValueTable);
+  console.log("cashValueTable=\n", cashValueInfo.cashValueTable);
   const currencyRate = proposal.target.currencyRate;
   const age = proposal.target.age;
   const numberOfPayments = proposal.target.numberOfYears;
@@ -180,20 +180,20 @@ const ProposalInfo = ({ open, onClose, cashValueInfo, selectedCurrency, proposal
                 let lastYearCashValue = '0';
                 for (const row of cashValueRows) {
                   const columns = row.split('~');
-                  console.log("columns====",columns)
+                  // console.log("columns====",columns)
                   if (columns.length >= 2) {
                     const firstColumn = columns[0].trim();
-                    console.log("firstColumn====",firstColumn)
+                    // console.log("firstColumn====",firstColumn)
                     const target = String(rowIndex);
-                    console.log("target====",target)
-                    console.log("rowIndex====",rowIndex)
+                    // console.log("target====",target)
+                    // console.log("rowIndex====",rowIndex)
                     if (firstColumn === target) {
                       const lastColumn = columns[columns.length - 1].trim();
                       
-                      console.log("lastColumn============", lastColumn);
+                      // console.log("lastColumn============", lastColumn);
                      
                       const cashValueStr = lastColumn.replace(/,/g, '');
-                       console.log("cashValueStr============", cashValueStr);
+                      //  console.log("cashValueStr============", cashValueStr);
                       const cashValue = parseFloat(cashValueStr);
                       if (!isNaN(cashValue)) {
                         lastYearCashValue = numberFormatter.format(cashValue);

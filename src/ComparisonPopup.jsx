@@ -547,6 +547,7 @@ const ComparisonPopup = ({
             <Grid item xs={6}>
               <OutputForm_2
                 proposal={proposal}
+                fontSizeMultiplier={1.5}
                 finalNotionalAmount={finalNotionalAmount}
                 cashValueInfo={cashValueInfo}
                 selectedCurrency={selectedCurrency}

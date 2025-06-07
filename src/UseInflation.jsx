@@ -44,6 +44,7 @@ const UseInflation = ({
   clientInfo,
   setClientInfo,
   IsProduction_Login,
+  proposals
   
 }) => {
   
@@ -109,6 +110,7 @@ const UseInflation = ({
         setpdfBase64={setpdfBase64}
         filename={filename}
         setfilename={setfilename}
+        proposals={proposals}
       />
       
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 1, p: 2 }}>

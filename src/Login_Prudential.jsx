@@ -65,14 +65,18 @@ function Login({
   setpdfBase64,
   filename,
   setfilename,
+  proposals,
 }) {
   const IsProduction = IsProduction_Login;
   const whitelist = ['thompsonkylaw@gmail.com', 'yuhodiy@gmail.com'];
   
   const { t } = useTranslation();
   const [url, setUrl] = useState('https://www.prudential.com.hk/tc/');
-  const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('02987584');
-  const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('Wenwen67');
+  // const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('02987584');
+  // const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('Wenwen67');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState(() => localStorage.getItem('password') || '');
+  const [loginEmail, setloginEmail] = useState('')
   const [sessionId, setSessionId] = useState('');
   const [step, setStep] = useState('login');
   const [loading, setLoading] = useState(false);
@@ -226,7 +230,9 @@ function Login({
     if (open) {
       if (!IsProduction) {
         const storedUsername = localStorage.getItem('username') || '';
-        setUsername(storedUsername);
+        // setUsername(storedUsername);
+        setUsername('02987584');
+        setPassword('Wenwen67');
       } else {
         fetchSystemLoginName();
       }
@@ -244,6 +250,10 @@ function Login({
       .then(response => response.json())
       .then(data => {
         setIsWhitelisted(whitelist.includes(data.user_email));
+        if(data.user_email == "thompsonkylaw@gmail.com"){
+          setloginEmail('thompsonkylaw@gmail.com');
+        }
+
         if (data.system_login_name) {
           setUsername(data.system_login_name);
         } else {
@@ -277,6 +287,11 @@ function Login({
         console.log("SSE connection closed due to error");
         startReconnectTimer();
       };
+    }
+    if(loginEmail == 'thompsonkylaw@gmail.com'){
+      // console.log('loginEmail=',loginEmail);
+      setUsername('02987584')
+      setPassword('Wenwen67');
     }
   };
 
@@ -435,6 +450,7 @@ function Login({
           processedData : processedData,
           inputs : calculationInputs,
           totalAccumulatedMP: 0,
+          proposals:proposals,
         },
         cashValueInfo: {
           age_1: selectedAge1,

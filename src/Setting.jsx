@@ -17,7 +17,8 @@ const Setting = ({ setAppBarColor, onClose, setCompany, selectedCurrency, setSel
 
   return (
     <>
-      <DialogTitle>Settings v1.0.8</DialogTitle>
+      <DialogTitle>Settings v1.1.0</DialogTitle>
+      
       <DialogContent>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
           {colorCompanyMap.map(({ color, company }) => (
