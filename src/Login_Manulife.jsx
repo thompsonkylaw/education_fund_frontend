@@ -498,7 +498,7 @@ function Login_Manulifte({
           selectedAge2,
           useAge,
           isEduFund,
-          isCFP
+          isCFP,
         },
       });
       if (response.data.status === 'otp_failed') {

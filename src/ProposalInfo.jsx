@@ -165,45 +165,34 @@ const ProposalInfo = ({ open, onClose, cashValueInfo, selectedCurrency, proposal
                 // console.log("numberOfYears============", numberOfYears);
                 const sumOfWithdrawal = Number.isFinite(input.yearlyWithdrawalAmount) && numberOfYears > 0 ? numberFormatter.format(input.yearlyWithdrawalAmount * numberOfYears) : '0';
                 // console.log("input.yearlyWithdrawalAmount============", input.yearlyWithdrawalAmount);
-
+                //before last row
                 // Calculate lastYearCashValue using input.toAge - age + 1 as index
-                let rowIndex
-                if (input.toAge == 100){
-                  rowIndex = '@ANB 101';
-                }
-                else {
-                  rowIndex = String(input.toAge - age + 1);
-                }
-                // console.log("input.toAge============", input.toAge);
-                // console.log("age============", age);
-                // console.log("rowIndex============", rowIndex);
                 let lastYearCashValue = '0';
-                for (const row of cashValueRows) {
-                  const columns = row.split('~');
-                  // console.log("columns====",columns)
+                let targetRow;
+
+                if (input.toAge === 100) {
+                  if (cashValueRows.length > 0) {
+                    targetRow = cashValueRows[cashValueRows.length - 1];
+                  }
+                } else {
+                  const rowIndex = String(input.toAge - age + 1);
+                  targetRow = cashValueRows.find(row => {
+                    const columns = row.split('~');
+                    return columns.length >= 2 && columns[0].trim() === rowIndex;
+                  });
+                }
+
+                if (targetRow) {
+                  const columns = targetRow.split('~');
                   if (columns.length >= 2) {
-                    const firstColumn = columns[0].trim();
-                    // console.log("firstColumn====",firstColumn)
-                    const target = String(rowIndex);
-                    // console.log("target====",target)
-                    // console.log("rowIndex====",rowIndex)
-                    if (firstColumn === target) {
-                      const lastColumn = columns[columns.length - 1].trim();
-                      
-                      // console.log("lastColumn============", lastColumn);
-                     
-                      const cashValueStr = lastColumn.replace(/,/g, '');
-                      //  console.log("cashValueStr============", cashValueStr);
-                      const cashValue = parseFloat(cashValueStr);
-                      if (!isNaN(cashValue)) {
-                        lastYearCashValue = numberFormatter.format(cashValue);
-                        // console.log("lastYearCashValue============", lastYearCashValue);
-                        break;
-                      }
+                    const lastColumn = columns[columns.length - 1].trim();
+                    const cashValueStr = lastColumn.replace(/,/g, '');
+                    const cashValue = parseFloat(cashValueStr);
+                    if (!isNaN(cashValue)) {
+                      lastYearCashValue = numberFormatter.format(cashValue);
                     }
                   }
                 }
-
                 return (
                   <TableRow key={index} sx={{ backgroundColor: '#efeae9' }}>
                     <TableCell sx={{ fontSize: '1.2rem' }}>{expenseType}</TableCell>
