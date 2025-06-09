@@ -127,6 +127,7 @@ function Login_Manulifte({
   const sessionIdRef = useRef(sessionId);
   const useAge = false;
   const isEduFund = true;
+  const isCFP = false;
   const serverURL = IsProduction ? 'https://fastapi-production-a20ab.up.railway.app' : 'http://localhost:7002';
 
   const [processedData, setProcessedData] = useState([]);
@@ -496,7 +497,8 @@ function Login_Manulifte({
           selectedAge1,
           selectedAge2,
           useAge,
-          isEduFund
+          isEduFund,
+          isCFP
         },
       });
       if (response.data.status === 'otp_failed') {

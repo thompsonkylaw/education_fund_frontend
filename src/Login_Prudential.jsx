@@ -127,6 +127,7 @@ function Login({
   const sessionIdRef = useRef(sessionId);
   const useAge = false;
   const isEduFund = true;
+  const isCFP = false;
 // State for calculation_data
   const [processedData, setProcessedData] = useState([]);
   const [calculationInputs, setCalculationInputs] = useState({});
@@ -478,7 +479,8 @@ function Login({
           selectedAge1,
           selectedAge2,
           useAge,
-          isEduFund
+          isEduFund,
+          isCFP
         },
       };
       // console.log("hrererereetereeererererererere")
