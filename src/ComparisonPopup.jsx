@@ -26,7 +26,7 @@ const ComparisonPopup = ({
   cashValueInfo,
   clientInfo,
   appBarColor,
-  selectedCurrency
+  selectedCurrency,
 }) => {
   const { t, i18n } = useTranslation();
   const [fontRegularData, setFontRegularData] = useState(null);
@@ -205,7 +205,7 @@ const ComparisonPopup = ({
 
     const currencyFormattedTraditionalTotalCost = numberFormatter.format(Math.round(traditionalTotalCost));
     const currencyFormattedFinancingTotalCost = numberFormatter.format(Math.round(financingTotalCost));
-    const currencyFormattedFinancingTotalCostPerYear = numberFormatter.format(Math.round(financingTotalCost / numberOfYears));
+    const currencyFormattedFinancingTotalCostPerYear = numberFormatter.format(Math.round(financingTotalCost/ numberOfYears));
 
     doc.text(`${t('common.age')}: ${age || ''} ${t('comparisonPopup.age')}`, x1, currentY);
     doc.text(`${t('common.numberOfYears')}: ${numberOfYears || ''}${t('Year')}`, x2-10, currentY);

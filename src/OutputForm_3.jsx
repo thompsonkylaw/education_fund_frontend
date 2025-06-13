@@ -38,7 +38,7 @@ const OutputForm_3 = ({
   appBarColor,
   pdfBase64,
   filename,
-  selectedCurrency
+  selectedCurrency,
 }) => {
   // console.log("firstTable_data==cccccccccccccccccccccccc=", cashValueInfo.firstTable_data);
   // console.log("lastYearWithdrawal_cash_value==cccccccccccccccccccccccc=", cashValueInfo.lastYearWithdrawal_cash_value);
