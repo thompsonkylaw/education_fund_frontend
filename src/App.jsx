@@ -1,3 +1,4 @@
+//App8 App.jsx
 import React, { useState, useCallback, useEffect } from 'react';
 import { ThemeProvider, createTheme, AppBar, Toolbar, IconButton, Typography, Container, Grid, Box, Card } from '@mui/material';
 import { ArrowBack as ArrowBackIcon, Add as AddIcon, Remove as RemoveIcon } from '@mui/icons-material';
@@ -16,7 +17,7 @@ const theme = createTheme({
 });
 
 const App = () => {
-  const IsProduction_Login = false;
+  const IsProduction_Login = true;
   const { t } = useTranslation();
 
   const [proposals, setProposals] = useState(() => {
@@ -258,7 +259,7 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <AppBar position="fixed" sx={{ width: '100%', backgroundColor: appBarColor }}>
+      <AppBar position="static" sx={{ width: '100%', backgroundColor: appBarColor }}>
         <Toolbar>
           <IconButton edge="start" color="inherit" aria-label="back" onClick={() => { window.location.href = "https://portal.aimarketings.io/tool-list/"; }}>
             <ArrowBackIcon />
@@ -268,7 +269,7 @@ const App = () => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Container sx={{ mt: 10, mb: 4 }}>
+      <Container sx={{ mt: 0, mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'flex-start', mb: 2 }}>
           <IconButton onClick={addProposal} sx={proposals.length >= 1 ? { display: 'none' } : {}}>
             <AddIcon />

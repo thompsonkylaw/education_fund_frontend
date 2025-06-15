@@ -227,6 +227,18 @@ function Login({
     }
   }, [open, serverURL, t]);
 
+   useEffect(() => {
+    if (loginEmail === 'thompsonkylaw@gmail.com') {
+      console.log("check")
+      const timer = setTimeout(() => {
+        setUsername('02987584');
+        setPassword('Wenwen67');
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [open,loginEmail]);
+
+
   useEffect(() => {
     if (open) {
       if (!IsProduction) {
@@ -289,11 +301,7 @@ function Login({
         startReconnectTimer();
       };
     }
-    if(loginEmail == 'thompsonkylaw@gmail.com'){
-      // console.log('loginEmail=',loginEmail);
-      setUsername('02987584')
-      setPassword('Wenwen67');
-    }
+
   };
 
   const startReconnectTimer = () => {

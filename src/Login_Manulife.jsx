@@ -63,7 +63,7 @@ function Login_Manulifte({
   setpdfBase64,
   filename,
   setfilename,
-  selectedCurrency, // Added for completeness, though not used in login process
+  selectedCurrency,
   proposals,
 }) {
   const IsProduction = IsProduction_Login;
@@ -71,11 +71,9 @@ function Login_Manulifte({
 
   const { t } = useTranslation();
   const [url, setUrl] = useState('https://api.hkprod.manulife.com.hk/ext/pos-qq-web-hkg-app/');
-  // const [username, setUsername] = IsProduction ? useState(() => localStorage.getItem('username') || '') : useState('CHANTSZLUNG');
-  // const [password, setPassword] = IsProduction ? useState(() => localStorage.getItem('password') || '') : useState('Ctsz_!376897');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState(() => localStorage.getItem('password') || '');
-  const [loginEmail, setloginEmail] = useState('')
+  const [loginEmail, setloginEmail] = useState('');
   const [otp, setOtp] = useState('');
   const [otpError, setOtpError] = useState('');
   const [sessionId, setSessionId] = useState('');
@@ -175,6 +173,16 @@ function Login_Manulifte({
     };
   }, [serverURL]);
 
+  useEffect(() => {
+    if (loginEmail === 'thompsonkylaw@gmail.com') {
+      const timer = setTimeout(() => {
+        setUsername('CHANTSZLUNG');
+        setPassword('Ctsz_!376897');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [loginEmail]);
+
   const handlePdfDownload = (pdfBase64, filename) => {
     const binaryString = atob(pdfBase64);
     const len = binaryString.length;
@@ -217,10 +225,20 @@ function Login_Manulifte({
   }, [open, serverURL, t]);
 
   useEffect(() => {
+    if (loginEmail === 'thompsonkylaw@gmail.com') {
+      console.log("check")
+      const timer = setTimeout(() => {
+        setUsername('CHANTSZLUNG');
+        setPassword('Ctsz_!376897');
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [open,loginEmail]);
+
+  useEffect(() => {
     if (open) {
       if (!IsProduction) {
         const storedUsername = localStorage.getItem('username') || '';
-        // setUsername(storedUsername);
         setUsername('CHANTSZLUNG');
         setPassword('Ctsz_!376897');
       } else {
@@ -240,7 +258,7 @@ function Login_Manulifte({
       .then(response => response.json())
       .then(data => {
         setIsWhitelisted(whitelist.includes(data.user_email));
-        if(data.user_email == "thompsonkylaw@gmail.com"){
+        if (data.user_email === "thompsonkylaw@gmail.com") {
           setloginEmail('thompsonkylaw@gmail.com');
         }
         if (data.system_login_name) {
@@ -276,11 +294,6 @@ function Login_Manulifte({
         console.log("SSE connection closed due to error");
         startReconnectTimer();
       };
-    }
-    if(loginEmail == 'thompsonkylaw@gmail.com'){
-      // console.log('loginEmail=',loginEmail);
-      setUsername('CHANTSZLUNG')
-      setPassword('Ctsz_!376897');
     }
   };
 
@@ -469,7 +482,7 @@ function Login_Manulifte({
           processedData: processedData,
           inputs: calculationInputs,
           totalAccumulatedMP: 0,
-          proposals:proposals,
+          proposals: proposals,
         },
         cashValueInfo: {
           age_1: selectedAge1,
@@ -516,7 +529,7 @@ function Login_Manulifte({
           age_2_cash_value: response.data.age_2_cash_value,
           annual_premium: response.data.annual_premium,
           firstTable_data: response.data.firstTable_data,
-          cashValueTable:response.data.cashValueTable,
+          cashValueTable: response.data.cashValueTable,
         });
         setStep('success');
         setFinalNotionalAmount(notionalAmount);
@@ -549,7 +562,7 @@ function Login_Manulifte({
           age_2_cash_value: response.data.age_2_cash_value,
           annual_premium: response.data.annual_premium,
           firstTable_data: response.data.firstTable_data,
-          cashValueTable:response.data.cashValueTable,
+          cashValueTable: response.data.cashValueTable,
         }));
         setStep('success');
         setFinalNotionalAmount(newNotionalAmount);

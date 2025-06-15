@@ -16,9 +16,11 @@ const Setting = ({ setAppBarColor, onClose, setCompany, selectedCurrency, setSel
   ];
   //for proposal
   //add IsCFP
+  //fix appbar
+  //setusername delay
   return (
     <>
-      <DialogTitle>Settings v3.0.0</DialogTitle>
+      <DialogTitle>Settings v3.2.0</DialogTitle>
       
       <DialogContent>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
